@@ -7,7 +7,9 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+// Increased limit to 50mb to allow for Photo and Signature Base64 uploads
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI)
@@ -56,10 +58,30 @@ const taskSchema = new mongoose.Schema({
     status: { type: String, default: 'Pending' }
 });
 
+// NEW: Advanced Action Logs (Photos, Signatures, GPS)
+const actionLogSchema = new mongoose.Schema({
+    driver_name: String,
+    plate_number: String,
+    action: String, // e.g., "Travel Update", "Final Task Handover"
+    task: String,
+    location: String,
+    delivery_status: String,
+    comments: String,
+    document_attached: String, // For the Base64 Photo Proof
+    latitude: String,
+    longitude: String,
+    completion_type: String,
+    incomplete_reasons: String,
+    reschedule_date: String,
+    signature: String, // For the Base64 E-Signature
+    timestamp: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 const FuelLog = mongoose.model('FuelLog', logSchema);
 const Task = mongoose.model('Task', taskSchema);
+const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 
 // ==========================================
 // --- API ROUTES ---
@@ -176,6 +198,26 @@ app.put('/api/tasks/:id', async (req, res) => {
         const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(updatedTask);
     } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+// --- ADVANCED ACTION & HANDOVER LOGS ---
+app.get('/api/action-logs', async (req, res) => {
+    try {
+        const logs = await ActionLog.find().sort({ timestamp: -1 });
+        res.json(logs);
+    } catch (err) { 
+        res.status(500).json({ error: err.message }); 
+    }
+});
+
+app.post('/api/action-logs', async (req, res) => {
+    try {
+        const newLog = new ActionLog(req.body);
+        await newLog.save();
+        res.status(201).json({ message: 'Log saved successfully!', log: newLog });
+    } catch (err) { 
+        res.status(400).json({ error: err.message }); 
+    }
 });
 
 // --- CONFIG ROUTE ---
