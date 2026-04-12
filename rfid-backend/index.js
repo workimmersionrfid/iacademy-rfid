@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); // For hashing passwords
+const jwt = require('jsonwebtoken'); // For login tokens
 const cors = require('cors');
 require('dotenv').config();
 
@@ -58,6 +60,122 @@ const FuelLog = mongoose.model('FuelLog', logSchema);
 
 
 // --- API ROUTES ---
+
+// --- AUTHENTICATION ROUTES ---
+
+// 1. Register a new user
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { username, password, role, department } = req.body;
+        
+        // Hash the password so it's secure in the database
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const newUser = new User({ 
+            username, 
+            password: hashedPassword, 
+            role, 
+            department 
+        });
+        
+        await newUser.save();
+        res.status(201).json({ message: 'Account created successfully!' });
+    } catch (err) {
+        if (err.code === 11000) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// 2. Login
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, department: user.department }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1d' }
+        );
+
+        res.json({ 
+            message: 'Login successful', 
+            token, 
+            role: user.role,
+            department: user.department
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// --- HIDDEN ADMIN SETUP ROUTE ---
+app.post('/api/auth/setup-admin', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        const existingAdmin = await User.findOne({ role: 'admin' });
+        if (existingAdmin) {
+            return res.status(403).json({ message: 'An admin account already exists!' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const adminUser = new User({
+            username: username,
+            password: hashedPassword,
+            role: 'admin',
+            department: 'ADMIN' 
+        });
+
+        await adminUser.save();
+        res.status(201).json({ message: 'Master Admin created successfully!' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// --- VEHICLE ROUTES (ADMIN DASHBOARD) ---
+
+// 1. Get all vehicles
+app.get('/api/vehicles', async (req, res) => {
+    try {
+        const vehicles = await Vehicle.find();
+        res.json(vehicles);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// 2. Add a new vehicle
+app.post('/api/vehicles', async (req, res) => {
+    try {
+        const newVehicle = new Vehicle(req.body);
+        await newVehicle.save();
+        res.status(201).json(newVehicle);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// 3. Delete a vehicle
+app.delete('/api/vehicles/:id', async (req, res) => {
+    try {
+        await Vehicle.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Vehicle deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
+// --- FUEL LOG ROUTES ---
 
 // Get all logs from the database
 app.get('/api/logs', async (req, res) => {
