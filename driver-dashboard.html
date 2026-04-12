@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Driver Portal - iACADEMY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,7 +16,16 @@
             if (!token || role !== 'driver') window.location.href = 'login.html';
             else {
                 document.getElementById('driverName').innerText = localStorage.getItem('username');
-                document.getElementById('driverDept').innerText = localStorage.getItem('userDept');
+                
+                // Parse department (handles arrays or strings from our previous backend update)
+                let deptData = localStorage.getItem('userDept');
+                try {
+                    let parsed = JSON.parse(deptData);
+                    document.getElementById('driverDept').innerText = Array.isArray(parsed) ? parsed.join(', ') : parsed;
+                } catch(e) {
+                    document.getElementById('driverDept').innerText = deptData || 'Pending';
+                }
+
                 loadMyTasks();
                 loadFleetForFuel();
             }
@@ -27,7 +36,7 @@
 
     <nav class="bg-brand-blue text-white p-5 sticky top-0 z-10 shadow-md">
         <div class="flex justify-between items-center mb-4">
-            <div class="font-bold text-lg tracking-tight">Driver Portal</div>
+            <div class="font-bold text-lg tracking-tight"><i class="fa-solid fa-truck-fast mr-2"></i>Driver Portal</div>
             <button onclick="logout()" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded transition">Logout</button>
         </div>
         <div>
@@ -38,6 +47,17 @@
 
     <main class="max-w-md mx-auto p-4 space-y-6">
         
+        <div class="grid grid-cols-2 gap-4">
+            <button id="btn-clock-in" class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl shadow-sm border border-green-700 flex flex-col items-center justify-center gap-2 transition">
+                <i class="fa-solid fa-clock text-2xl mb-1"></i>
+                <span class="text-sm font-bold">Clock In</span>
+            </button>
+            <button id="btn-clock-out" class="bg-red-500 hover:bg-red-600 text-white p-4 rounded-xl shadow-sm border border-red-600 flex flex-col items-center justify-center gap-2 transition">
+                <i class="fa-solid fa-stopwatch text-2xl mb-1"></i>
+                <span class="text-sm font-bold">Clock Out</span>
+            </button>
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
             <button onclick="document.getElementById('fuelModal').classList.remove('hidden')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 hover:border-brand-blue transition">
                 <div class="bg-blue-50 text-brand-blue w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-gas-pump"></i></div>
@@ -50,9 +70,120 @@
         </div>
 
         <div>
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3"><i class="fa-solid fa-clipboard-list mr-1"></i> My Itinerary</h2>
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3"><i class="fa-solid fa-clipboard-list mr-1"></i> Assigned Dispatches</h2>
             <div id="taskList" class="space-y-3">
                 <div class="text-center p-6 bg-white rounded-xl shadow-sm text-gray-400 text-sm"><i class="fa-solid fa-spinner fa-spin mb-2 text-xl"></i><br>Loading tasks...</div>
+            </div>
+        </div>
+
+        <div id="execution-panel" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gray-50 p-4 border-b border-gray-100">
+                <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider"><i class="fa-solid fa-truck-fast mr-1 text-brand-blue"></i> Execution & Handover</h2>
+            </div>
+            <div class="p-5">
+                <p id="status-text" class="text-sm font-bold text-brand-blue mb-4">Status: Waiting for shift start...</p>
+
+                <div class="space-y-3 mb-6">
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Task Type</label>
+                    <select id="task-dropdown" class="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue bg-white">
+                        <option value="">Select Specific Task</option>       
+                        <option value="Asset Collection">Asset Collection</option>            
+                        <option value="Document Routing">Document Routing</option>            
+                        <option value="Hardware Transport">Hardware Transport</option>        
+                        <option value="Bank Transaction">Bank Transaction</option>
+                        <option value="Other">Other (Specify Task)</option>
+                    </select>
+                    <input type="text" id="task-details" class="hidden w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue" placeholder="Specify details...">
+                    
+                    <label class="block text-xs font-bold text-gray-500 uppercase mt-3">Destination</label>
+                    <select id="location-dropdown" class="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue bg-white">
+                        <option value="">Select Destination</option>            
+                        <optgroup label="iACADEMY Campuses">             
+                            <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus (Yakal St.)</option>                
+                            <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza (Buendia)</option>            
+                        </optgroup>            
+                        <optgroup label="Tech & Computing Partners">                
+                            <option value="Amazon Web Services">Amazon Web Services</option>                
+                            <option value="ASUS">ASUS</option>   
+                        </optgroup>            
+                        <optgroup label="Business, Finance & Marketing">                
+                            <option value="Metrobank">Metrobank</option>                
+                            <option value="Macquarie">Macquarie</option>                
+                        </optgroup>            
+                        <optgroup label="Custom Destination">                
+                            <option value="Other">Other (Specify Destination)</option>            
+                        </optgroup> 
+                    </select>
+                    <input type="text" id="location-details" class="hidden w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue" placeholder="Type exact destination name...">
+                </div>
+
+                <hr class="border-gray-100 my-5">
+
+                <h3 class="font-bold text-teal-700 mb-2">1. Travel Updates</h3>
+                <select id="transit-dropdown" class="w-full border-2 border-teal-500 rounded-lg p-3 text-sm outline-none bg-white font-bold mb-3">
+                    <option value="">-- Select Travel Status --</option>
+                    <option value="En Route">En Route (On Time)</option>
+                    <option value="Delayed">Delayed (Select Reason)</option>
+                    <option value="Nearby">Arrived / Nearby</option>
+                </select>
+                
+                <div id="ui-transit" class="hidden bg-orange-50 border border-orange-100 p-4 rounded-lg mb-3">
+                    <p class="text-orange-800 font-bold text-sm mb-2">Select reasons for delay:</p>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="transit-reason mr-3 w-4 h-4" value="Heavy Traffic"> Heavy Traffic</label>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="transit-reason mr-3 w-4 h-4" value="Road block / Maintenance"> Road block / Maintenance</label>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="transit-reason mr-3 w-4 h-4" value="Lost / Rerouting"> Lost / Rerouting</label>
+                </div>
+
+                <button id="btn-log-travel" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-md mb-2 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-location-crosshairs"></i> Log Travel Update
+                </button>
+
+                <hr class="border-gray-100 my-5">
+
+                <h3 class="font-bold text-brand-blue mb-2">2. Final Handover</h3>
+                <select id="completion-status" class="w-full border-2 border-brand-blue rounded-lg p-3 text-sm outline-none bg-white font-bold mb-3">
+                    <option value="">-- Select Final Outcome --</option>
+                    <option value="Completed">Successful</option>
+                    <option value="Completed_Remarks">Successful (With Remarks)</option>
+                    <option value="Failed">Delivery Failed</option>
+                </select>
+
+                <div id="ui-success-remarks" class="hidden bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-3">
+                    <p class="text-yellow-800 font-bold text-sm mb-2">Select Remarks:</p>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="remark-reason mr-3 w-4 h-4" value="Received by alternate person"> Received by alternate person</label>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="remark-reason mr-3 w-4 h-4" value="Packaging slightly damaged"> Packaging slightly damaged</label>
+                </div>
+
+                <div id="ui-completed" class="hidden bg-green-50 border border-green-200 p-4 rounded-lg mb-3 space-y-4">
+                    <div>
+                        <p class="text-green-800 font-bold text-sm mb-2"><i class="fa-solid fa-camera"></i> Required Proof:</p>
+                        <label for="file-upload" class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-lg font-bold cursor-pointer transition shadow-sm">
+                            <i class="fa-solid fa-upload mr-1"></i> <span id="file-name">Attach Photo (REQUIRED)</span>
+                        </label>
+                        <input type="file" id="file-upload" class="hidden" accept="image/*" capture="environment">
+                    </div>
+                    <div>
+                        <p class="text-green-800 font-bold text-sm mb-2"><i class="fa-solid fa-pen-nib"></i> Recipient E-Signature (REQUIRED):</p>
+                        <canvas id="signature-pad" class="w-full bg-white border border-green-400 rounded-lg touch-none shadow-inner" height="150"></canvas>
+                        <button id="clear-signature" class="mt-2 text-xs font-bold bg-red-100 text-red-600 px-3 py-1.5 rounded hover:bg-red-200 border border-red-200 transition">Clear Signature</button>
+                    </div>
+                </div>
+
+                <div id="ui-failed" class="hidden bg-red-50 border border-red-200 p-4 rounded-lg mb-3">
+                    <p class="text-red-800 font-bold text-sm mb-2">Select Failure Reasons:</p>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" value="Recipient Absent"> Recipient Absent</label>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" value="Cannot Locate Address"> Cannot Locate Address</label>
+                    <hr class="border-red-200 my-3">
+                    <p class="text-red-800 font-bold text-sm mb-2">Next Steps:</p>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" id="check-reschedule" value="Needs Rebooking"> Needs Rebooking by Admin</label>
+                    <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" id="check-later" value="Will retry today"> Will retry later today</label>
+                </div>
+
+                <textarea id="comments" placeholder="Additional Comments / Notes" class="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue bg-gray-50 mb-4" rows="3"></textarea>
+                
+                <button id="btn-submit-handover" class="hidden w-full bg-brand-blue hover:bg-brand-blueHover text-white font-bold py-3 rounded-lg shadow-md flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-check-circle"></i> Submit Final Task Completion
+                </button>
             </div>
         </div>
     </main>
@@ -90,18 +221,23 @@
     </div>
 
     <script>
+        const API_BASE = 'https://iacademy-rfid.onrender.com/api';
+        let currentActiveTaskId = null;
+        let currentActiveVehicle = "N/A";
+        const statusText = document.getElementById('status-text');
+
         function logout() { localStorage.clear(); window.location.href = 'login.html'; }
 
+        // --- LOAD TASKS & VEHICLES ---
         async function loadMyTasks() {
             const myName = localStorage.getItem('username');
             try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
+                const res = await fetch(`${API_BASE}/tasks`);
                 const allTasks = await res.json();
                 
-                // Filter tasks that belong to this specific driver
                 const myTasks = allTasks.filter(t => t.driver === myName);
-                
                 const list = document.getElementById('taskList');
+                
                 if(myTasks.length === 0) {
                     list.innerHTML = `<div class="text-center p-6 bg-white rounded-xl shadow-sm text-gray-400 text-sm">No tasks assigned to you yet.</div>`;
                     return;
@@ -109,8 +245,10 @@
 
                 list.innerHTML = myTasks.map(t => {
                     const isDone = t.status === 'Completed';
-                    const bgClass = isDone ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100';
-                    const icon = isDone ? '<i class="fa-solid fa-circle-check text-green-500"></i>' : '<i class="fa-regular fa-circle text-gray-300"></i>';
+                    const isRebook = t.status === 'Rebook';
+                    const bgClass = isDone ? 'bg-green-50 border-green-200' : (isRebook ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200');
+                    const statusBadge = isDone ? '<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded">DONE</span>' : 
+                                       (isRebook ? '<span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded">REBOOK</span>' : '');
                     
                     return `
                     <div class="${bgClass} p-4 rounded-xl shadow-sm border transition-all">
@@ -119,14 +257,16 @@
                                 <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">${t.date}</span>
                                 <span class="text-xs font-bold bg-blue-50 text-brand-blue px-2 py-1 rounded ml-1"><i class="fa-solid fa-car mr-1"></i>${t.vehicle}</span>
                             </div>
-                            ${isDone ? '<span class="text-xs font-bold text-green-600">DONE</span>' : ''}
+                            ${statusBadge}
                         </div>
                         <h3 class="font-bold text-gray-800 text-lg leading-tight mt-2">${t.description}</h3>
                         <p class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> ${t.destination}</p>
                         
-                        ${!isDone ? `
-                        <div class="mt-4 pt-3 border-t border-gray-100 flex gap-2">
-                            <button onclick="updateTask('${t._id}', 'Completed')" class="flex-1 bg-green-500 text-white text-sm font-bold py-2 rounded-lg shadow-sm hover:bg-green-600">Mark Complete</button>
+                        ${(!isDone && !isRebook) ? `
+                        <div class="mt-4 pt-3 border-t border-gray-100">
+                            <button onclick="startAssignedTask('${t._id}', '${t.description}', '${t.destination}', '${t.vehicle}')" class="w-full bg-orange-500 text-white text-sm font-bold py-2.5 rounded-lg shadow-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-play"></i> Auto-Fill & Start Route
+                            </button>
                         </div>
                         ` : ''}
                     </div>
@@ -135,20 +275,9 @@
             } catch (err) { console.error(err); }
         }
 
-        async function updateTask(id, newStatus) {
-            try {
-                await fetch(`https://iacademy-rfid.onrender.com/api/tasks/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                loadMyTasks(); // Refresh list
-            } catch (err) { alert('Error updating task'); }
-        }
-
         async function loadFleetForFuel() {
             try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/vehicles');
+                const res = await fetch(`${API_BASE}/vehicles`);
                 const vehicles = await res.json();
                 const select = document.getElementById('fVehicle');
                 select.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
@@ -164,7 +293,7 @@
             const logData = {
                 vehicle: document.getElementById('fVehicle').value,
                 driver: localStorage.getItem('username'),
-                department: localStorage.getItem('userDept'),
+                department: localStorage.getItem('userDept') || 'Unknown',
                 date: new Date().toLocaleDateString(),
                 liters: parseFloat(document.getElementById('fLiters').value),
                 price: parseFloat(document.getElementById('fPrice').value),
@@ -173,7 +302,7 @@
             };
 
             try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/logs', {
+                const res = await fetch(`${API_BASE}/logs`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(logData)
@@ -186,6 +315,280 @@
             } catch (err) { alert('Server error'); }
             finally { btn.innerText = "Submit Log"; btn.disabled = false; }
         }
+
+        // --- ADVANCED TASK EXECUTION LOGIC ---
+        const taskDropdown = document.getElementById('task-dropdown');
+        const taskDetails = document.getElementById('task-details');
+        const locationDropdown = document.getElementById('location-dropdown');
+        const locationDetails = document.getElementById('location-details');
+
+        window.startAssignedTask = function(taskId, taskType, destName, assignedVehicle) {
+            currentActiveTaskId = taskId;
+            currentActiveVehicle = assignedVehicle || "N/A";
+            
+            let foundTask = Array.from(taskDropdown.options).some(opt => {
+                if (opt.value === taskType) { taskDropdown.value = taskType; return true; }
+                return false;
+            });
+            if (!foundTask) {
+                taskDropdown.value = 'Other';
+                taskDetails.value = taskType;
+                taskDetails.classList.remove('hidden');
+            }
+
+            let foundLoc = Array.from(locationDropdown.options).some(opt => {
+                if (opt.value === destName) { locationDropdown.value = destName; return true; }
+                return false;
+            });
+            if (!foundLoc) {
+                locationDropdown.value = 'Other';
+                locationDetails.value = destName;
+                locationDetails.classList.remove('hidden');
+            }
+
+            statusText.textContent = `Task details loaded for Vehicle: ${currentActiveVehicle}. Ready for Travel Update.`;
+            statusText.classList.replace('text-brand-blue', 'text-green-600');
+            document.getElementById('execution-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        taskDropdown.addEventListener('change', (e) => {
+            if (e.target.value === 'Bank Transaction' || e.target.value === 'Other') {
+                taskDetails.placeholder = e.target.value === 'Bank Transaction' ? "Specify transaction..." : "Specify details...";
+                taskDetails.classList.remove('hidden');
+            } else { taskDetails.classList.add('hidden'); taskDetails.value = ""; }
+        });
+
+        locationDropdown.addEventListener('change', (e) => {
+            if (e.target.value === 'Other') locationDetails.classList.remove('hidden');
+            else { locationDetails.classList.add('hidden'); locationDetails.value = ""; }
+        });
+
+        function getFinalTaskAndLocation() {
+            let finalTask = taskDropdown.value || "Not Selected";
+            if ((finalTask === "Bank Transaction" || finalTask === "Other") && taskDetails.value) finalTask += ` (${taskDetails.value})`;
+            let finalLoc = locationDropdown.value || "Not Selected";
+            if (finalLoc === "Other" && locationDetails.value) finalLoc = locationDetails.value;
+            return { finalTask, finalLoc };
+        }
+
+        // --- GPS & COMPRESSION HELPERS ---
+        function getLiveLocation() {    
+            return new Promise((resolve) => {        
+                if ("geolocation" in navigator) {            
+                    navigator.geolocation.getCurrentPosition(                
+                        (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
+                        (err) => resolve({ lat: "N/A", lon: "N/A" }), { timeout: 5000 }            
+                    );        
+                } else resolve({ lat: "N/A", lon: "N/A" });    
+            });
+        }
+
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width, height = img.height;
+                        const MAX_SIZE = 1000; 
+                        if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                        else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                        canvas.width = width; canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    };
+                };
+            });
+        }
+
+        // --- CLOCK IN/OUT ---
+        async function sendActionLog(payload, successMsg) {    
+            statusText.textContent = "Saving to Database...";
+            statusText.classList.replace('text-green-600', 'text-orange-500');
+            try {        
+                const response = await fetch(`${API_BASE}/action-logs`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
+                if (response.ok) { 
+                    statusText.textContent = successMsg; 
+                    statusText.classList.replace('text-orange-500', 'text-green-600');
+                    return true; 
+                } else throw new Error("Server Error");
+            } catch (error) {         
+                statusText.textContent = "Error: Database refused connection.";
+                statusText.classList.replace('text-orange-500', 'text-red-500');         
+                return false;    
+            }
+        }
+
+        document.getElementById('btn-clock-in').addEventListener('click', async () => {    
+            const coords = await getLiveLocation();    
+            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started!");
+        });
+
+        document.getElementById('btn-clock-out').addEventListener('click', async () => {    
+            const coords = await getLiveLocation();    
+            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended!");
+        });
+
+        // --- TRAVEL UPDATES ---
+        const transitStatus = document.getElementById('transit-dropdown');
+        const uiTransit = document.getElementById('ui-transit');
+        const btnLogTravel = document.getElementById('btn-log-travel');
+
+        transitStatus.addEventListener('change', (e) => {    
+            uiTransit.classList.add('hidden');
+            if (e.target.value === "Delayed") uiTransit.classList.remove('hidden');
+            btnLogTravel.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Log Travel Update';    
+            btnLogTravel.classList.replace('bg-green-600', 'bg-teal-600');
+            btnLogTravel.classList.replace('hover:bg-green-700', 'hover:bg-teal-700');
+        });
+
+        btnLogTravel.addEventListener('click', async () => {    
+            if(!transitStatus.value) { alert("Please select a travel status first."); return; }        
+            let travelStatus = transitStatus.options[transitStatus.selectedIndex].text;
+            let selectedReasons = [];    
+            document.querySelectorAll('.transit-reason:checked').forEach(cb => {        
+                if (!cb.closest('div').classList.contains('hidden')) selectedReasons.push(cb.value); 
+            });
+            if (selectedReasons.length > 0) travelStatus += " (" + selectedReasons.join(", ") + ")";    
+            
+            const coords = await getLiveLocation();
+            const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
+            
+            const payload = {        
+                driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Travel Update",        
+                task: finalTask, location: finalLoc, delivery_status: travelStatus,        
+                comments: document.getElementById('comments').value || "None",        
+                document_attached: "None", latitude: coords.lat, longitude: coords.lon    
+            };
+            
+            const success = await sendActionLog(payload, "Travel Status Updated!");    
+            if(success) {         
+                btnLogTravel.innerHTML = '<i class="fa-solid fa-arrow-down"></i> Logged! Proceed below.';        
+                btnLogTravel.classList.replace('bg-teal-600', 'bg-green-600');
+                btnLogTravel.classList.replace('hover:bg-teal-700', 'hover:bg-green-700');
+            }
+        });
+
+        // --- FINAL HANDOVER ---
+        const completionStatus = document.getElementById('completion-status');
+        const uiCompleted = document.getElementById('ui-completed');
+        const uiSuccessRemarks = document.getElementById('ui-success-remarks');
+        const uiFailed = document.getElementById('ui-failed');
+        const btnSubmitHandover = document.getElementById('btn-submit-handover');
+
+        completionStatus.addEventListener('change', (e) => {    
+            [uiCompleted, uiSuccessRemarks, uiFailed, btnSubmitHandover].forEach(el => el.classList.add('hidden'));        
+            if (e.target.value === "Completed") { uiCompleted.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); } 
+            else if (e.target.value === "Completed_Remarks") { uiCompleted.classList.remove('hidden'); uiSuccessRemarks.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); } 
+            else if (e.target.value === "Failed") { uiFailed.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); }
+        });
+
+        // File & Signature Logic
+        const fileNameDisplay = document.getElementById('file-name');
+        let uploadedImageData = "None";
+        document.getElementById('file-upload').addEventListener('change', async (e) => {    
+            if (e.target.files.length > 0) {        
+                fileNameDisplay.textContent = "Processing Photo...";        
+                uploadedImageData = await compressImage(e.target.files[0]);
+                fileNameDisplay.textContent = `Attached: ${e.target.files[0].name}`;        
+            }
+        });
+
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false, signatureEmpty = true;
+        
+        function getCoordinates(e) {    
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;    
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+        function startDrawing(e) { isDrawing = true; signatureEmpty = false; const { x, y } = getCoordinates(e); ctx.beginPath(); ctx.moveTo(x, y); if (e.touches) e.preventDefault(); }
+        function draw(e) { if (!isDrawing) return; const { x, y } = getCoordinates(e); ctx.lineTo(x, y); ctx.stroke(); if (e.touches) e.preventDefault(); }
+        function stopDrawing() { isDrawing = false; ctx.closePath(); }
+
+        canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); 
+        canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); 
+        canvas.addEventListener('touchend', stopDrawing);
+        document.getElementById('clear-signature').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true; });
+
+        // Submit Logic
+        btnSubmitHandover.addEventListener('click', async () => {    
+            const compType = completionStatus.value;    
+            let failReasonsStr = "None", sigData = "None";    
+            let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
+            
+            if (compType === "Completed" || compType === "Completed_Remarks") {        
+                if (uploadedImageData === "None") return alert("❌ REQUIRED: Attach a photo proof."); 
+                if (signatureEmpty) return alert("❌ REQUIRED: Recipient e-signature."); 
+                sigData = canvas.toDataURL("image/png");  
+                if (compType === "Completed_Remarks") {            
+                    const remarks = document.querySelectorAll('.remark-reason:checked');            
+                    if (remarks.length === 0) return alert("❌ Please select at least one remark."); 
+                    failReasonsStr = Array.from(remarks).map(cb => cb.value).join(" | ");         
+                }    
+            }   
+            if (compType === "Failed") {        
+                const checkboxes = document.querySelectorAll('.fail-reason:checked');
+                if (checkboxes.length === 0) return alert("❌ Please select a failure reason."); 
+                failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(" | ");  
+            }    
+            
+            const coords = await getLiveLocation();
+            const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
+
+            const payload = {        
+                driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Final Task Handover",        
+                task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
+                comments: document.getElementById('comments').value || "None",        
+                document_attached: uploadedImageData, latitude: coords.lat, longitude: coords.lon,        
+                completion_type: compType, incomplete_reasons: failReasonsStr, signature: sigData    
+            };
+            
+            const success = await sendActionLog(payload, "Task Successfully Handed Over!");    
+            
+            if (success) {        
+                if (currentActiveTaskId) {
+                    const isNeedsRebook = (compType === "Failed" && document.getElementById('check-reschedule').checked);
+                    const shouldKeepTaskPending = (compType === "Failed" && document.getElementById('check-later').checked);
+                    
+                    const updateStatus = isNeedsRebook ? 'Rebook' : (shouldKeepTaskPending ? 'Pending' : 'Completed');
+                    
+                    if (updateStatus !== 'Pending') {
+                        await fetch(`${API_BASE}/tasks/${currentActiveTaskId}`, {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status: updateStatus })
+                        });
+                        alert(updateStatus === 'Rebook' ? "Task flagged for Rebooking by Admin." : "Task completed and removed from pending list!");
+                    } else {
+                        alert("Task attempt logged. It remains on your pending list for later.");
+                    }
+                    currentActiveTaskId = null;
+                    currentActiveVehicle = "N/A";
+                }
+
+                // Reset UI
+                transitStatus.value = ""; btnLogTravel.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Log Travel Update';        
+                btnLogTravel.classList.replace('bg-green-600', 'bg-teal-600'); btnLogTravel.classList.replace('hover:bg-green-700', 'hover:bg-teal-700');         
+                uiTransit.classList.add('hidden'); completionStatus.value = "";         
+                [uiCompleted, uiSuccessRemarks, uiFailed, btnSubmitHandover].forEach(el => el.classList.add('hidden'));                
+                ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);        
+                uploadedImageData = "None"; fileNameDisplay.textContent = "Attach Photo (REQUIRED)";                
+                taskDetails.classList.add('hidden'); taskDetails.value = ""; locationDetails.classList.add('hidden'); locationDetails.value = "";
+                taskDropdown.value = ""; locationDropdown.value = ""; document.getElementById('comments').value = "";
+                loadMyTasks();
+            }
+        });
     </script>
 </body>
 </html>
