@@ -9,7 +9,6 @@ function renderNavigation(activePageId) {
         { id: 'fuel-log', name: 'Mileage and Fuel Log', href: 'fuel-log.html' },
         { id: 'calculator', name: 'Calculator', href: 'calculator.html' },
         { id: 'travel-map', name: 'Travel Map', href: 'travel-map.html' },
-        { id: 'insights', name: 'Insights', href: 'insights.html' }
     ];
 
     const linksHTML = navItems.map(item => {
