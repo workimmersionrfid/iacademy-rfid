@@ -90,10 +90,11 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
+              if (response.ok) {
                     // Success! Store the token and user info in the browser
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userRole', data.role);
+                    localStorage.setItem('username', username); // <--- ADD THIS LINE
                     if (data.department) localStorage.setItem('userDept', data.department);
 
                     // Redirect based on role
