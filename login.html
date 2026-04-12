@@ -56,6 +56,19 @@
     </div>
 
     <script>
+        // --- SESSION CHECK ---
+        // If a token already exists, skip the login page and go to the dashboard
+        const savedToken = localStorage.getItem('token');
+        const savedRole = localStorage.getItem('userRole');
+
+        if (savedToken && savedRole) {
+            if (savedRole === 'admin') {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.location.href = 'driver-dashboard.html';
+            }
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
