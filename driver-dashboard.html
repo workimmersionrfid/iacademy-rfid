@@ -6,8 +6,25 @@
     <title>Driver Portal - iACADEMY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = { theme: { extend: { colors: { brand: { blue: '#3674FF', bg: '#f4f5f7' } } } } }
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { 
+                        brand: { 
+                            dark: '#0f172a',      // Slate 900
+                            primary: '#1d4ed8',   // Blue 700
+                            light: '#eff6ff',     // Blue 50
+                            bg: '#f8fafc',        // Slate 50
+                            border: '#e2e8f0',    // Slate 200
+                            muted: '#64748b'      // Slate 500
+                        } 
+                    } 
+                } 
+            } 
+        }
 
         // Security Check
         document.addEventListener("DOMContentLoaded", () => {
@@ -17,7 +34,7 @@
             else {
                 document.getElementById('driverName').innerText = localStorage.getItem('username');
                 
-                // Parse department (handles arrays or strings from our previous backend update)
+                // Parse department
                 let deptData = localStorage.getItem('userDept');
                 try {
                     let parsed = JSON.parse(deptData);
@@ -32,190 +49,194 @@
         });
     </script>
 </head>
-<body class="bg-brand-bg font-sans min-h-screen pb-20">
+<body class="bg-brand-bg font-sans min-h-screen pb-20 text-slate-800 antialiased">
 
-    <nav class="bg-brand-blue text-white p-5 sticky top-0 z-10 shadow-md">
-        <div class="flex justify-between items-center mb-4">
-            <div class="font-bold text-lg tracking-tight"><i class="fa-solid fa-truck-fast mr-2"></i>Driver Portal</div>
-            <button onclick="logout()" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded transition">Logout</button>
+    <nav class="bg-brand-dark text-white p-6 sticky top-0 z-10 shadow-sm border-b border-slate-800">
+        <div class="flex justify-between items-center mb-5">
+            <div class="font-bold text-lg tracking-tight"><i class="fa-solid fa-truck-fast mr-2 text-blue-400"></i>Driver Portal</div>
+            <button onclick="logout()" class="text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg transition-colors border border-slate-700">Logout</button>
         </div>
         <div>
-            <p class="text-blue-100 text-xs uppercase tracking-wider font-bold mb-1" id="driverDept">Department</p>
-            <h1 class="text-2xl font-black" id="driverName">Driver Name</h1>
+            <p class="text-blue-300 text-xs uppercase tracking-widest font-bold mb-1" id="driverDept">Department</p>
+            <h1 class="text-2xl font-bold tracking-tight" id="driverName">Driver Name</h1>
         </div>
     </nav>
 
-    <main class="max-w-md mx-auto p-4 space-y-6">
+    <main class="max-w-md mx-auto p-5 space-y-6">
         
         <div class="grid grid-cols-2 gap-4">
-            <button id="btn-clock-in" class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl shadow-sm border border-green-700 flex flex-col items-center justify-center gap-2 transition">
-                <i class="fa-solid fa-clock text-2xl mb-1"></i>
-                <span class="text-sm font-bold">Clock In</span>
+            <button id="btn-clock-in" class="bg-brand-primary hover:bg-blue-800 text-white p-5 rounded-xl shadow-sm border border-blue-800 flex flex-col items-center justify-center gap-2 transition-colors">
+                <i class="fa-solid fa-clock text-2xl mb-1 text-blue-200"></i>
+                <span class="text-sm font-semibold tracking-wide">Clock In</span>
             </button>
-            <button id="btn-clock-out" class="bg-red-500 hover:bg-red-600 text-white p-4 rounded-xl shadow-sm border border-red-600 flex flex-col items-center justify-center gap-2 transition">
-                <i class="fa-solid fa-stopwatch text-2xl mb-1"></i>
-                <span class="text-sm font-bold">Clock Out</span>
+            <button id="btn-clock-out" class="bg-white hover:bg-slate-100 text-brand-dark p-5 rounded-xl shadow-sm border border-brand-border flex flex-col items-center justify-center gap-2 transition-colors">
+                <i class="fa-solid fa-stopwatch text-2xl mb-1 text-slate-400"></i>
+                <span class="text-sm font-semibold tracking-wide">Clock Out</span>
             </button>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="document.getElementById('fuelModal').classList.remove('hidden')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 hover:border-brand-blue transition">
-                <div class="bg-blue-50 text-brand-blue w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-gas-pump"></i></div>
-                <span class="text-sm font-bold text-gray-700">Log Fuel</span>
+            <button onclick="document.getElementById('fuelModal').classList.remove('hidden')" class="bg-white p-4 rounded-xl shadow-sm border border-brand-border flex flex-col items-center justify-center gap-3 hover:border-blue-300 transition-colors">
+                <div class="bg-brand-light text-brand-primary w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-gas-pump"></i></div>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Log Fuel</span>
             </button>
-            <button onclick="alert('Toll logging coming soon!')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 hover:border-brand-blue transition">
-                <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-ticket"></i></div>
-                <span class="text-sm font-bold text-gray-700">Log Toll Fee</span>
+            <button onclick="alert('Toll logging coming soon!')" class="bg-white p-4 rounded-xl shadow-sm border border-brand-border flex flex-col items-center justify-center gap-3 hover:border-blue-300 transition-colors">
+                <div class="bg-brand-light text-brand-primary w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-ticket"></i></div>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Log Toll</span>
             </button>
         </div>
 
-        <div>
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3"><i class="fa-solid fa-clipboard-list mr-1"></i> Assigned Dispatches</h2>
-            <div id="taskList" class="space-y-3">
-                <div class="text-center p-6 bg-white rounded-xl shadow-sm text-gray-400 text-sm"><i class="fa-solid fa-spinner fa-spin mb-2 text-xl"></i><br>Loading tasks...</div>
+        <div class="pt-2">
+            <h2 class="text-xs font-bold text-brand-muted uppercase tracking-widest mb-4 flex items-center"><i class="fa-solid fa-clipboard-list mr-2"></i> Assigned Dispatches</h2>
+            <div id="taskList" class="space-y-4">
+                <div class="text-center p-8 bg-white rounded-xl shadow-sm border border-brand-border text-brand-muted text-sm"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Loading tasks...</div>
             </div>
         </div>
 
-        <div id="execution-panel" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="bg-gray-50 p-4 border-b border-gray-100">
-                <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider"><i class="fa-solid fa-truck-fast mr-1 text-brand-blue"></i> Execution & Handover</h2>
+        <div id="execution-panel" class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden">
+            <div class="bg-slate-50 p-5 border-b border-brand-border">
+                <h2 class="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center"><i class="fa-solid fa-truck-fast mr-2 text-brand-primary"></i> Execution & Handover</h2>
             </div>
-            <div class="p-5">
-                <p id="status-text" class="text-sm font-bold text-brand-blue mb-4">Status: Waiting for shift start...</p>
+            <div class="p-6">
+                <p id="status-text" class="text-xs font-bold text-brand-muted mb-5 tracking-wide">STATUS: WAITING FOR SHIFT START...</p>
 
-                <div class="space-y-3 mb-6">
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Task Type</label>
-                    <select id="task-dropdown" class="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue bg-white">
-                        <option value="">Select Specific Task</option>       
-                        <option value="Asset Collection">Asset Collection</option>            
-                        <option value="Document Routing">Document Routing</option>            
-                        <option value="Hardware Transport">Hardware Transport</option>        
-                        <option value="Bank Transaction">Bank Transaction</option>
-                        <option value="Other">Other (Specify Task)</option>
-                    </select>
-                    <input type="text" id="task-details" class="hidden w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue" placeholder="Specify details...">
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-2">Task Type</label>
+                        <select id="task-dropdown" class="w-full border border-brand-border rounded-lg p-3.5 text-sm outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary bg-white text-slate-700 transition-all">
+                            <option value="">Select Specific Task</option>       
+                            <option value="Asset Collection">Asset Collection</option>            
+                            <option value="Document Routing">Document Routing</option>            
+                            <option value="Hardware Transport">Hardware Transport</option>        
+                            <option value="Bank Transaction">Bank Transaction</option>
+                            <option value="Other">Other (Specify Task)</option>
+                        </select>
+                        <input type="text" id="task-details" class="hidden mt-3 w-full border border-brand-border rounded-lg p-3.5 text-sm outline-none focus:border-brand-primary bg-white text-slate-700" placeholder="Specify details...">
+                    </div>
                     
-                    <label class="block text-xs font-bold text-gray-500 uppercase mt-3">Destination</label>
-                    <select id="location-dropdown" class="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue bg-white">
-                        <option value="">Select Destination</option>            
-                        <optgroup label="iACADEMY Campuses">             
-                            <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus (Yakal St.)</option>                
-                            <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza (Buendia)</option>            
-                        </optgroup>            
-                        <optgroup label="Tech & Computing Partners">                
-                            <option value="Amazon Web Services">Amazon Web Services</option>                
-                            <option value="ASUS">ASUS</option>   
-                        </optgroup>            
-                        <optgroup label="Business, Finance & Marketing">                
-                            <option value="Metrobank">Metrobank</option>                
-                            <option value="Macquarie">Macquarie</option>                
-                        </optgroup>            
-                        <optgroup label="Custom Destination">                
-                            <option value="Other">Other (Specify Destination)</option>            
-                        </optgroup> 
-                    </select>
-                    <input type="text" id="location-details" class="hidden w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue" placeholder="Type exact destination name...">
+                    <div>
+                        <label class="block text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-2 mt-2">Destination</label>
+                        <select id="location-dropdown" class="w-full border border-brand-border rounded-lg p-3.5 text-sm outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary bg-white text-slate-700 transition-all">
+                            <option value="">Select Destination</option>            
+                            <optgroup label="iACADEMY Campuses">             
+                                <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus (Yakal St.)</option>                
+                                <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza (Buendia)</option>            
+                            </optgroup>            
+                            <optgroup label="Tech & Computing Partners">                
+                                <option value="Amazon Web Services">Amazon Web Services</option>                
+                                <option value="ASUS">ASUS</option>   
+                            </optgroup>            
+                            <optgroup label="Business, Finance & Marketing">                
+                                <option value="Metrobank">Metrobank</option>                
+                                <option value="Macquarie">Macquarie</option>                
+                            </optgroup>            
+                            <optgroup label="Custom Destination">                
+                                <option value="Other">Other (Specify Destination)</option>            
+                            </optgroup> 
+                        </select>
+                        <input type="text" id="location-details" class="hidden mt-3 w-full border border-brand-border rounded-lg p-3.5 text-sm outline-none focus:border-brand-primary bg-white text-slate-700" placeholder="Type exact destination name...">
+                    </div>
                 </div>
 
-                <hr class="border-gray-100 my-5">
+                <hr class="border-brand-border my-6">
 
-                <h3 class="font-bold text-teal-700 mb-2">1. Travel Updates</h3>
-                <select id="transit-dropdown" class="w-full border-2 border-teal-500 rounded-lg p-3 text-sm outline-none bg-white font-bold mb-3">
+                <h3 class="font-bold text-brand-primary text-sm tracking-wide mb-3">1. Travel Updates</h3>
+                <select id="transit-dropdown" class="w-full border border-blue-200 bg-brand-light rounded-lg p-3.5 text-sm outline-none font-semibold text-brand-primary mb-4 focus:border-brand-primary transition-all">
                     <option value="">-- Select Travel Status --</option>
                     <option value="En Route">En Route (On Time)</option>
                     <option value="Delayed">Delayed (Select Reason)</option>
                     <option value="Nearby">Arrived / Nearby</option>
                 </select>
                 
-                <div id="ui-transit" class="hidden bg-orange-50 border border-orange-100 p-4 rounded-lg mb-3">
-                    <p class="text-orange-800 font-bold text-sm mb-2">Select reasons for delay:</p>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="transit-reason mr-3 w-4 h-4" value="Heavy Traffic"> Heavy Traffic</label>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="transit-reason mr-3 w-4 h-4" value="Road block / Maintenance"> Road block / Maintenance</label>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="transit-reason mr-3 w-4 h-4" value="Lost / Rerouting"> Lost / Rerouting</label>
+                <div id="ui-transit" class="hidden bg-slate-50 border border-brand-border p-5 rounded-lg mb-4">
+                    <p class="text-slate-700 font-semibold text-xs tracking-wide uppercase mb-3">Select reasons for delay:</p>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer mb-3"><input type="checkbox" class="transit-reason mr-3 w-4 h-4 accent-brand-primary border-slate-300 rounded"> Heavy Traffic</label>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer mb-3"><input type="checkbox" class="transit-reason mr-3 w-4 h-4 accent-brand-primary border-slate-300 rounded"> Road block / Maintenance</label>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="transit-reason mr-3 w-4 h-4 accent-brand-primary border-slate-300 rounded"> Lost / Rerouting</label>
                 </div>
 
-                <button id="btn-log-travel" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-md mb-2 flex items-center justify-center gap-2 transition">
+                <button id="btn-log-travel" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold tracking-wide py-3.5 rounded-lg shadow-sm mb-2 flex items-center justify-center gap-2 transition-colors">
                     <i class="fa-solid fa-location-crosshairs"></i> Log Travel Update
                 </button>
 
-                <hr class="border-gray-100 my-5">
+                <hr class="border-brand-border my-8">
 
-                <h3 class="font-bold text-brand-blue mb-2">2. Final Handover</h3>
-                <select id="completion-status" class="w-full border-2 border-brand-blue rounded-lg p-3 text-sm outline-none bg-white font-bold mb-3">
+                <h3 class="font-bold text-brand-primary text-sm tracking-wide mb-3">2. Final Handover</h3>
+                <select id="completion-status" class="w-full border border-blue-200 bg-brand-light rounded-lg p-3.5 text-sm outline-none font-semibold text-brand-primary mb-4 focus:border-brand-primary transition-all">
                     <option value="">-- Select Final Outcome --</option>
                     <option value="Completed">Successful</option>
                     <option value="Completed_Remarks">Successful (With Remarks)</option>
                     <option value="Failed">Delivery Failed</option>
                 </select>
 
-                <div id="ui-success-remarks" class="hidden bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-3">
-                    <p class="text-yellow-800 font-bold text-sm mb-2">Select Remarks:</p>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="remark-reason mr-3 w-4 h-4" value="Received by alternate person"> Received by alternate person</label>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="remark-reason mr-3 w-4 h-4" value="Packaging slightly damaged"> Packaging slightly damaged</label>
+                <div id="ui-success-remarks" class="hidden bg-slate-50 border border-brand-border p-5 rounded-lg mb-4">
+                    <p class="text-slate-700 font-semibold text-xs tracking-wide uppercase mb-3">Select Remarks:</p>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer mb-3"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 accent-brand-primary border-slate-300 rounded"> Received by alternate person</label>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 accent-brand-primary border-slate-300 rounded"> Packaging slightly damaged</label>
                 </div>
 
-                <div id="ui-completed" class="hidden bg-green-50 border border-green-200 p-4 rounded-lg mb-3 space-y-4">
+                <div id="ui-completed" class="hidden bg-brand-light border border-blue-100 p-5 rounded-lg mb-4 space-y-5">
                     <div>
-                        <p class="text-green-800 font-bold text-sm mb-2"><i class="fa-solid fa-camera"></i> Required Proof:</p>
-                        <label for="file-upload" class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-lg font-bold cursor-pointer transition shadow-sm">
-                            <i class="fa-solid fa-upload mr-1"></i> <span id="file-name">Attach Photo (REQUIRED)</span>
+                        <p class="text-brand-primary font-bold text-xs uppercase tracking-wider mb-3"><i class="fa-solid fa-camera mr-1"></i> Required Proof:</p>
+                        <label for="file-upload" class="block w-full text-center bg-white border border-blue-300 hover:bg-blue-50 text-brand-primary p-3.5 rounded-lg font-semibold cursor-pointer transition-colors shadow-sm">
+                            <i class="fa-solid fa-upload mr-2"></i> <span id="file-name">Attach Photo</span>
                         </label>
                         <input type="file" id="file-upload" class="hidden" accept="image/*" capture="environment">
                     </div>
                     <div>
-                        <p class="text-green-800 font-bold text-sm mb-2"><i class="fa-solid fa-pen-nib"></i> Recipient E-Signature (REQUIRED):</p>
-                        <canvas id="signature-pad" class="w-full bg-white border border-green-400 rounded-lg touch-none shadow-inner" height="150"></canvas>
-                        <button id="clear-signature" class="mt-2 text-xs font-bold bg-red-100 text-red-600 px-3 py-1.5 rounded hover:bg-red-200 border border-red-200 transition">Clear Signature</button>
+                        <p class="text-brand-primary font-bold text-xs uppercase tracking-wider mb-3"><i class="fa-solid fa-pen-nib mr-1"></i> E-Signature (Required):</p>
+                        <canvas id="signature-pad" class="w-full bg-white border border-blue-200 rounded-lg touch-none shadow-sm" height="150"></canvas>
+                        <button id="clear-signature" class="mt-3 text-[11px] uppercase tracking-wider font-bold bg-white text-slate-500 px-4 py-2 rounded-lg hover:bg-slate-100 border border-slate-200 transition-colors">Clear Signature</button>
                     </div>
                 </div>
 
-                <div id="ui-failed" class="hidden bg-red-50 border border-red-200 p-4 rounded-lg mb-3">
-                    <p class="text-red-800 font-bold text-sm mb-2">Select Failure Reasons:</p>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" value="Recipient Absent"> Recipient Absent</label>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" value="Cannot Locate Address"> Cannot Locate Address</label>
-                    <hr class="border-red-200 my-3">
-                    <p class="text-red-800 font-bold text-sm mb-2">Next Steps:</p>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer mb-2"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" id="check-reschedule" value="Needs Rebooking"> Needs Rebooking by Admin</label>
-                    <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4" id="check-later" value="Will retry today"> Will retry later today</label>
+                <div id="ui-failed" class="hidden bg-slate-50 border border-brand-border p-5 rounded-lg mb-4">
+                    <p class="text-slate-700 font-semibold text-xs tracking-wide uppercase mb-3">Select Failure Reasons:</p>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer mb-3"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 accent-slate-600 border-slate-300 rounded"> Recipient Absent</label>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer mb-4"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 accent-slate-600 border-slate-300 rounded"> Cannot Locate Address</label>
+                    <hr class="border-brand-border my-4">
+                    <p class="text-slate-700 font-semibold text-xs tracking-wide uppercase mb-3">Next Steps:</p>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer mb-3"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 accent-slate-600 border-slate-300 rounded" id="check-reschedule" value="Needs Rebooking"> Needs Rebooking by Admin</label>
+                    <label class="flex items-center text-sm text-slate-600 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 accent-slate-600 border-slate-300 rounded" id="check-later" value="Will retry today"> Will retry later today</label>
                 </div>
 
-                <textarea id="comments" placeholder="Additional Comments / Notes" class="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:border-brand-blue bg-gray-50 mb-4" rows="3"></textarea>
+                <textarea id="comments" placeholder="Additional Comments / Notes" class="w-full border border-brand-border rounded-lg p-4 text-sm outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary bg-white mb-5 transition-all min-h-[100px]" rows="3"></textarea>
                 
-                <button id="btn-submit-handover" class="hidden w-full bg-brand-blue hover:bg-brand-blueHover text-white font-bold py-3 rounded-lg shadow-md flex items-center justify-center gap-2 transition">
+                <button id="btn-submit-handover" class="hidden w-full bg-brand-dark hover:bg-slate-800 text-white font-semibold tracking-wide py-4 rounded-lg shadow-md flex items-center justify-center gap-2 transition-colors">
                     <i class="fa-solid fa-check-circle"></i> Submit Final Task Completion
                 </button>
             </div>
         </div>
     </main>
 
-    <div id="fuelModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
-                <h3 class="font-bold text-gray-800">Submit Fuel Log</h3>
-                <button onclick="document.getElementById('fuelModal').classList.add('hidden')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="fuelModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+            <div class="p-5 bg-slate-50 border-b border-brand-border flex justify-between items-center">
+                <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Submit Fuel Log</h3>
+                <button onclick="document.getElementById('fuelModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <form id="fuelForm" onsubmit="submitFuel(event)" class="p-5 space-y-4">
+            <form id="fuelForm" onsubmit="submitFuel(event)" class="p-6 space-y-5">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Assigned Vehicle</label>
-                    <select id="fVehicle" required class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none focus:border-brand-blue">
+                    <label class="block text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-2">Assigned Vehicle</label>
+                    <select id="fVehicle" required class="w-full border border-brand-border rounded-lg p-3 text-sm bg-white outline-none focus:border-brand-primary transition-colors">
                         <option value="" disabled selected>Loading...</option>
                     </select>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Liters</label>
-                        <input type="number" id="fLiters" step="0.01" required class="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <label class="block text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-2">Liters</label>
+                        <input type="number" id="fLiters" step="0.01" required class="w-full border border-brand-border rounded-lg p-3 text-sm outline-none focus:border-brand-primary transition-colors">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Price/Liter</label>
-                        <input type="number" id="fPrice" step="0.01" required class="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <label class="block text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-2">Price/Liter</label>
+                        <input type="number" id="fPrice" step="0.01" required class="w-full border border-brand-border rounded-lg p-3 text-sm outline-none focus:border-brand-primary transition-colors">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Gas Station</label>
-                    <input type="text" id="fStation" required class="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                    <label class="block text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-2">Gas Station</label>
+                    <input type="text" id="fStation" required class="w-full border border-brand-border rounded-lg p-3 text-sm outline-none focus:border-brand-primary transition-colors">
                 </div>
-                <button type="submit" class="w-full bg-brand-blue text-white font-bold py-3 rounded-lg shadow-md mt-2">Submit Log</button>
+                <button type="submit" class="w-full bg-brand-primary hover:bg-blue-800 text-white font-semibold tracking-wide py-3.5 rounded-lg shadow-sm mt-4 transition-colors">Submit Log</button>
             </form>
         </div>
     </div>
@@ -239,33 +260,35 @@
                 const list = document.getElementById('taskList');
                 
                 if(myTasks.length === 0) {
-                    list.innerHTML = `<div class="text-center p-6 bg-white rounded-xl shadow-sm text-gray-400 text-sm">No tasks assigned to you yet.</div>`;
+                    list.innerHTML = `<div class="text-center p-8 bg-white rounded-xl shadow-sm border border-brand-border text-brand-muted text-sm">No tasks assigned to you yet.</div>`;
                     return;
                 }
 
                 list.innerHTML = myTasks.map(t => {
                     const isDone = t.status === 'Completed';
                     const isRebook = t.status === 'Rebook';
-                    const bgClass = isDone ? 'bg-green-50 border-green-200' : (isRebook ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200');
-                    const statusBadge = isDone ? '<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded">DONE</span>' : 
-                                       (isRebook ? '<span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded">REBOOK</span>' : '');
+                    
+                    // Monochromatic styling for task cards
+                    const bgClass = isDone ? 'bg-brand-light border-blue-200 opacity-75' : (isRebook ? 'bg-slate-100 border-slate-300' : 'bg-white border-brand-border');
+                    const statusBadge = isDone ? '<span class="text-[10px] font-bold text-brand-primary bg-blue-100 px-2 py-1 rounded tracking-wider">DONE</span>' : 
+                                       (isRebook ? '<span class="text-[10px] font-bold text-slate-600 bg-slate-200 px-2 py-1 rounded tracking-wider">REBOOK</span>' : '');
                     
                     return `
-                    <div class="${bgClass} p-4 rounded-xl shadow-sm border transition-all">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">${t.date}</span>
-                                <span class="text-xs font-bold bg-blue-50 text-brand-blue px-2 py-1 rounded ml-1"><i class="fa-solid fa-car mr-1"></i>${t.vehicle}</span>
+                    <div class="${bgClass} p-5 rounded-xl shadow-sm border transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex gap-2">
+                                <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2.5 py-1 rounded border border-slate-200 tracking-wider">${t.date}</span>
+                                <span class="text-[10px] font-bold bg-brand-light text-brand-primary px-2.5 py-1 rounded border border-blue-100 tracking-wider"><i class="fa-solid fa-car mr-1"></i>${t.vehicle}</span>
                             </div>
                             ${statusBadge}
                         </div>
-                        <h3 class="font-bold text-gray-800 text-lg leading-tight mt-2">${t.description}</h3>
-                        <p class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> ${t.destination}</p>
+                        <h3 class="font-bold text-brand-dark text-lg leading-tight mt-3">${t.description}</h3>
+                        <p class="text-sm text-brand-muted mt-2 font-medium"><i class="fa-solid fa-location-dot mr-1.5 text-slate-400"></i> ${t.destination}</p>
                         
                         ${(!isDone && !isRebook) ? `
-                        <div class="mt-4 pt-3 border-t border-gray-100">
-                            <button onclick="startAssignedTask('${t._id}', '${t.description}', '${t.destination}', '${t.vehicle}')" class="w-full bg-orange-500 text-white text-sm font-bold py-2.5 rounded-lg shadow-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-play"></i> Auto-Fill & Start Route
+                        <div class="mt-5 pt-4 border-t border-brand-border">
+                            <button onclick="startAssignedTask('${t._id}', '${t.description}', '${t.destination}', '${t.vehicle}')" class="w-full bg-blue-100 text-brand-primary text-sm font-semibold tracking-wide py-3 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-play text-xs"></i> Auto-Fill & Start Route
                             </button>
                         </div>
                         ` : ''}
@@ -346,8 +369,8 @@
                 locationDetails.classList.remove('hidden');
             }
 
-            statusText.textContent = `Task details loaded for Vehicle: ${currentActiveVehicle}. Ready for Travel Update.`;
-            statusText.classList.replace('text-brand-blue', 'text-green-600');
+            statusText.textContent = `STATUS: LOADED FOR VEHICLE ${currentActiveVehicle}`;
+            statusText.classList.replace('text-brand-muted', 'text-brand-primary');
             document.getElementById('execution-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
@@ -406,8 +429,9 @@
 
         // --- CLOCK IN/OUT ---
         async function sendActionLog(payload, successMsg) {    
-            statusText.textContent = "Saving to Database...";
-            statusText.classList.replace('text-green-600', 'text-orange-500');
+            statusText.textContent = "STATUS: SAVING TO DATABASE...";
+            statusText.classList.replace('text-brand-primary', 'text-slate-500');
+            statusText.classList.replace('text-brand-muted', 'text-slate-500');
             try {        
                 const response = await fetch(`${API_BASE}/action-logs`, { 
                     method: 'POST', 
@@ -415,25 +439,25 @@
                     body: JSON.stringify(payload) 
                 });
                 if (response.ok) { 
-                    statusText.textContent = successMsg; 
-                    statusText.classList.replace('text-orange-500', 'text-green-600');
+                    statusText.textContent = `STATUS: ${successMsg.toUpperCase()}`; 
+                    statusText.classList.replace('text-slate-500', 'text-brand-primary');
                     return true; 
                 } else throw new Error("Server Error");
             } catch (error) {         
-                statusText.textContent = "Error: Database refused connection.";
-                statusText.classList.replace('text-orange-500', 'text-red-500');         
+                statusText.textContent = "STATUS: DATABASE CONNECTION ERROR";
+                statusText.classList.replace('text-slate-500', 'text-red-500');         
                 return false;    
             }
         }
 
         document.getElementById('btn-clock-in').addEventListener('click', async () => {    
             const coords = await getLiveLocation();    
-            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started!");
+            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
         });
 
         document.getElementById('btn-clock-out').addEventListener('click', async () => {    
             const coords = await getLiveLocation();    
-            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended!");
+            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
         });
 
         // --- TRAVEL UPDATES ---
@@ -445,8 +469,8 @@
             uiTransit.classList.add('hidden');
             if (e.target.value === "Delayed") uiTransit.classList.remove('hidden');
             btnLogTravel.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Log Travel Update';    
-            btnLogTravel.classList.replace('bg-green-600', 'bg-teal-600');
-            btnLogTravel.classList.replace('hover:bg-green-700', 'hover:bg-teal-700');
+            btnLogTravel.classList.replace('bg-brand-dark', 'bg-blue-600');
+            btnLogTravel.classList.replace('hover:bg-slate-800', 'hover:bg-blue-700');
         });
 
         btnLogTravel.addEventListener('click', async () => {    
@@ -468,11 +492,11 @@
                 document_attached: "None", latitude: coords.lat, longitude: coords.lon    
             };
             
-            const success = await sendActionLog(payload, "Travel Status Updated!");    
+            const success = await sendActionLog(payload, "Travel Status Updated");    
             if(success) {         
-                btnLogTravel.innerHTML = '<i class="fa-solid fa-arrow-down"></i> Logged! Proceed below.';        
-                btnLogTravel.classList.replace('bg-teal-600', 'bg-green-600');
-                btnLogTravel.classList.replace('hover:bg-teal-700', 'hover:bg-green-700');
+                btnLogTravel.innerHTML = '<i class="fa-solid fa-check"></i> Logged! Proceed below.';        
+                btnLogTravel.classList.replace('bg-blue-600', 'bg-brand-dark');
+                btnLogTravel.classList.replace('hover:bg-blue-700', 'hover:bg-slate-800');
             }
         });
 
@@ -528,18 +552,18 @@
             let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
             
             if (compType === "Completed" || compType === "Completed_Remarks") {        
-                if (uploadedImageData === "None") return alert("❌ REQUIRED: Attach a photo proof."); 
-                if (signatureEmpty) return alert("❌ REQUIRED: Recipient e-signature."); 
+                if (uploadedImageData === "None") return alert("Please attach a photo proof."); 
+                if (signatureEmpty) return alert("Please provide recipient e-signature."); 
                 sigData = canvas.toDataURL("image/png");  
                 if (compType === "Completed_Remarks") {            
                     const remarks = document.querySelectorAll('.remark-reason:checked');            
-                    if (remarks.length === 0) return alert("❌ Please select at least one remark."); 
+                    if (remarks.length === 0) return alert("Please select at least one remark."); 
                     failReasonsStr = Array.from(remarks).map(cb => cb.value).join(" | ");         
                 }    
             }   
             if (compType === "Failed") {        
                 const checkboxes = document.querySelectorAll('.fail-reason:checked');
-                if (checkboxes.length === 0) return alert("❌ Please select a failure reason."); 
+                if (checkboxes.length === 0) return alert("Please select a failure reason."); 
                 failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(" | ");  
             }    
             
@@ -554,7 +578,7 @@
                 completion_type: compType, incomplete_reasons: failReasonsStr, signature: sigData    
             };
             
-            const success = await sendActionLog(payload, "Task Successfully Handed Over!");    
+            const success = await sendActionLog(payload, "Task Successfully Handed Over");    
             
             if (success) {        
                 if (currentActiveTaskId) {
@@ -578,12 +602,12 @@
 
                 // Reset UI
                 transitStatus.value = ""; btnLogTravel.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Log Travel Update';        
-                btnLogTravel.classList.replace('bg-green-600', 'bg-teal-600'); btnLogTravel.classList.replace('hover:bg-green-700', 'hover:bg-teal-700');         
+                btnLogTravel.classList.replace('bg-brand-dark', 'bg-blue-600'); btnLogTravel.classList.replace('hover:bg-slate-800', 'hover:bg-blue-700');         
                 uiTransit.classList.add('hidden'); completionStatus.value = "";         
                 [uiCompleted, uiSuccessRemarks, uiFailed, btnSubmitHandover].forEach(el => el.classList.add('hidden'));                
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
                 document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);        
-                uploadedImageData = "None"; fileNameDisplay.textContent = "Attach Photo (REQUIRED)";                
+                uploadedImageData = "None"; fileNameDisplay.textContent = "Attach Photo";                
                 taskDetails.classList.add('hidden'); taskDetails.value = ""; locationDetails.classList.add('hidden'); locationDetails.value = "";
                 taskDropdown.value = ""; locationDropdown.value = ""; document.getElementById('comments').value = "";
                 loadMyTasks();
