@@ -52,6 +52,11 @@ app.post('/api/logs', async (req, res) => {
     }
 });
 
+// 3. Securely send the Google Maps API Key to the frontend
+app.get('/api/config/maps', (req, res) => {
+    res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
+});
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
