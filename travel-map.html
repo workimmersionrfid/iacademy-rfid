@@ -76,73 +76,27 @@
                         <label for="toggleToll" class="text-sm font-medium text-[#3a3a3a] cursor-pointer">Avoid toll roads</label>
                     </div>
 
-                    <div class="bg-[#f8f9fa] border border-brand-border rounded-xl p-5 mb-6 flex-1">
+                    <div class="bg-[#f8f9fa] border border-brand-border rounded-xl p-5 mb-6 flex-1 flex flex-col max-h-[400px]">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-sm font-semibold text-[#3a3a3a]">Toll Calculator</h3>
                             <span class="text-xs text-brand-gray">from toll.ph</span>
                         </div>
                         <p class="text-xs text-brand-gray mb-4">Select your expressway, then entry and exit points. Add a row for each expressway you'll use.</p>
                         
-                        <div id="tollSegments" class="space-y-4">
-                            <div class="border-b border-[#e5e7eb] pb-4">
-                                <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Expressway</label>
-                                <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none mb-3">
-                                    <option>North Luzon Expressway</option>
-                                </select>
-                                <div class="grid grid-cols-2 gap-3 mb-2">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Entry</label>
-                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
-                                            <option>Dau</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Exit</label>
-                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
-                                            <option>Mexico</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="text-right text-sm font-medium text-[#3a3a3a]">Dau → Mexico: ₱57.00</div>
+                        <div id="tollSegments" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
                             </div>
 
-                            <div class="pb-2">
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <label class="block text-xs font-semibold text-brand-gray uppercase tracking-wider">Expressway</label>
-                                    <button class="text-xs text-red-500 hover:underline">Remove</button>
-                                </div>
-                                <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none mb-3">
-                                    <option>Cavite Expressway</option>
-                                </select>
-                                <div class="grid grid-cols-2 gap-3 mb-2">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Entry</label>
-                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
-                                            <option>Bacoor/Zapote</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Exit</label>
-                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
-                                            <option>Parañaque</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="text-right text-sm font-medium text-[#3a3a3a]">Bacoor → Parañaque: ₱39.00</div>
-                            </div>
-                        </div>
-
-                        <button class="w-full text-xs text-brand-blue hover:text-brand-blueHover font-medium py-3 border border-dashed border-brand-blue rounded mt-2 transition-colors">
+                        <button onclick="addTollSegment()" class="w-full text-xs text-brand-blue hover:text-brand-blueHover font-medium py-3 border border-dashed border-brand-blue rounded mt-4 transition-colors shrink-0 bg-[#EBF2FF]/50 hover:bg-[#EBF2FF]">
                             + Add another toll road
                         </button>
 
-                        <div class="mt-4 pt-4 border-t border-[#e5e7eb] flex justify-between items-center">
+                        <div class="mt-4 pt-4 border-t border-[#e5e7eb] flex justify-between items-center shrink-0">
                             <span class="text-sm text-brand-gray">Total toll</span>
-                            <span class="text-sm font-bold text-brand-blue">exact ₱96.00</span>
+                            <span id="totalTollCost" class="text-sm font-bold text-brand-blue">exact ₱0.00</span>
                         </div>
                     </div>
 
-                    <button id="planRouteBtn" onclick="simulateRouting()" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white py-3.5 rounded-lg font-medium transition-colors flex justify-center items-center">
+                    <button id="planRouteBtn" onclick="simulateRouting()" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white py-3.5 rounded-lg font-medium transition-colors flex justify-center items-center mt-auto">
                         Plan Route
                     </button>
                 </div>
@@ -178,14 +132,12 @@
 
                         <div class="w-full h-px bg-[#e5e7eb]"></div>
 
-                        <div class="text-sm space-y-2">
-                            <div class="flex justify-between"><span class="text-brand-gray">North Luzon Expressway</span> <span class="font-medium text-[#3a3a3a]">₱57.00</span></div>
-                            <div class="flex justify-between"><span class="text-brand-gray">Cavite Expressway</span> <span class="font-medium text-[#3a3a3a]">₱39.00</span></div>
-                            <div class="flex justify-between mt-2"><span class="text-brand-gray">Total toll <span class="bg-brand-lightBlue text-brand-blue text-[10px] px-1 rounded ml-1">exact</span></span> <span class="font-bold text-[#3a3a3a]">₱96.00</span></div>
+                        <div class="text-sm space-y-2" id="summaryTollBreakdown">
+                            <div class="flex justify-between mt-2"><span class="text-brand-gray">Total toll <span class="bg-brand-lightBlue text-brand-blue text-[10px] px-1 rounded ml-1">exact</span></span> <span id="summaryTotalToll" class="font-bold text-[#3a3a3a]">₱0.00</span></div>
                         </div>
                         
                         <div class="text-xs text-brand-gray bg-[#f8f9fa] p-3 rounded border border-[#e5e7eb] leading-relaxed">
-                            Via North Luzon Expressway → Cavite Expressway — Class 1 (Car/SUV)
+                            Via Class 1 (Car/SUV)
                             <br><br>Prices sourced from toll.ph
                         </div>
                     </div>
@@ -193,7 +145,7 @@
                     <div class="mt-4 pt-4 border-t-2 border-[#3a3a3a]">
                         <div class="flex justify-between items-end mb-2">
                             <span class="text-lg font-bold text-[#3a3a3a]">Total Cost</span>
-                            <span class="text-2xl font-bold text-brand-blue">₱179.32</span>
+                            <span id="grandTotalCost" class="text-2xl font-bold text-brand-blue">₱0.00</span>
                         </div>
                         <div class="text-xs text-brand-gray">Fuel + exact toll</div>
                         <p class="text-[10px] text-brand-gray mt-3 leading-tight">
@@ -227,7 +179,138 @@
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => renderNavigation('travel-map'));
+        // --- Comprehensive Expressway Data ---
+        const expressways = {
+            "North Luzon Expressway": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
+            "Subic-Clark-Tarlac Expressway": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
+            "South Luzon Expressway": ["Magallanes", "Nichols", "Merville", "Bicutan", "Sucat", "Alabang", "Filinvest", "Susana Heights", "San Pedro", "Southwoods", "Carmona", "Mamplasan", "Sta. Rosa", "ABI/Greenfield", "Cabuyao", "Silangan", "Calamba", "Santo Tomas"],
+            "Metro Manila Skyway": ["Quezon Ave", "Plaza Dilao", "Nagtahan", "Buendia", "Amorsolo", "Magallanes", "NAIAx", "Bicutan", "Sucat", "Alabang", "South Station", "Filinvest", "Susana Heights"],
+            "Muntinlupa-Cavite Expressway": ["Daang Hari", "SLEX"],
+            "Southern Tagalog Arterial Road": ["Santo Tomas", "Tanauan", "Malvar", "Balete", "Lipa", "San Jose", "Ibaan", "Batangas City"],
+            "Cavite-Laguna Expressway": ["Mamplasan", "Laguna Boulevard", "Laguna Technopark", "Santa Rosa-Tagaytay", "Silang East", "Silang (Aguinaldo)"],
+            "Cavite Expressway": ["Roxas Blvd", "MIA Road", "Zapote", "Bacoor", "Kawit"],
+            "NAIA Expressway": ["Skyway", "Sales", "Andrews Ave", "NAIA T3", "NAIA T1/T2", "Macapagal Blvd", "CAVITEX"],
+            "Tarlac-Pangasinan-La Union Exp": ["Tarlac", "Victoria", "Pura", "Ramos", "Anao", "Carmen", "Urdaneta", "Binalonan", "Pozorrubio", "Sison", "Rosario"],
+            "Cebu-Cordova Link Expressway": ["Cebu City", "Cordova"]
+        };
+
+        let segmentCounter = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderNavigation('travel-map');
+            // Add initial segment
+            addTollSegment();
+        });
+
+        function addTollSegment() {
+            segmentCounter++;
+            const id = segmentCounter;
+            const container = document.getElementById('tollSegments');
+            
+            // Build Expressway Options
+            let expOptions = `<option value="" disabled selected>Select Expressway</option>`;
+            for (const exp in expressways) {
+                expOptions += `<option value="${exp}">${exp}</option>`;
+            }
+
+            const segmentHTML = `
+                <div id="segment-${id}" class="border-b border-[#e5e7eb] pb-4 segment-block">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-semibold text-brand-gray uppercase tracking-wider">Expressway</label>
+                        ${id > 1 ? `<button onclick="removeSegment(${id})" class="text-xs text-red-500 hover:underline">Remove</button>` : ''}
+                    </div>
+                    <select id="exp-${id}" onchange="updateExits(${id})" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none mb-3">
+                        ${expOptions}
+                    </select>
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Entry</label>
+                            <select id="entry-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none disabled:bg-gray-50 disabled:text-gray-400" disabled>
+                                <option value="" disabled selected>Select Entry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Exit</label>
+                            <select id="exit-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none disabled:bg-gray-50 disabled:text-gray-400" disabled>
+                                <option value="" disabled selected>Select Exit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-right text-sm font-medium text-[#3a3a3a]">
+                        <span id="route-text-${id}">Select points</span>: <span id="price-text-${id}" data-cost="0">₱0.00</span>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', segmentHTML);
+            updateTotalToll();
+        }
+
+        function removeSegment(id) {
+            document.getElementById(`segment-${id}`).remove();
+            updateTotalToll();
+        }
+
+        function updateExits(id) {
+            const expSelect = document.getElementById(`exp-${id}`);
+            const entrySelect = document.getElementById(`entry-${id}`);
+            const exitSelect = document.getElementById(`exit-${id}`);
+            
+            const selectedExp = expSelect.value;
+            const exits = expressways[selectedExp] || [];
+
+            let options = `<option value="" disabled selected>Select point</option>`;
+            exits.forEach((exit, index) => {
+                options += `<option value="${exit}" data-index="${index}">${exit}</option>`;
+            });
+
+            entrySelect.innerHTML = options;
+            exitSelect.innerHTML = options;
+            
+            entrySelect.disabled = false;
+            exitSelect.disabled = false;
+
+            calculateSegmentToll(id);
+        }
+
+        function calculateSegmentToll(id) {
+            const entrySelect = document.getElementById(`entry-${id}`);
+            const exitSelect = document.getElementById(`exit-${id}`);
+            const routeText = document.getElementById(`route-text-${id}`);
+            const priceText = document.getElementById(`price-text-${id}`);
+
+            if (entrySelect.value && exitSelect.value) {
+                const entryName = entrySelect.value.split('/')[0].split(' ')[0]; // Shorten name for display
+                const exitName = exitSelect.value.split('/')[0].split(' ')[0];
+                
+                const entryIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
+                const exitIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
+
+                // Dummy calculation based on distance between indices (base 20 + 15 per hop)
+                let cost = 0;
+                if (entryIndex !== exitIndex) {
+                    cost = Math.abs(exitIndex - entryIndex) * 15 + 20;
+                }
+
+                routeText.innerText = `${entryName} → ${exitName}`;
+                priceText.innerText = `₱${cost.toFixed(2)}`;
+                priceText.setAttribute('data-cost', cost);
+            } else {
+                routeText.innerText = "Select points";
+                priceText.innerText = "₱0.00";
+                priceText.setAttribute('data-cost', 0);
+            }
+
+            updateTotalToll();
+        }
+
+        function updateTotalToll() {
+            let total = 0;
+            document.querySelectorAll('[id^="price-text-"]').forEach(span => {
+                total += parseFloat(span.getAttribute('data-cost') || 0);
+            });
+            document.getElementById('totalTollCost').innerText = `exact ₱${total.toFixed(2)}`;
+        }
 
         // Simulates the routing calculation seen in the video
         function simulateRouting() {
@@ -243,6 +326,9 @@
                 btn.innerText = originalText;
                 btn.classList.remove("opacity-80", "cursor-wait");
                 
+                // Build Summary Data
+                buildSummary();
+
                 document.getElementById('plannerForm').classList.add('hidden');
                 document.getElementById('plannerForm').classList.remove('flex');
                 
@@ -251,6 +337,35 @@
 
                 document.getElementById('trafficLegend').classList.remove('hidden');
             }, 1500);
+        }
+
+        function buildSummary() {
+            const breakdownContainer = document.getElementById('summaryTollBreakdown');
+            breakdownContainer.innerHTML = ''; // Clear previous
+
+            let totalToll = 0;
+            const segments = document.querySelectorAll('.segment-block');
+            
+            segments.forEach(seg => {
+                const id = seg.id.split('-')[1];
+                const expName = document.getElementById(`exp-${id}`).value;
+                const cost = parseFloat(document.getElementById(`price-text-${id}`).getAttribute('data-cost') || 0);
+                
+                if (expName && cost > 0) {
+                    totalToll += cost;
+                    breakdownContainer.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-between"><span class="text-brand-gray">${expName}</span> <span class="font-medium text-[#3a3a3a]">₱${cost.toFixed(2)}</span></div>
+                    `);
+                }
+            });
+
+            breakdownContainer.insertAdjacentHTML('beforeend', `
+                <div class="flex justify-between mt-2"><span class="text-brand-gray">Total toll <span class="bg-brand-lightBlue text-brand-blue text-[10px] px-1 rounded ml-1">exact</span></span> <span class="font-bold text-[#3a3a3a]">₱${totalToll.toFixed(2)}</span></div>
+            `);
+
+            const fuelCost = 83.32; // Static for demo
+            const grandTotal = fuelCost + totalToll;
+            document.getElementById('grandTotalCost').innerText = `₱${grandTotal.toFixed(2)}`;
         }
 
         // Resets back to the form view

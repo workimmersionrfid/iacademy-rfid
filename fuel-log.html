@@ -41,9 +41,40 @@
                     <option>All Fuel Types</option>
                     <option>Ron95</option>
                 </select>
-                <select class="bg-white border border-brand-border text-brand-text text-sm rounded-lg p-2.5 outline-none focus:border-brand-blue appearance-none pr-10 shadow-sm">
-                    <option>April 2026</option>
-                </select>
+                
+                <div class="relative inline-block text-left">
+                    <button type="button" onclick="document.getElementById('monthPicker').classList.toggle('hidden')" class="bg-white border border-brand-border text-brand-text text-sm rounded-lg p-2.5 outline-none focus:border-brand-blue flex items-center justify-between gap-3 shadow-sm min-w-[140px]">
+                        <span>April 2026</span>
+                        <i class="fa-regular fa-calendar text-brand-gray"></i>
+                    </button>
+
+                    <div id="monthPicker" class="absolute right-0 lg:left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-brand-border z-20 hidden">
+                        <div class="p-3 border-b border-brand-border bg-gray-50 rounded-t-lg text-sm font-medium text-[#3a3a3a]">
+                            2026
+                        </div>
+                        <div class="p-3">
+                            <div class="grid grid-cols-4 gap-2 text-sm text-center">
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Jan</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Feb</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Mar</div>
+                                <div class="py-1.5 bg-brand-blue text-white font-medium rounded cursor-pointer shadow-sm">Apr</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">May</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Jun</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Jul</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Aug</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Sep</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Oct</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Nov</div>
+                                <div class="py-1.5 hover:bg-gray-100 rounded cursor-pointer text-[#3a3a3a]">Dec</div>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-brand-border flex justify-between items-center text-xs text-brand-blue">
+                            <button class="hover:underline font-medium">Clear</button>
+                            <button class="hover:underline font-medium">This month</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <button onclick="openModal('addFuelModal')" class="bg-brand-blue hover:bg-brand-blueHover text-white px-6 py-2.5 rounded font-medium transition-all flex items-center gap-2 shadow-sm">
                 <i class="fa-solid fa-plus"></i> Add Fill-up
@@ -157,7 +188,8 @@
                 <div>
                     <label class="block text-xs font-semibold text-brand-gray mb-2 uppercase tracking-wider">Vehicle</label>
                     <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-3 outline-none focus:border-brand-blue transition-colors appearance-none">
-                        <option>Toyota Vios (2026) - 14 km/L</option>
+                        <option value="" disabled selected class="text-gray-400">Select vehicle</option>
+                        <option value="Toyota Vios (2026)">Toyota Vios (2026) - 14 km/L</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
