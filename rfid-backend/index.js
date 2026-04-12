@@ -16,7 +16,9 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('✅ Successfully connected to MongoDB!'))
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// --- DATABASE MODELS ---
+// ==========================================
+// --- DATABASE MODELS (SCHEMAS) ---
+// ==========================================
 
 // 1. User Model (Admin vs Driver)
 const userSchema = new mongoose.Schema({
@@ -35,7 +37,7 @@ const vehicleSchema = new mongoose.Schema({
     fuelType: String
 });
 
-// 3. Updated Fuel Log (Added Department & Driver fields)
+// 3. Fuel Log Model
 const logSchema = new mongoose.Schema({
     vehicle: String,
     driver: String,
@@ -54,12 +56,26 @@ const logSchema = new mongoose.Schema({
     notes: String
 });
 
+// 4. TASK & ASSIGNMENT SCHEMA (NEW)
+const taskSchema = new mongoose.Schema({
+    driver: String,
+    vehicle: String,
+    description: String,
+    destination: String,
+    date: String,
+    status: { type: String, default: 'Pending' } // Can be: Pending, In Progress, Completed
+});
+
+// Register Models
 const User = mongoose.model('User', userSchema);
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 const FuelLog = mongoose.model('FuelLog', logSchema);
+const Task = mongoose.model('Task', taskSchema);
 
 
+// ==========================================
 // --- API ROUTES ---
+// ==========================================
 
 // --- AUTHENTICATION ROUTES ---
 
@@ -67,23 +83,13 @@ const FuelLog = mongoose.model('FuelLog', logSchema);
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, password, role, department } = req.body;
-        
-        // Hash the password so it's secure in the database
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        const newUser = new User({ 
-            username, 
-            password: hashedPassword, 
-            role, 
-            department 
-        });
-        
+        const newUser = new User({ username, password: hashedPassword, role, department });
         await newUser.save();
         res.status(201).json({ message: 'Account created successfully!' });
     } catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({ message: 'Username already exists' });
-        }
+        if (err.code === 11000) return res.status(400).json({ message: 'Username already exists' });
         res.status(500).json({ message: err.message });
     }
 });
@@ -92,7 +98,6 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
         const user = await User.findOne({ username });
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -105,34 +110,21 @@ app.post('/api/auth/login', async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        res.json({ 
-            message: 'Login successful', 
-            token, 
-            role: user.role,
-            department: user.department
-        });
+        res.json({ message: 'Login successful', token, role: user.role, department: user.department });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// --- HIDDEN ADMIN SETUP ROUTE ---
+// 3. Hidden Admin Setup Route
 app.post('/api/auth/setup-admin', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
         const existingAdmin = await User.findOne({ role: 'admin' });
-        if (existingAdmin) {
-            return res.status(403).json({ message: 'An admin account already exists!' });
-        }
+        if (existingAdmin) return res.status(403).json({ message: 'An admin account already exists!' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const adminUser = new User({
-            username: username,
-            password: hashedPassword,
-            role: 'admin',
-            department: 'ADMIN' 
-        });
+        const adminUser = new User({ username, password: hashedPassword, role: 'admin', department: 'ADMIN' });
 
         await adminUser.save();
         res.status(201).json({ message: 'Master Admin created successfully!' });
@@ -141,69 +133,76 @@ app.post('/api/auth/setup-admin', async (req, res) => {
     }
 });
 
-// --- VEHICLE ROUTES (ADMIN DASHBOARD) ---
-
-// 1. Get all vehicles
+// --- VEHICLE ROUTES ---
 app.get('/api/vehicles', async (req, res) => {
     try {
         const vehicles = await Vehicle.find();
         res.json(vehicles);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// 2. Add a new vehicle
 app.post('/api/vehicles', async (req, res) => {
     try {
         const newVehicle = new Vehicle(req.body);
         await newVehicle.save();
         res.status(201).json(newVehicle);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+    } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
-// 3. Delete a vehicle
 app.delete('/api/vehicles/:id', async (req, res) => {
     try {
         await Vehicle.findByIdAndDelete(req.params.id);
         res.json({ message: 'Vehicle deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    } catch (err) { res.status(500).json({ message: err.message }); }
 });
-
 
 // --- FUEL LOG ROUTES ---
-
-// Get all logs from the database
 app.get('/api/logs', async (req, res) => {
     try {
-        const logs = await FuelLog.find().sort({ _id: -1 }); // Get newest logs first
+        const logs = await FuelLog.find().sort({ _id: -1 });
         res.json(logs);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// Save a new log to the database
 app.post('/api/logs', async (req, res) => {
-    const log = new FuelLog(req.body);
     try {
-        const newLog = await log.save();
+        const newLog = new FuelLog(req.body);
+        await newLog.save();
         res.status(201).json(newLog);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+    } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
-// Securely send the Google Maps API Key to the frontend
+// --- TASK & DISPATCH ROUTES (NEW) ---
+app.get('/api/tasks', async (req, res) => {
+    try {
+        const tasks = await Task.find().sort({ _id: -1 });
+        res.json(tasks);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/tasks', async (req, res) => {
+    try {
+        const newTask = new Task(req.body);
+        await newTask.save();
+        res.status(201).json(newTask);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.put('/api/tasks/:id', async (req, res) => {
+    try {
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updatedTask);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+// --- CONFIG ROUTE ---
 app.get('/api/config/maps', (req, res) => {
     res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
 });
 
-// Start the server
+// ==========================================
+// --- START SERVER ---
+// ==========================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
