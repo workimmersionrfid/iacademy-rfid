@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Calculator - iACADEMY RFID</title>
+    <title>Trip Calculator - iACADEMY RFID</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,100 +12,131 @@
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { blue: '#3674FF', blueHover: '#1349CC', bg: '#f4f5f7', border: '#e5e7eb' } }
+                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
                 }
             }
         }
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem('token');
+            if (!token) window.location.href = 'login.html';
+        });
     </script>
     <style>
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23666666' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.75rem center;
-            background-repeat: no-repeat;
-            background-size: 1em 1em;
-        }
+        .dpd-card-accent { border-bottom-left-radius: 100%; }
     </style>
 </head>
-<body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased flex flex-col">
+<body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
 
     <div id="shared-nav"></div>
 
-    <main class="flex-1 max-w-[1000px] w-full mx-auto px-6 py-8">
+    <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-800">Fuel & Distance Calculator</h1>
-            <p class="text-sm text-gray-500 mt-1">Quick utility to estimate travel costs using your fleet's actual efficiency data.</p>
+        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between">
+            <div class="relative z-10">
+                <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide uppercase">Planning & Logistics</p>
+                <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Trip Cost Calculator</h1>
+                <p class="text-blue-50 mt-2 max-w-lg text-sm">Estimate fuel consumption, toll fees, and overall route expenses.</p>
+            </div>
+            <div class="hidden md:block relative z-10 text-white/20">
+                <i class="fa-solid fa-calculator text-9xl"></i>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
-            <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit">
-                <h3 class="font-bold text-lg mb-6 flex items-center text-[#3a3a3a]"><i class="fa-solid fa-route text-brand-blue mr-2"></i> Trip Cost Estimator</h3>
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 xl:col-span-1 h-fit relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                <h3 class="font-bold text-xl mb-6 text-blue-900">Trip Details</h3>
                 
-                <div class="space-y-5">
+                <form id="calculatorForm" class="space-y-6">
                     <div>
-                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Select Vehicle</label>
-                        <select id="calc1Vehicle" onchange="calcTripCost()" class="w-full bg-gray-50 border border-brand-border text-[#3a3a3a] text-sm rounded-lg p-3 outline-none focus:border-brand-blue appearance-none">
-                            <option value="14" disabled selected>Loading fleet...</option>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Select Vehicle</label>
+                        <select id="calcVehicle" onchange="updateEfficiency()" class="w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Loading fleet...</option>
                         </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Distance (km)</label>
-                            <input type="number" id="calc1Distance" value="50" oninput="calcTripCost()" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded-lg p-3 outline-none focus:border-brand-blue">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Fuel Efficiency</label>
+                            <div class="relative">
+                                <input type="number" id="calcEfficiency" step="0.1" placeholder="0.0" class="w-full border border-gray-200 rounded-xl p-3.5 pr-12 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-semibold text-blue-900">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">km/L</span>
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Fuel Price (₱/L)</label>
-                            <input type="number" id="calc1Price" value="65" oninput="calcTripCost()" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded-lg p-3 outline-none focus:border-brand-blue">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Fuel Price</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
+                                <input type="number" id="calcPrice" step="0.01" placeholder="65.00" class="w-full border border-gray-200 rounded-xl p-3.5 pl-8 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-semibold text-blue-900">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-brand-border space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-brand-gray font-medium">Liters Required:</span>
-                            <span id="calc1Liters" class="font-bold text-[#3a3a3a]">0.0 L</span>
-                        </div>
-                        <div class="flex justify-between items-end">
-                            <span class="text-sm text-brand-gray font-medium">Estimated Cost:</span>
-                            <span id="calc1Total" class="text-3xl font-black text-brand-blue">₱0.00</span>
+                    <hr class="border-gray-100">
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Total Distance (Round Trip)</label>
+                        <div class="relative">
+                            <input type="number" id="calcDistance" step="0.1" placeholder="Enter distance" class="w-full border border-gray-200 rounded-xl p-3.5 pr-12 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-bold text-blue-900">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">KM</span>
                         </div>
                     </div>
-                </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Estimated Toll Fees</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
+                            <input type="number" id="calcToll" step="0.01" placeholder="0.00" class="w-full border border-gray-200 rounded-xl p-3.5 pl-8 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-semibold text-blue-900">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="calculateCost()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-equals"></i> Calculate Estimate
+                    </button>
+                    <button type="button" onclick="resetCalculator()" class="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold py-3 rounded-xl transition-colors mt-2 text-xs uppercase tracking-wider">
+                        Clear Fields
+                    </button>
+                </form>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit">
-                <h3 class="font-bold text-lg mb-6 flex items-center text-[#3a3a3a]"><i class="fa-solid fa-wallet text-green-500 mr-2"></i> Budget to Distance</h3>
+            <div class="xl:col-span-2 space-y-6">
                 
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Select Vehicle</label>
-                        <select id="calc2Vehicle" onchange="calcDistance()" class="w-full bg-gray-50 border border-brand-border text-[#3a3a3a] text-sm rounded-lg p-3 outline-none focus:border-brand-blue appearance-none">
-                            <option value="14" disabled selected>Loading fleet...</option>
-                        </select>
+                <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative p-8">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                    <h2 class="font-bold text-xl text-blue-900 mb-6 border-b border-gray-100 pb-4">Estimation Results</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="relative bg-gray-50 rounded-2xl p-6 overflow-hidden flex flex-col items-start border border-gray-100">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-blue-100 dpd-card-accent flex items-start justify-end p-3">
+                                <i class="fa-solid fa-droplet text-blue-600 text-lg"></i>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Required Fuel</p>
+                                <h3 id="resLiters" class="text-4xl font-black text-blue-900">0.00 <span class="text-lg text-gray-400 font-bold">L</span></h3>
+                            </div>
+                        </div>
+
+                        <div class="relative bg-gray-50 rounded-2xl p-6 overflow-hidden flex flex-col items-start border border-gray-100">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-blue-100 dpd-card-accent flex items-start justify-end p-3">
+                                <i class="fa-solid fa-gas-pump text-blue-600 text-lg"></i>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Est. Fuel Cost</p>
+                                <h3 id="resFuelCost" class="text-4xl font-black text-blue-900"><span class="text-lg text-gray-400 font-bold">₱</span> 0.00</h3>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Budget (₱)</label>
-                            <input type="number" id="calc2Budget" value="1000" oninput="calcDistance()" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded-lg p-3 outline-none focus:border-brand-blue">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Fuel Price (₱/L)</label>
-                            <input type="number" id="calc2Price" value="65" oninput="calcDistance()" class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded-lg p-3 outline-none focus:border-brand-blue">
+                    <div class="mt-6 relative bg-blue-800 rounded-2xl shadow-inner p-8 overflow-hidden flex flex-col items-center justify-center text-center border border-blue-900">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==')] opacity-50"></div>
+                        <div class="relative z-10">
+                            <p class="text-sm font-bold text-blue-200 uppercase tracking-widest mb-2"><i class="fa-solid fa-money-check-dollar mr-2"></i>Total Estimated Trip Budget</p>
+                            <h3 id="resTotalCost" class="text-5xl md:text-6xl font-black text-white tracking-tight">₱ 0.00</h3>
+                            <p class="text-xs text-blue-300 mt-3 font-medium">Includes estimated fuel consumption and toll fees.</p>
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-brand-border space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-brand-gray font-medium">Fuel Afforded:</span>
-                            <span id="calc2Liters" class="font-bold text-[#3a3a3a]">0.0 L</span>
-                        </div>
-                        <div class="flex justify-between items-end">
-                            <span class="text-sm text-brand-gray font-medium">Max Distance:</span>
-                            <span id="calc2Total" class="text-3xl font-black text-green-500">0 km</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -116,67 +147,79 @@
     <script src="js/app.js"></script>
     
     <script>
+        let fleetData = [];
+
         document.addEventListener("DOMContentLoaded", () => {
-            renderNavigation('calculator');
-            loadFleetData();
+            if (typeof renderNavigation === 'function') {
+                renderNavigation('calculator');
+            }
+            loadFleetForCalculator();
         });
 
-        async function loadFleetData() {
-            const select1 = document.getElementById('calc1Vehicle');
-            const select2 = document.getElementById('calc2Vehicle');
-            
+        async function loadFleetForCalculator() {
             try {
-                const vehicles = await getVehicles();
+                fleetData = await getVehicles();
+                const select = document.getElementById('calcVehicle');
+                select.innerHTML = '<option value="" disabled selected>-- Select a Vehicle --</option>';
                 
-                if(vehicles.length === 0) {
-                    const fallback = '<option value="14" disabled>No vehicles found (Using 14km/L)</option>';
-                    select1.innerHTML = fallback;
-                    select2.innerHTML = fallback;
-                } else {
-                    let optionsHTML = '';
-                    vehicles.forEach(v => {
-                        optionsHTML += `<option value="${v.efficiency}">${v.plateNumber} - ${v.model} (${v.efficiency} km/L)</option>`;
-                    });
-                    select1.innerHTML = optionsHTML;
-                    select2.innerHTML = optionsHTML;
-                }
+                fleetData.forEach(v => {
+                    select.innerHTML += `<option value="${v.plateNumber}">${v.model} (${v.plateNumber})</option>`;
+                });
             } catch (err) {
-                console.error("Error loading vehicles", err);
+                console.error("Failed to load fleet:", err);
+            }
+        }
+
+        // Auto-fill efficiency when a vehicle is selected
+        function updateEfficiency() {
+            const selectedPlate = document.getElementById('calcVehicle').value;
+            const vehicle = fleetData.find(v => v.plateNumber === selectedPlate);
+            
+            if (vehicle && vehicle.efficiency) {
+                const effInput = document.getElementById('calcEfficiency');
+                effInput.value = vehicle.efficiency;
+                
+                // Add a brief highlight flash to show it updated
+                effInput.classList.add('bg-blue-50');
+                setTimeout(() => effInput.classList.remove('bg-blue-50'), 500);
+                
+                calculateCost(); // Recalculate if there are already numbers in the distance/price
+            }
+        }
+
+        function calculateCost() {
+            const efficiency = parseFloat(document.getElementById('calcEfficiency').value) || 0;
+            const price = parseFloat(document.getElementById('calcPrice').value) || 0;
+            const distance = parseFloat(document.getElementById('calcDistance').value) || 0;
+            const toll = parseFloat(document.getElementById('calcToll').value) || 0;
+
+            let litersNeeded = 0;
+            let fuelCost = 0;
+            let totalCost = 0;
+
+            if (efficiency > 0 && distance > 0) {
+                litersNeeded = distance / efficiency;
+                fuelCost = litersNeeded * price;
+                totalCost = fuelCost + toll;
             }
 
-            // Run initial calculations
-            calcTripCost();
-            calcDistance();
+            // Animate results
+            document.getElementById('resLiters').innerHTML = `${litersNeeded.toFixed(2)} <span class="text-lg text-gray-400 font-bold">L</span>`;
+            document.getElementById('resFuelCost').innerHTML = `<span class="text-lg text-gray-400 font-bold">₱</span> ${fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('resTotalCost').innerHTML = `₱ ${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         }
 
-        function calcTripCost() {
-            const efficiency = parseFloat(document.getElementById('calc1Vehicle').value) || 14;
-            const distance = parseFloat(document.getElementById('calc1Distance').value) || 0;
-            const price = parseFloat(document.getElementById('calc1Price').value) || 0;
-
-            const liters = distance / efficiency;
-            const totalCost = liters * price;
-
-            document.getElementById('calc1Liters').innerText = `${liters.toFixed(1)} L`;
-            document.getElementById('calc1Total').innerText = `₱${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        function resetCalculator() {
+            document.getElementById('calculatorForm').reset();
+            document.getElementById('resLiters').innerHTML = `0.00 <span class="text-lg text-gray-400 font-bold">L</span>`;
+            document.getElementById('resFuelCost').innerHTML = `<span class="text-lg text-gray-400 font-bold">₱</span> 0.00`;
+            document.getElementById('resTotalCost').innerHTML = `₱ 0.00`;
         }
 
-        function calcDistance() {
-            const efficiency = parseFloat(document.getElementById('calc2Vehicle').value) || 14;
-            const budget = parseFloat(document.getElementById('calc2Budget').value) || 0;
-            const price = parseFloat(document.getElementById('calc2Price').value) || 0;
-
-            let liters = 0;
-            let maxDistance = 0;
-
-            if (price > 0) {
-                liters = budget / price;
-                maxDistance = liters * efficiency;
-            }
-
-            document.getElementById('calc2Liters').innerText = `${liters.toFixed(1)} L`;
-            document.getElementById('calc2Total').innerText = `${maxDistance.toFixed(1)} km`;
-        }
+        // Add auto-calculation listeners to inputs so it updates as the user types
+        ['calcEfficiency', 'calcPrice', 'calcDistance', 'calcToll'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateCost);
+        });
     </script>
 </body>
 </html>
