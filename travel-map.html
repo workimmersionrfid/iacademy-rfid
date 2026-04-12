@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -24,14 +25,20 @@
             background-repeat: no-repeat;
             background-size: 1em 1em;
         }
-        /* Toggle Switch Styles */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #3674FF;
+        .toggle-checkbox:checked { right: 0; border-color: #3674FF; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3674FF; }
+        
+        /* Fix for Google Places Autocomplete Dropdown z-index */
+        .pac-container {
+            z-index: 10000 !important;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            font-family: 'Inter', sans-serif;
+            margin-top: 4px;
         }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #3674FF;
-        }
+        .pac-item { padding: 10px; cursor: pointer; }
+        .pac-item:hover { background-color: #f4f5f7; }
     </style>
 </head>
 <body class="bg-brand-bg text-brand-text font-sans antialiased min-h-screen flex flex-col">
@@ -83,7 +90,7 @@
                         </div>
                         <p class="text-xs text-brand-gray mb-4">Select your expressway, then entry and exit points. Add a row for each expressway you'll use.</p>
                         
-                        <div id="tollSegments" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
+                        <div id="tollSegments" class="space-y-4 flex-1">
                             </div>
 
                         <button onclick="addTollSegment()" class="w-full text-xs text-brand-blue hover:text-brand-blueHover font-medium py-3 border border-dashed border-brand-blue rounded mt-4 transition-colors shrink-0 bg-[#EBF2FF]/50 hover:bg-[#EBF2FF]">
@@ -104,8 +111,8 @@
                 <div id="plannerSummary" class="bg-white rounded-xl shadow-sm border border-brand-border p-6 hidden flex-col h-full animate-[fadeIn_0.3s_ease-in-out]">
                     <div class="mb-6">
                         <div class="text-xs text-brand-gray uppercase tracking-wider font-semibold mb-1">Route</div>
-                        <div class="font-medium text-[#3a3a3a] text-sm mb-1">Makati City, Metro Manila, Philippines</div>
-                        <div class="font-medium text-[#3a3a3a] text-sm">Pasig, Metro Manila, Philippines</div>
+                        <div id="summaryOriginText" class="font-medium text-[#3a3a3a] text-sm mb-1">Origin</div>
+                        <div id="summaryDestText" class="font-medium text-[#3a3a3a] text-sm">Destination</div>
                     </div>
 
                     <button onclick="resetPlanner()" class="w-full bg-white border border-brand-border text-[#3a3a3a] hover:bg-gray-50 py-2.5 rounded-lg font-medium transition-colors mb-6 text-sm">
@@ -116,18 +123,17 @@
                     
                     <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
                         <div class="text-sm space-y-2">
-                            <div class="flex justify-between"><span class="text-brand-gray">Distance</span> <span class="font-medium text-[#3a3a3a]">9.0 km</span></div>
-                            <div class="flex justify-between"><span class="text-brand-gray">Travel time</span> <span class="font-medium text-[#3a3a3a]">27 mins</span></div>
-                            <div class="flex justify-between"><span class="text-brand-gray">Traffic delay</span> <span class="font-medium text-red-500">+1 mins</span></div>
-                            <div class="flex justify-between"><span class="text-brand-gray">Traffic</span> <span class="font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded text-xs">Light traffic</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Distance</span> <span id="summaryDistance" class="font-medium text-[#3a3a3a]">0 km</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Travel time</span> <span id="summaryDuration" class="font-medium text-[#3a3a3a]">0 mins</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Traffic</span> <span class="font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded text-xs">Standard</span></div>
                         </div>
                         
                         <div class="w-full h-px bg-[#e5e7eb]"></div>
 
                         <div class="text-sm space-y-2">
-                            <div class="flex justify-between"><span class="text-brand-gray">Liters needed</span> <span class="font-medium text-[#3a3a3a]">0.64L</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Liters needed</span> <span id="summaryLiters" class="font-medium text-[#3a3a3a]">0L</span></div>
                             <div class="flex justify-between"><span class="text-brand-gray">Fuel price</span> <span class="font-medium text-[#3a3a3a]">₱130.00/L</span></div>
-                            <div class="flex justify-between"><span class="text-brand-gray">Fuel cost</span> <span class="font-medium text-[#3a3a3a]">₱83.32</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Fuel cost</span> <span id="summaryFuelCost" class="font-medium text-[#3a3a3a]">₱0.00</span></div>
                         </div>
 
                         <div class="w-full h-px bg-[#e5e7eb]"></div>
@@ -149,7 +155,7 @@
                         </div>
                         <div class="text-xs text-brand-gray">Fuel + exact toll</div>
                         <p class="text-[10px] text-brand-gray mt-3 leading-tight">
-                            Fuel estimate includes a traffic adjustment (moderate +10%, heavy +20%). Actual consumption may vary by vehicle and driving conditions.
+                            Fuel estimate based on 14 km/L efficiency. Actual consumption may vary by vehicle and driving conditions.
                         </p>
                     </div>
                 </div>
@@ -157,19 +163,7 @@
 
             <div class="lg:col-span-8 bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden relative min-h-[500px] lg:min-h-full">
                 <div class="absolute inset-0 bg-[#e5e3df] flex flex-col">
-                    <iframe class="w-full h-full border-0" src="https://www.openstreetmap.org/export/embed.html?bbox=120.95%2C14.5%2C121.1%2C14.65&amp;layer=mapnik"></iframe>
-                    
-                    <div class="absolute top-4 left-4 bg-white rounded shadow px-3 py-2 text-sm font-medium flex gap-4">
-                        <button class="text-[#3a3a3a] hover:text-brand-blue">Map</button>
-                        <div class="w-px bg-gray-300"></div>
-                        <button class="text-brand-gray hover:text-brand-blue">Satellite</button>
-                    </div>
-
-                    <div id="trafficLegend" class="absolute bottom-6 left-6 bg-white rounded-lg shadow-md p-3 text-xs space-y-2 hidden animate-[fadeIn_0.3s_ease-in-out]">
-                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-green-500 rounded"></span> Light traffic</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-yellow-500 rounded"></span> Moderate traffic</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-red-500 rounded"></span> Heavy traffic</div>
-                    </div>
+                    <div id="map" class="w-full h-full"></div>
                 </div>
             </div>
             
@@ -179,7 +173,60 @@
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // --- Comprehensive Expressway Data ---
+        // --- GOOGLE MAPS SETUP ---
+        let map;
+        let directionsService;
+        let directionsRenderer;
+
+        // Securely fetch API key
+        async function loadGoogleMaps() {
+            try {
+                const response = await fetch('http://localhost:5000/api/config/maps');
+                const data = await response.json();
+                
+                if (data.apiKey) {
+                    const script = document.createElement('script');
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places&callback=initGooglePlaces`;
+                    script.async = true;
+                    script.defer = true;
+                    document.head.appendChild(script);
+                } else {
+                    console.warn("Google Maps API key not found in backend.");
+                }
+            } catch (error) {
+                console.error("Could not load Google Maps script:", error);
+            }
+        }
+
+        // Initialize Map and Places
+        function initGooglePlaces() {
+            // Setup the Map
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 14.5995, lng: 120.9842 }, // Manila
+                zoom: 12,
+                disableDefaultUI: true,
+                zoomControl: true
+            });
+
+            // Setup Routing
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+
+            // Setup Autocomplete
+            const originInput = document.getElementById('routeOrigin');
+            const destInput = document.getElementById('routeDest');
+            
+            const options = {
+                componentRestrictions: { country: "ph" },
+                fields: ["formatted_address", "geometry", "name"],
+                strictBounds: false,
+            };
+
+            new google.maps.places.Autocomplete(originInput, options);
+            new google.maps.places.Autocomplete(destInput, options);
+        }
+
         const expressways = {
             "North Luzon Expressway": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
             "Subic-Clark-Tarlac Expressway": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
@@ -198,7 +245,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             renderNavigation('travel-map');
-            // Add initial segment
+            loadGoogleMaps(); 
             addTollSegment();
         });
 
@@ -207,7 +254,6 @@
             const id = segmentCounter;
             const container = document.getElementById('tollSegments');
             
-            // Build Expressway Options
             let expOptions = `<option value="" disabled selected>Select Expressway</option>`;
             for (const exp in expressways) {
                 expOptions += `<option value="${exp}">${exp}</option>`;
@@ -280,13 +326,12 @@
             const priceText = document.getElementById(`price-text-${id}`);
 
             if (entrySelect.value && exitSelect.value) {
-                const entryName = entrySelect.value.split('/')[0].split(' ')[0]; // Shorten name for display
+                const entryName = entrySelect.value.split('/')[0].split(' ')[0];
                 const exitName = exitSelect.value.split('/')[0].split(' ')[0];
                 
                 const entryIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
                 const exitIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
 
-                // Dummy calculation based on distance between indices (base 20 + 15 per hop)
                 let cost = 0;
                 if (entryIndex !== exitIndex) {
                     cost = Math.abs(exitIndex - entryIndex) * 15 + 20;
@@ -312,36 +357,71 @@
             document.getElementById('totalTollCost').innerText = `exact ₱${total.toFixed(2)}`;
         }
 
-        // Simulates the routing calculation seen in the video
+        // REAL ROUTING WITH GOOGLE MAPS
         function simulateRouting() {
             const btn = document.getElementById('planRouteBtn');
             const originalText = btn.innerText;
             
-            // Show loading state
+            const origin = document.getElementById('routeOrigin').value;
+            const destination = document.getElementById('routeDest').value;
+            const avoidTolls = document.getElementById('toggleToll').checked;
+
+            if (!origin || !destination) {
+                alert("Please select both an Origin and a Destination.");
+                return;
+            }
+            
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Calculating route...`;
             btn.classList.add("opacity-80", "cursor-wait");
-            
-            // Wait 1.5 seconds, then switch views
-            setTimeout(() => {
+
+            // Ask Google Maps for the route
+            directionsService.route({
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.DRIVING,
+                avoidTolls: avoidTolls
+            }, (response, status) => {
                 btn.innerText = originalText;
                 btn.classList.remove("opacity-80", "cursor-wait");
-                
-                // Build Summary Data
-                buildSummary();
 
-                document.getElementById('plannerForm').classList.add('hidden');
-                document.getElementById('plannerForm').classList.remove('flex');
-                
-                document.getElementById('plannerSummary').classList.remove('hidden');
-                document.getElementById('plannerSummary').classList.add('flex');
+                if (status === "OK") {
+                    // Draw the blue line on the map!
+                    directionsRenderer.setDirections(response);
+                    
+                    // Extract real distance and duration from Google
+                    const route = response.routes[0].legs[0];
+                    const distanceText = route.distance.text;
+                    const durationText = route.duration.text;
+                    
+                    // Basic fuel math (Distance in KM / 14 km/L) * ₱130
+                    const distanceKm = parseFloat(distanceText.replace(',', ''));
+                    const litersNeeded = (distanceKm / 14).toFixed(2);
+                    const fuelCost = (litersNeeded * 130).toFixed(2);
 
-                document.getElementById('trafficLegend').classList.remove('hidden');
-            }, 1500);
+                    // Update Summary UI text
+                    document.getElementById('summaryOriginText').innerText = origin;
+                    document.getElementById('summaryDestText').innerText = destination;
+                    document.getElementById('summaryDistance').innerText = distanceText;
+                    document.getElementById('summaryDuration').innerText = durationText;
+                    document.getElementById('summaryLiters').innerText = `${litersNeeded}L`;
+                    document.getElementById('summaryFuelCost').innerText = `₱${fuelCost}`;
+
+                    buildSummary(parseFloat(fuelCost));
+
+                    // Switch panels
+                    document.getElementById('plannerForm').classList.add('hidden');
+                    document.getElementById('plannerForm').classList.remove('flex');
+                    document.getElementById('plannerSummary').classList.remove('hidden');
+                    document.getElementById('plannerSummary').classList.add('flex');
+                } else {
+                    alert("Google Maps could not find a route between those locations.");
+                }
+            });
         }
 
-        function buildSummary() {
+        function buildSummary(fuelCost) {
             const breakdownContainer = document.getElementById('summaryTollBreakdown');
-            breakdownContainer.innerHTML = ''; // Clear previous
+            breakdownContainer.innerHTML = ''; 
 
             let totalToll = 0;
             const segments = document.querySelectorAll('.segment-block');
@@ -363,20 +443,29 @@
                 <div class="flex justify-between mt-2"><span class="text-brand-gray">Total toll <span class="bg-brand-lightBlue text-brand-blue text-[10px] px-1 rounded ml-1">exact</span></span> <span class="font-bold text-[#3a3a3a]">₱${totalToll.toFixed(2)}</span></div>
             `);
 
-            const fuelCost = 83.32; // Static for demo
             const grandTotal = fuelCost + totalToll;
             document.getElementById('grandTotalCost').innerText = `₱${grandTotal.toFixed(2)}`;
         }
 
-        // Resets back to the form view
         function resetPlanner() {
+            // Clear map
+            if (directionsRenderer) {
+                directionsRenderer.setDirections({routes: []});
+            }
+            if (map) {
+                map.setCenter({ lat: 14.5995, lng: 120.9842 });
+                map.setZoom(12);
+            }
+
             document.getElementById('plannerSummary').classList.add('hidden');
             document.getElementById('plannerSummary').classList.remove('flex');
             
             document.getElementById('plannerForm').classList.remove('hidden');
             document.getElementById('plannerForm').classList.add('flex');
-
-            document.getElementById('trafficLegend').classList.add('hidden');
+            
+            // Clear inputs
+            document.getElementById('routeOrigin').value = '';
+            document.getElementById('routeDest').value = '';
         }
     </script>
 </body>
