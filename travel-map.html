@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey Planner - iACADEMY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: { blue: '#3674FF', blueHover: '#1349CC', lightBlue: '#EBF2FF', bg: '#f4f5f7', text: '#333333', gray: '#666666', border: '#e5e7eb' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23666666' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1em 1em;
+        }
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3674FF;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3674FF;
+        }
+    </style>
+</head>
+<body class="bg-brand-bg text-brand-text font-sans antialiased min-h-screen flex flex-col">
+    
+    <div id="shared-nav"></div>
+    
+    <main class="flex-1 max-w-[1400px] w-full mx-auto px-6 py-8">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+            
+            <div class="lg:col-span-4 flex flex-col h-full">
+                
+                <div id="plannerForm" class="bg-white rounded-xl shadow-sm border border-brand-border p-6 flex-1 flex flex-col animate-[fadeIn_0.3s_ease-in-out]">
+                    <h2 class="text-2xl font-medium text-[#3a3a3a] mb-6">Journey Planner</h2>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Origin</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-location-dot text-brand-gray"></i>
+                                </div>
+                                <input type="text" id="routeOrigin" placeholder="Search origin..." class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded-lg pl-9 p-3 outline-none focus:border-brand-blue transition-colors">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Destination</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-location-crosshairs text-brand-gray"></i>
+                                </div>
+                                <input type="text" id="routeDest" placeholder="Search destination..." class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded-lg pl-9 p-3 outline-none focus:border-brand-blue transition-colors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center mb-6">
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="toggleToll" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-[#e5e7eb] appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0"/>
+                            <label for="toggleToll" class="toggle-label block overflow-hidden h-5 rounded-full bg-[#e5e7eb] cursor-pointer transition-all duration-300"></label>
+                        </div>
+                        <label for="toggleToll" class="text-sm font-medium text-[#3a3a3a] cursor-pointer">Avoid toll roads</label>
+                    </div>
+
+                    <div class="bg-[#f8f9fa] border border-brand-border rounded-xl p-5 mb-6 flex-1">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-semibold text-[#3a3a3a]">Toll Calculator</h3>
+                            <span class="text-xs text-brand-gray">from toll.ph</span>
+                        </div>
+                        <p class="text-xs text-brand-gray mb-4">Select your expressway, then entry and exit points. Add a row for each expressway you'll use.</p>
+                        
+                        <div id="tollSegments" class="space-y-4">
+                            <div class="border-b border-[#e5e7eb] pb-4">
+                                <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Expressway</label>
+                                <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none mb-3">
+                                    <option>North Luzon Expressway</option>
+                                </select>
+                                <div class="grid grid-cols-2 gap-3 mb-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Entry</label>
+                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
+                                            <option>Dau</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Exit</label>
+                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
+                                            <option>Mexico</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="text-right text-sm font-medium text-[#3a3a3a]">Dau → Mexico: ₱57.00</div>
+                            </div>
+
+                            <div class="pb-2">
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label class="block text-xs font-semibold text-brand-gray uppercase tracking-wider">Expressway</label>
+                                    <button class="text-xs text-red-500 hover:underline">Remove</button>
+                                </div>
+                                <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none mb-3">
+                                    <option>Cavite Expressway</option>
+                                </select>
+                                <div class="grid grid-cols-2 gap-3 mb-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Entry</label>
+                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
+                                            <option>Bacoor/Zapote</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-brand-gray mb-1.5 uppercase tracking-wider">Exit</label>
+                                        <select class="w-full bg-white border border-brand-border text-[#3a3a3a] text-sm rounded p-2.5 outline-none focus:border-brand-blue appearance-none">
+                                            <option>Parañaque</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="text-right text-sm font-medium text-[#3a3a3a]">Bacoor → Parañaque: ₱39.00</div>
+                            </div>
+                        </div>
+
+                        <button class="w-full text-xs text-brand-blue hover:text-brand-blueHover font-medium py-3 border border-dashed border-brand-blue rounded mt-2 transition-colors">
+                            + Add another toll road
+                        </button>
+
+                        <div class="mt-4 pt-4 border-t border-[#e5e7eb] flex justify-between items-center">
+                            <span class="text-sm text-brand-gray">Total toll</span>
+                            <span class="text-sm font-bold text-brand-blue">exact ₱96.00</span>
+                        </div>
+                    </div>
+
+                    <button id="planRouteBtn" onclick="simulateRouting()" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white py-3.5 rounded-lg font-medium transition-colors flex justify-center items-center">
+                        Plan Route
+                    </button>
+                </div>
+
+                <div id="plannerSummary" class="bg-white rounded-xl shadow-sm border border-brand-border p-6 hidden flex-col h-full animate-[fadeIn_0.3s_ease-in-out]">
+                    <div class="mb-6">
+                        <div class="text-xs text-brand-gray uppercase tracking-wider font-semibold mb-1">Route</div>
+                        <div class="font-medium text-[#3a3a3a] text-sm mb-1">Makati City, Metro Manila, Philippines</div>
+                        <div class="font-medium text-[#3a3a3a] text-sm">Pasig, Metro Manila, Philippines</div>
+                    </div>
+
+                    <button onclick="resetPlanner()" class="w-full bg-white border border-brand-border text-[#3a3a3a] hover:bg-gray-50 py-2.5 rounded-lg font-medium transition-colors mb-6 text-sm">
+                        Plan New Route
+                    </button>
+
+                    <h3 class="text-lg font-medium text-[#3a3a3a] mb-4">Trip Cost Summary</h3>
+                    
+                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                        <div class="text-sm space-y-2">
+                            <div class="flex justify-between"><span class="text-brand-gray">Distance</span> <span class="font-medium text-[#3a3a3a]">9.0 km</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Travel time</span> <span class="font-medium text-[#3a3a3a]">27 mins</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Traffic delay</span> <span class="font-medium text-red-500">+1 mins</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Traffic</span> <span class="font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded text-xs">Light traffic</span></div>
+                        </div>
+                        
+                        <div class="w-full h-px bg-[#e5e7eb]"></div>
+
+                        <div class="text-sm space-y-2">
+                            <div class="flex justify-between"><span class="text-brand-gray">Liters needed</span> <span class="font-medium text-[#3a3a3a]">0.64L</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Fuel price</span> <span class="font-medium text-[#3a3a3a]">₱130.00/L</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Fuel cost</span> <span class="font-medium text-[#3a3a3a]">₱83.32</span></div>
+                        </div>
+
+                        <div class="w-full h-px bg-[#e5e7eb]"></div>
+
+                        <div class="text-sm space-y-2">
+                            <div class="flex justify-between"><span class="text-brand-gray">North Luzon Expressway</span> <span class="font-medium text-[#3a3a3a]">₱57.00</span></div>
+                            <div class="flex justify-between"><span class="text-brand-gray">Cavite Expressway</span> <span class="font-medium text-[#3a3a3a]">₱39.00</span></div>
+                            <div class="flex justify-between mt-2"><span class="text-brand-gray">Total toll <span class="bg-brand-lightBlue text-brand-blue text-[10px] px-1 rounded ml-1">exact</span></span> <span class="font-bold text-[#3a3a3a]">₱96.00</span></div>
+                        </div>
+                        
+                        <div class="text-xs text-brand-gray bg-[#f8f9fa] p-3 rounded border border-[#e5e7eb] leading-relaxed">
+                            Via North Luzon Expressway → Cavite Expressway — Class 1 (Car/SUV)
+                            <br><br>Prices sourced from toll.ph
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t-2 border-[#3a3a3a]">
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-lg font-bold text-[#3a3a3a]">Total Cost</span>
+                            <span class="text-2xl font-bold text-brand-blue">₱179.32</span>
+                        </div>
+                        <div class="text-xs text-brand-gray">Fuel + exact toll</div>
+                        <p class="text-[10px] text-brand-gray mt-3 leading-tight">
+                            Fuel estimate includes a traffic adjustment (moderate +10%, heavy +20%). Actual consumption may vary by vehicle and driving conditions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden relative min-h-[500px] lg:min-h-full">
+                <div class="absolute inset-0 bg-[#e5e3df] flex flex-col">
+                    <iframe class="w-full h-full border-0" src="https://www.openstreetmap.org/export/embed.html?bbox=120.95%2C14.5%2C121.1%2C14.65&amp;layer=mapnik"></iframe>
+                    
+                    <div class="absolute top-4 left-4 bg-white rounded shadow px-3 py-2 text-sm font-medium flex gap-4">
+                        <button class="text-[#3a3a3a] hover:text-brand-blue">Map</button>
+                        <div class="w-px bg-gray-300"></div>
+                        <button class="text-brand-gray hover:text-brand-blue">Satellite</button>
+                    </div>
+
+                    <div id="trafficLegend" class="absolute bottom-6 left-6 bg-white rounded-lg shadow-md p-3 text-xs space-y-2 hidden animate-[fadeIn_0.3s_ease-in-out]">
+                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-green-500 rounded"></span> Light traffic</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-yellow-500 rounded"></span> Moderate traffic</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-1 bg-red-500 rounded"></span> Heavy traffic</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => renderNavigation('travel-map'));
+
+        // Simulates the routing calculation seen in the video
+        function simulateRouting() {
+            const btn = document.getElementById('planRouteBtn');
+            const originalText = btn.innerText;
+            
+            // Show loading state
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Calculating route...`;
+            btn.classList.add("opacity-80", "cursor-wait");
+            
+            // Wait 1.5 seconds, then switch views
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove("opacity-80", "cursor-wait");
+                
+                document.getElementById('plannerForm').classList.add('hidden');
+                document.getElementById('plannerForm').classList.remove('flex');
+                
+                document.getElementById('plannerSummary').classList.remove('hidden');
+                document.getElementById('plannerSummary').classList.add('flex');
+
+                document.getElementById('trafficLegend').classList.remove('hidden');
+            }, 1500);
+        }
+
+        // Resets back to the form view
+        function resetPlanner() {
+            document.getElementById('plannerSummary').classList.add('hidden');
+            document.getElementById('plannerSummary').classList.remove('flex');
+            
+            document.getElementById('plannerForm').classList.remove('hidden');
+            document.getElementById('plannerForm').classList.add('flex');
+
+            document.getElementById('trafficLegend').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
