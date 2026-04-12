@@ -326,34 +326,31 @@
         async function loadDashboardData() {
             const vehicles = await getVehicles();
             const logs = await getLogs();
-            const drivers = await getDrivers(); // <-- Fetch drivers
+            const drivers = await getDrivers(); 
             
-            // Load Tasks from Server
             let tasks = [];
             try {
                 const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
                 tasks = await res.json();
             } catch(e) { console.error("Could not load tasks"); }
 
-            // Populate Dispatch Driver Dropdown
             const tDriverSelect = document.getElementById('tDriver');
             if (drivers.length === 0) {
                 tDriverSelect.innerHTML = '<option value="" disabled selected>No drivers registered</option>';
             } else {
                 tDriverSelect.innerHTML = '<option value="" disabled selected>Select a driver</option>';
                 drivers.forEach(d => {
-                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${d.department || 'Pending'})</option>`;
+                    const deptText = Array.isArray(d.department) ? d.department.join(', ') : (d.department || 'Pending');
+                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${deptText})</option>`;
                 });
             }
 
-            // Populate Dispatch Vehicle Dropdown
             const tVehicleSelect = document.getElementById('tVehicle');
             tVehicleSelect.innerHTML = '<option value="" disabled selected>Select from fleet</option>';
             vehicles.forEach(v => {
                 tVehicleSelect.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`;
             });
 
-            // Update Stats
             document.getElementById('statVehicles').innerText = vehicles.length;
             document.getElementById('statTasks').innerText = tasks.length;
             document.getElementById('statLogs').innerText = logs.length;
@@ -361,7 +358,6 @@
             const totalSpent = logs.reduce((sum, log) => sum + (log.total || 0), 0);
             document.getElementById('statSpent').innerText = `₱${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
-            // Render Task Board
             const tBoard = document.getElementById('taskBoard');
             if (tasks.length === 0) {
                 tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks dispatched yet.</td></tr>`;
@@ -384,7 +380,6 @@
                 `}).join('');
             }
 
-            // Render Vehicles
             const vList = document.getElementById('vehicleList');
             if (vehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
             else vList.innerHTML = vehicles.map(v => `
@@ -394,7 +389,6 @@
                         <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-red-500 hover:text-red-700 bg-white border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm"><i class="fa-solid fa-trash-can"></i> Delete</button></td>
                     </tr>`).join('');
 
-            // Render Logs
             const lList = document.getElementById('logsList');
             if (logs.length === 0) lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
             else lList.innerHTML = logs.map(l => `
@@ -405,7 +399,6 @@
                         <td class="p-4 text-right font-bold text-gray-800">₱${l.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     </tr>`).join('');
 
-            // Render Driver Management Table
             const dList = document.getElementById('adminDriverList');
             const departmentsList = [
                 "ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", 
@@ -416,16 +409,13 @@
                 dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
             } else {
                 dList.innerHTML = drivers.map(d => {
-                    // Ensure department is treated as an array
                     const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
                     const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
                     
-                    // Generate multiple badges if they have multiple departments
                     const deptBadge = isPending 
                         ? `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs inline-block m-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Pending</span>`
                         : deptArray.map(dept => `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs inline-block m-0.5"><i class="fa-solid fa-building-user mr-1"></i> ${dept}</span>`).join('');
                     
-                    // Generate options and mark previously selected ones
                     const deptOptions = departmentsList.map(dept => {
                         const isSelected = deptArray.includes(dept) ? 'selected' : '';
                         return `<option value="${dept}" ${isSelected}>${dept}</option>`;
@@ -449,8 +439,8 @@
                     </tr>`;
                 }).join('');
             }
+        }
 
-        // --- SUBMIT NEW TASK ---
         async function submitTask(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -482,7 +472,6 @@
             finally { btn.innerHTML = `Send to Driver`; btn.disabled = false; }
         }
 
-        // --- SUBMIT NEW VEHICLE ---
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -512,11 +501,8 @@
             finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
 
-        // --- UPDATE DRIVER DEPARTMENT (MULTIPLE) ---
         async function updateDriverDepartment(driverId) {
             const selectEl = document.getElementById(`dept-select-${driverId}`);
-            
-            // Extract all selected values from the multi-select box
             const selectedDepartments = Array.from(selectEl.selectedOptions).map(option => option.value);
 
             if (selectedDepartments.length === 0) {
@@ -528,12 +514,12 @@
                 const res = await fetch(`https://iacademy-rfid.onrender.com/api/drivers/${driverId}/department`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ department: selectedDepartments }) // Sends the array to backend
+                    body: JSON.stringify({ department: selectedDepartments }) 
                 });
 
                 if (res.ok) {
                     alert("Departments updated successfully!");
-                    loadDashboardData(); // Refresh to show new badges
+                    loadDashboardData(); 
                 } else {
                     alert("Failed to update departments.");
                 }
