@@ -60,12 +60,46 @@
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const submitBtn = document.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            const originalText = submitBtn.innerText;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
+            submitBtn.disabled = true;
 
-            // DUMMY LOGIC FOR NOW (We will connect this to the real API in the next step)
-            if (username === 'admin') {
-                window.location.href = 'dashboard.html';
-            } else {
-                window.location.href = 'driver-dashboard.html';
+            try {
+                // Call the real backend API
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success! Store the token and user info in the browser
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userRole', data.role);
+                    if (data.department) localStorage.setItem('userDept', data.department);
+
+                    // Redirect based on role
+                    if (data.role === 'admin') {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'driver-dashboard.html';
+                    }
+                } else {
+                    // Fail: Show error message
+                    alert(data.message || 'Login failed. Please check your credentials.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Server error. Make sure your Node.js backend is running!');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         });
     </script>

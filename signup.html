@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Registration - iACADEMY RFID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { brand: { blue: '#3674FF', blueHover: '#1349CC', bg: '#f4f5f7' } } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-bg font-sans min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        <div class="p-8 text-center bg-brand-blue text-white">
+            <h1 class="text-2xl font-bold">Driver Registration</h1>
+            <p class="text-blue-100 text-sm mt-1">iACADEMY Vehicle Management</p>
+        </div>
+
+        <form id="signupForm" class="p-8 space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Username</label>
+                <div class="relative">
+                    <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="username" required class="w-full border border-gray-200 rounded-lg pl-10 p-3 outline-none focus:border-brand-blue transition-colors">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
+                <div class="relative">
+                    <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="password" id="password" required class="w-full border border-gray-200 rounded-lg pl-10 p-3 outline-none focus:border-brand-blue transition-colors">
+                </div>
+            </div>
+
+            <div id="departmentContainer">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Department</label>
+                <div class="relative">
+                    <i class="fa-solid fa-building absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <select id="department" required class="w-full border border-gray-200 rounded-lg pl-10 p-3 outline-none focus:border-brand-blue transition-colors appearance-none bg-white">
+                        <option value="" disabled selected>Select your department</option>
+                        <option value="ELPD">ELPD</option>
+                        <option value="OSAS">OSAS</option>
+                        <option value="IT">IT</option>
+                        <option value="REGISTRAR">REGISTRAR</option>
+                        <option value="FINANCE">FINANCE</option>
+                        <option value="ADMISSIONS">ADMISSIONS</option>
+                        <option value="ADCOM">ADCOM</option>
+                        <option value="CLINIC">CLINIC</option>
+                        <option value="PURCHASING">PURCHASING</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="SHS">SHS</option>
+                        <option value="COLLEGE">COLLEGE</option>
+                        <option value="LIBRARY">LIBRARY</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white font-bold py-3 rounded-lg shadow-lg transition-all mt-4">
+                Register as Driver
+            </button>
+            
+            <p class="text-center text-xs text-gray-400 mt-4">
+                Already have an account? <a href="login.html" class="text-brand-blue font-bold">Log In</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const department = document.getElementById('department').value;
+            // HARDCODE THE ROLE TO DRIVER SO NOBODY CAN HACK IT
+            const role = 'driver'; 
+            const submitBtn = document.querySelector('button[type="submit"]');
+
+            const originalText = submitBtn.innerText;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering...`;
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role, department })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Driver account created successfully! You can now log in.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.message || 'Registration failed.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Server error. Make sure your Node.js backend is running!');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
