@@ -133,6 +133,17 @@ app.post('/api/auth/setup-admin', async (req, res) => {
     }
 });
 
+// --- DRIVER LIST ROUTE (NEW) ---
+app.get('/api/drivers', async (req, res) => {
+    try {
+        // Find all users with the 'driver' role and return only their username & department
+        const drivers = await User.find({ role: 'driver' }, 'username department');
+        res.json(drivers);
+    } catch (err) { 
+        res.status(500).json({ message: err.message }); 
+    }
+});
+
 // --- VEHICLE ROUTES ---
 app.get('/api/vehicles', async (req, res) => {
     try {

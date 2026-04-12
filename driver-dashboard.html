@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Portal - iACADEMY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: { blue: '#3674FF', bg: '#f4f5f7' } } } } }
+
+        // Security Check
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'driver') window.location.href = 'login.html';
+            else {
+                document.getElementById('driverName').innerText = localStorage.getItem('username');
+                document.getElementById('driverDept').innerText = localStorage.getItem('userDept');
+                loadMyTasks();
+                loadFleetForFuel();
+            }
+        });
+    </script>
+</head>
+<body class="bg-brand-bg font-sans min-h-screen pb-20">
+
+    <nav class="bg-brand-blue text-white p-5 sticky top-0 z-10 shadow-md">
+        <div class="flex justify-between items-center mb-4">
+            <div class="font-bold text-lg tracking-tight">Driver Portal</div>
+            <button onclick="logout()" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded transition">Logout</button>
+        </div>
+        <div>
+            <p class="text-blue-100 text-xs uppercase tracking-wider font-bold mb-1" id="driverDept">Department</p>
+            <h1 class="text-2xl font-black" id="driverName">Driver Name</h1>
+        </div>
+    </nav>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
+        
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="document.getElementById('fuelModal').classList.remove('hidden')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 hover:border-brand-blue transition">
+                <div class="bg-blue-50 text-brand-blue w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-gas-pump"></i></div>
+                <span class="text-sm font-bold text-gray-700">Log Fuel</span>
+            </button>
+            <button onclick="alert('Toll logging coming soon!')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 hover:border-brand-blue transition">
+                <div class="bg-orange-50 text-orange-500 w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-ticket"></i></div>
+                <span class="text-sm font-bold text-gray-700">Log Toll Fee</span>
+            </button>
+        </div>
+
+        <div>
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3"><i class="fa-solid fa-clipboard-list mr-1"></i> My Itinerary</h2>
+            <div id="taskList" class="space-y-3">
+                <div class="text-center p-6 bg-white rounded-xl shadow-sm text-gray-400 text-sm"><i class="fa-solid fa-spinner fa-spin mb-2 text-xl"></i><br>Loading tasks...</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="fuelModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">Submit Fuel Log</h3>
+                <button onclick="document.getElementById('fuelModal').classList.add('hidden')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="fuelForm" onsubmit="submitFuel(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Assigned Vehicle</label>
+                    <select id="fVehicle" required class="w-full border rounded-lg p-2.5 text-sm bg-gray-50 outline-none focus:border-brand-blue">
+                        <option value="" disabled selected>Loading...</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Liters</label>
+                        <input type="number" id="fLiters" step="0.01" required class="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Price/Liter</label>
+                        <input type="number" id="fPrice" step="0.01" required class="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Gas Station</label>
+                    <input type="text" id="fStation" required class="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                </div>
+                <button type="submit" class="w-full bg-brand-blue text-white font-bold py-3 rounded-lg shadow-md mt-2">Submit Log</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        async function loadMyTasks() {
+            const myName = localStorage.getItem('username');
+            try {
+                const res = await fetch('http://localhost:5000/api/tasks');
+                const allTasks = await res.json();
+                
+                // Filter tasks that belong to this specific driver
+                const myTasks = allTasks.filter(t => t.driver === myName);
+                
+                const list = document.getElementById('taskList');
+                if(myTasks.length === 0) {
+                    list.innerHTML = `<div class="text-center p-6 bg-white rounded-xl shadow-sm text-gray-400 text-sm">No tasks assigned to you yet.</div>`;
+                    return;
+                }
+
+                list.innerHTML = myTasks.map(t => {
+                    const isDone = t.status === 'Completed';
+                    const bgClass = isDone ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100';
+                    const icon = isDone ? '<i class="fa-solid fa-circle-check text-green-500"></i>' : '<i class="fa-regular fa-circle text-gray-300"></i>';
+                    
+                    return `
+                    <div class="${bgClass} p-4 rounded-xl shadow-sm border transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">${t.date}</span>
+                                <span class="text-xs font-bold bg-blue-50 text-brand-blue px-2 py-1 rounded ml-1"><i class="fa-solid fa-car mr-1"></i>${t.vehicle}</span>
+                            </div>
+                            ${isDone ? '<span class="text-xs font-bold text-green-600">DONE</span>' : ''}
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-lg leading-tight mt-2">${t.description}</h3>
+                        <p class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> ${t.destination}</p>
+                        
+                        ${!isDone ? `
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex gap-2">
+                            <button onclick="updateTask('${t._id}', 'Completed')" class="flex-1 bg-green-500 text-white text-sm font-bold py-2 rounded-lg shadow-sm hover:bg-green-600">Mark Complete</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                    `;
+                }).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        async function updateTask(id, newStatus) {
+            try {
+                await fetch(`http://localhost:5000/api/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                loadMyTasks(); // Refresh list
+            } catch (err) { alert('Error updating task'); }
+        }
+
+        async function loadFleetForFuel() {
+            try {
+                const res = await fetch('http://localhost:5000/api/vehicles');
+                const vehicles = await res.json();
+                const select = document.getElementById('fVehicle');
+                select.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
+                vehicles.forEach(v => select.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`);
+            } catch (err) { console.error(err); }
+        }
+
+        async function submitFuel(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Saving..."; btn.disabled = true;
+
+            const logData = {
+                vehicle: document.getElementById('fVehicle').value,
+                driver: localStorage.getItem('username'),
+                department: localStorage.getItem('userDept'),
+                date: new Date().toLocaleDateString(),
+                liters: parseFloat(document.getElementById('fLiters').value),
+                price: parseFloat(document.getElementById('fPrice').value),
+                total: parseFloat(document.getElementById('fLiters').value) * parseFloat(document.getElementById('fPrice').value),
+                station: document.getElementById('fStation').value
+            };
+
+            try {
+                const res = await fetch('http://localhost:5000/api/logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(logData)
+                });
+                if (res.ok) {
+                    alert('Fuel log saved successfully!');
+                    document.getElementById('fuelModal').classList.add('hidden');
+                    e.target.reset();
+                }
+            } catch (err) { alert('Server error'); }
+            finally { btn.innerText = "Submit Log"; btn.disabled = false; }
+        }
+    </script>
+</body>
+</html>

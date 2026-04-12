@@ -43,20 +43,27 @@
         
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">System Overview</h1>
-                <p class="text-sm text-gray-500 mt-1">Manage your active fleet and monitor driver fuel logs.</p>
+                <h1 class="text-2xl font-bold text-gray-800">Master Dispatch & Fleet Overview</h1>
+                <p class="text-sm text-gray-500 mt-1">Manage fleet, dispatch driver tasks, and monitor fuel consumption.</p>
             </div>
             <button onclick="logout()" class="text-sm font-medium text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors">
                 <i class="fa-solid fa-right-from-bracket mr-2"></i> Log Out
             </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
                 <div class="bg-blue-50 text-brand-blue w-12 h-12 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-car"></i></div>
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Vehicles</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Fleet</p>
                     <h3 id="statVehicles" class="text-2xl font-black text-gray-800">0</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
+                <div class="bg-orange-50 text-orange-500 w-12 h-12 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Tasks</p>
+                    <h3 id="statTasks" class="text-2xl font-black text-gray-800">0</h3>
                 </div>
             </div>
             <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
@@ -75,6 +82,63 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+            
+            <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit xl:col-span-1">
+                <h3 class="font-bold text-lg mb-4 flex items-center text-orange-500"><i class="fa-solid fa-paper-plane mr-2"></i> Dispatch a Task</h3>
+                <form id="taskForm" onsubmit="submitTask(event)" class="space-y-4">
+                    <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Driver Username</label>
+    <select id="tDriver" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
+        <option value="" disabled selected>Loading drivers...</option>
+    </select>
+</div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Assign Vehicle</label>
+                        <select id="tVehicle" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
+                            <option value="" disabled selected>Loading fleet...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Destination</label>
+                        <input type="text" id="tDestination" placeholder="e.g. Makati Campus" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Task Description</label>
+                        <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Date</label>
+                        <input type="date" id="tDate" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                    </div>
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-sm transition-colors mt-2">
+                        Send to Driver
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden flex flex-col xl:col-span-2">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="font-bold text-sm text-gray-600 uppercase tracking-wider"><i class="fa-solid fa-satellite-dish text-orange-400 mr-2"></i>Live Dispatch Board</h2>
+                </div>
+                <div class="overflow-x-auto max-h-[450px] overflow-y-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wider">
+                                <th class="p-4 font-bold">Status</th>
+                                <th class="p-4 font-bold">Date & Driver</th>
+                                <th class="p-4 font-bold">Vehicle</th>
+                                <th class="p-4 font-bold">Itinerary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskBoard" class="text-sm divide-y divide-gray-100">
+                            <tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br>Loading tasks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
             <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit">
@@ -83,35 +147,35 @@
                 <div class="mb-5 pb-5 border-b border-gray-100">
                     <label class="block text-xs font-bold text-brand-blue uppercase mb-1.5"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Quick Fill Preset</label>
                     <select id="vPreset" onchange="applyPreset()" class="preset-dropdown appearance-none w-full border border-blue-200 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-blue-50/30 text-brand-blue font-medium transition-colors cursor-pointer">
-    <option value="" class="text-gray-800">-- Select a vehicle or type manually --</option>
-    <option value="Toyota Vios" class="text-gray-800">Toyota Vios (14 km/L - Gas)</option>
-    <option value="Toyota Wigo" class="text-gray-800">Toyota Wigo (16 km/L - Gas)</option>
-    <option value="Toyota Innova" class="text-gray-800">Toyota Innova (11 km/L - Diesel)</option>
-    <option value="Toyota Fortuner" class="text-gray-800">Toyota Fortuner (10 km/L - Diesel)</option>
-    <option value="Toyota Hilux" class="text-gray-800">Toyota Hilux (11 km/L - Diesel)</option>
-    <option value="Toyota Hi-Ace" class="text-gray-800">Toyota Hi-Ace (10 km/L - Diesel)</option>
-    <option value="Mitsubishi Mirage" class="text-gray-800">Mitsubishi Mirage (16 km/L - Gas)</option>
-    <option value="Mitsubishi Xpander" class="text-gray-800">Mitsubishi Xpander (13 km/L - Gas)</option>
-    <option value="Mitsubishi Montero Sport" class="text-gray-800">Mitsubishi Montero (11 km/L - Diesel)</option>
-    <option value="Mitsubishi L300" class="text-gray-800">Mitsubishi L300 (10 km/L - Diesel)</option>
-    <option value="Honda Brio" class="text-gray-800">Honda Brio (16 km/L - Gas)</option>
-    <option value="Honda City" class="text-gray-800">Honda City (15 km/L - Gas)</option>
-    <option value="Honda Civic" class="text-gray-800">Honda Civic (12 km/L - Gas)</option>
-    <option value="Honda BR-V" class="text-gray-800">Honda BR-V (14 km/L - Gas)</option>
-    <option value="Nissan Navara" class="text-gray-800">Nissan Navara (11 km/L - Diesel)</option>
-    <option value="Nissan NV350 Urvan" class="text-gray-800">Nissan NV350 Urvan (9 km/L - Diesel)</option>
-    <option value="Isuzu mu-X" class="text-gray-800">Isuzu mu-X (11 km/L - Diesel)</option>
-    <option value="Isuzu D-Max" class="text-gray-800">Isuzu D-Max (12 km/L - Diesel)</option>
-    <option value="Ford Ranger" class="text-gray-800">Ford Ranger (11 km/L - Diesel)</option>
-    <option value="Ford Everest" class="text-gray-800">Ford Everest (10 km/L - Diesel)</option>
-    <option value="Suzuki Carry" class="text-gray-800">Suzuki Carry (12 km/L - Diesel)</option>
-    <option value="Suzuki Ertiga" class="text-gray-800">Suzuki Ertiga (14 km/L - Gas)</option>
-    <option value="Hyundai Tucson" class="text-gray-800">Hyundai Tucson (12 km/L - Gas)</option>
-    <option value="Kia Picanto" class="text-gray-800">Kia Picanto (18 km/L - Gas)</option>
-    <option value="Geely Coolray" class="text-gray-800">Geely Coolray (14 km/L - Gas)</option>
-    <option value="Honda Beat" class="text-gray-800">Honda Beat (50 km/L - Gas)</option>
-    <option value="Yamaha Mio" class="text-gray-800">Yamaha Mio (55 km/L - Gas)</option>
-</select>
+                        <option value="" class="text-gray-800">-- Select a vehicle or type manually --</option>
+                        <option value="Toyota Vios" class="text-gray-800">Toyota Vios (14 km/L - Gas)</option>
+                        <option value="Toyota Wigo" class="text-gray-800">Toyota Wigo (16 km/L - Gas)</option>
+                        <option value="Toyota Innova" class="text-gray-800">Toyota Innova (11 km/L - Diesel)</option>
+                        <option value="Toyota Fortuner" class="text-gray-800">Toyota Fortuner (10 km/L - Diesel)</option>
+                        <option value="Toyota Hilux" class="text-gray-800">Toyota Hilux (11 km/L - Diesel)</option>
+                        <option value="Toyota Hi-Ace" class="text-gray-800">Toyota Hi-Ace (10 km/L - Diesel)</option>
+                        <option value="Mitsubishi Mirage" class="text-gray-800">Mitsubishi Mirage (16 km/L - Gas)</option>
+                        <option value="Mitsubishi Xpander" class="text-gray-800">Mitsubishi Xpander (13 km/L - Gas)</option>
+                        <option value="Mitsubishi Montero Sport" class="text-gray-800">Mitsubishi Montero (11 km/L - Diesel)</option>
+                        <option value="Mitsubishi L300" class="text-gray-800">Mitsubishi L300 (10 km/L - Diesel)</option>
+                        <option value="Honda Brio" class="text-gray-800">Honda Brio (16 km/L - Gas)</option>
+                        <option value="Honda City" class="text-gray-800">Honda City (15 km/L - Gas)</option>
+                        <option value="Honda Civic" class="text-gray-800">Honda Civic (12 km/L - Gas)</option>
+                        <option value="Honda BR-V" class="text-gray-800">Honda BR-V (14 km/L - Gas)</option>
+                        <option value="Nissan Navara" class="text-gray-800">Nissan Navara (11 km/L - Diesel)</option>
+                        <option value="Nissan NV350 Urvan" class="text-gray-800">Nissan NV350 Urvan (9 km/L - Diesel)</option>
+                        <option value="Isuzu mu-X" class="text-gray-800">Isuzu mu-X (11 km/L - Diesel)</option>
+                        <option value="Isuzu D-Max" class="text-gray-800">Isuzu D-Max (12 km/L - Diesel)</option>
+                        <option value="Ford Ranger" class="text-gray-800">Ford Ranger (11 km/L - Diesel)</option>
+                        <option value="Ford Everest" class="text-gray-800">Ford Everest (10 km/L - Diesel)</option>
+                        <option value="Suzuki Carry" class="text-gray-800">Suzuki Carry (12 km/L - Diesel)</option>
+                        <option value="Suzuki Ertiga" class="text-gray-800">Suzuki Ertiga (14 km/L - Gas)</option>
+                        <option value="Hyundai Tucson" class="text-gray-800">Hyundai Tucson (12 km/L - Gas)</option>
+                        <option value="Kia Picanto" class="text-gray-800">Kia Picanto (18 km/L - Gas)</option>
+                        <option value="Geely Coolray" class="text-gray-800">Geely Coolray (14 km/L - Gas)</option>
+                        <option value="Honda Beat" class="text-gray-800">Honda Beat (50 km/L - Gas)</option>
+                        <option value="Yamaha Mio" class="text-gray-800">Yamaha Mio (55 km/L - Gas)</option>
+                    </select>
                 </div>
 
                 <form id="vehicleForm" class="space-y-4">
@@ -197,51 +261,31 @@
     <script src="js/app.js"></script>
     
     <script>
-        // --- PRESET DATABASE ---
         const vehiclePresets = {
-            "Toyota Vios": { eff: 14, fuel: "Gasoline" },
-            "Toyota Wigo": { eff: 16, fuel: "Gasoline" },
-            "Toyota Innova": { eff: 11, fuel: "Diesel" },
-            "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
-            "Toyota Hilux": { eff: 11, fuel: "Diesel" },
-            "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" },
-            "Mitsubishi Mirage": { eff: 16, fuel: "Gasoline" },
-            "Mitsubishi Xpander": { eff: 13, fuel: "Gasoline" },
-            "Mitsubishi Montero Sport": { eff: 11, fuel: "Diesel" },
-            "Mitsubishi L300": { eff: 10, fuel: "Diesel" },
-            "Honda Brio": { eff: 16, fuel: "Gasoline" },
-            "Honda City": { eff: 15, fuel: "Gasoline" },
-            "Honda Civic": { eff: 12, fuel: "Gasoline" },
-            "Honda BR-V": { eff: 14, fuel: "Gasoline" },
-            "Nissan Navara": { eff: 11, fuel: "Diesel" },
-            "Nissan NV350 Urvan": { eff: 9, fuel: "Diesel" },
-            "Isuzu mu-X": { eff: 11, fuel: "Diesel" },
-            "Isuzu D-Max": { eff: 12, fuel: "Diesel" },
-            "Ford Ranger": { eff: 11, fuel: "Diesel" },
-            "Ford Everest": { eff: 10, fuel: "Diesel" },
-            "Suzuki Carry": { eff: 12, fuel: "Diesel" },
-            "Suzuki Ertiga": { eff: 14, fuel: "Gasoline" },
-            "Hyundai Tucson": { eff: 12, fuel: "Gasoline" },
-            "Kia Picanto": { eff: 18, fuel: "Gasoline" },
-            "Geely Coolray": { eff: 14, fuel: "Gasoline" },
-            "Honda Beat": { eff: 50, fuel: "Gasoline" },
+            "Toyota Vios": { eff: 14, fuel: "Gasoline" }, "Toyota Wigo": { eff: 16, fuel: "Gasoline" },
+            "Toyota Innova": { eff: 11, fuel: "Diesel" }, "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
+            "Toyota Hilux": { eff: 11, fuel: "Diesel" }, "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" },
+            "Mitsubishi Mirage": { eff: 16, fuel: "Gasoline" }, "Mitsubishi Xpander": { eff: 13, fuel: "Gasoline" },
+            "Mitsubishi Montero Sport": { eff: 11, fuel: "Diesel" }, "Mitsubishi L300": { eff: 10, fuel: "Diesel" },
+            "Honda Brio": { eff: 16, fuel: "Gasoline" }, "Honda City": { eff: 15, fuel: "Gasoline" },
+            "Honda Civic": { eff: 12, fuel: "Gasoline" }, "Honda BR-V": { eff: 14, fuel: "Gasoline" },
+            "Nissan Navara": { eff: 11, fuel: "Diesel" }, "Nissan NV350 Urvan": { eff: 9, fuel: "Diesel" },
+            "Isuzu mu-X": { eff: 11, fuel: "Diesel" }, "Isuzu D-Max": { eff: 12, fuel: "Diesel" },
+            "Ford Ranger": { eff: 11, fuel: "Diesel" }, "Ford Everest": { eff: 10, fuel: "Diesel" },
+            "Suzuki Carry": { eff: 12, fuel: "Diesel" }, "Suzuki Ertiga": { eff: 14, fuel: "Gasoline" },
+            "Hyundai Tucson": { eff: 12, fuel: "Gasoline" }, "Kia Picanto": { eff: 18, fuel: "Gasoline" },
+            "Geely Coolray": { eff: 14, fuel: "Gasoline" }, "Honda Beat": { eff: 50, fuel: "Gasoline" },
             "Yamaha Mio": { eff: 55, fuel: "Gasoline" }
         };
-        
-        // --- PRESET FUNCTION ---
+
         function applyPreset() {
             const presetName = document.getElementById('vPreset').value;
             if (presetName && vehiclePresets[presetName]) {
                 const data = vehiclePresets[presetName];
-                
-                // Auto-fill fields
                 document.getElementById('vModel').value = presetName;
                 document.getElementById('vEfficiency').value = data.eff;
                 document.getElementById('vFuel').value = data.fuel;
-                
-                // Add brief highlight animation
-                const fields = ['vModel', 'vEfficiency', 'vFuel'];
-                fields.forEach(f => {
+                ['vModel', 'vEfficiency', 'vFuel'].forEach(f => {
                     const el = document.getElementById(f);
                     el.classList.add('bg-blue-50', 'border-brand-blue');
                     setTimeout(() => el.classList.remove('bg-blue-50', 'border-brand-blue'), 800);
@@ -249,66 +293,133 @@
             }
         }
 
-        // --- DASHBOARD LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
             renderNavigation('dashboard');
+            document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
             loadDashboardData();
         });
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
 
         async function loadDashboardData() {
             const vehicles = await getVehicles();
             const logs = await getLogs();
+            const drivers = await getDrivers(); // <-- NEW: Fetch drivers
+            
+            // Load Tasks from Server
+            let tasks = [];
+            try {
+                const res = await fetch('http://localhost:5000/api/tasks');
+                tasks = await res.json();
+            } catch(e) { console.error("Could not load tasks"); }
+
+            // NEW: Populate Dispatch Driver Dropdown
+            const tDriverSelect = document.getElementById('tDriver');
+            if (drivers.length === 0) {
+                tDriverSelect.innerHTML = '<option value="" disabled selected>No drivers registered</option>';
+            } else {
+                tDriverSelect.innerHTML = '<option value="" disabled selected>Select a driver</option>';
+                drivers.forEach(d => {
+                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${d.department})</option>`;
+                });
+            }
+
+            // Populate Dispatch Vehicle Dropdown
+            const tVehicleSelect = document.getElementById('tVehicle');
+            tVehicleSelect.innerHTML = '<option value="" disabled selected>Select from fleet</option>';
+            vehicles.forEach(v => {
+                tVehicleSelect.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`;
+            });
 
             // Update Stats
             document.getElementById('statVehicles').innerText = vehicles.length;
+            document.getElementById('statTasks').innerText = tasks.length;
             document.getElementById('statLogs').innerText = logs.length;
             
             const totalSpent = logs.reduce((sum, log) => sum + (log.total || 0), 0);
             document.getElementById('statSpent').innerText = `₱${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
+            // Render Task Board
+            const tBoard = document.getElementById('taskBoard');
+            if (tasks.length === 0) {
+                tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks dispatched yet.</td></tr>`;
+            } else {
+                tBoard.innerHTML = tasks.map(t => {
+                    const isDone = t.status === 'Completed';
+                    const statusHtml = isDone 
+                        ? `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-check mr-1"></i>Completed</span>`
+                        : `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-regular fa-clock mr-1"></i>Pending</span>`;
+                    return `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4">${statusHtml}</td>
+                        <td class="p-4"><div class="font-medium text-gray-800">${t.date}</div><div class="text-xs text-gray-500"><i class="fa-regular fa-user mr-1 text-brand-blue"></i>${t.driver}</div></td>
+                        <td class="p-4 text-gray-600 font-medium"><i class="fa-solid fa-car-side mr-1 text-gray-400"></i>${t.vehicle}</td>
+                        <td class="p-4">
+                            <div class="font-bold text-gray-800">${t.destination}</div>
+                            <div class="text-xs text-gray-500 truncate max-w-[200px]">${t.description}</div>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+
             // Render Vehicles
             const vList = document.getElementById('vehicleList');
-            if (vehicles.length === 0) {
-                vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
-            } else {
-                vList.innerHTML = vehicles.map(v => `
+            if (vehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
+            else vList.innerHTML = vehicles.map(v => `
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4"><span class="bg-blue-50 text-brand-blue font-bold px-3 py-1.5 rounded border border-blue-100 tracking-wider">${v.plateNumber}</span></td>
                         <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
-                        <td class="p-4 text-right">
-                            <button onclick="deleteVehicle('${v._id}')" class="text-red-500 hover:text-red-700 bg-white border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm"><i class="fa-solid fa-trash-can"></i> Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+                        <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-red-500 hover:text-red-700 bg-white border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm"><i class="fa-solid fa-trash-can"></i> Delete</button></td>
+                    </tr>`).join('');
 
             // Render Logs
             const lList = document.getElementById('logsList');
-            if (logs.length === 0) {
-                lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
-            } else {
-                lList.innerHTML = logs.map(l => `
+            if (logs.length === 0) lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
+            else lList.innerHTML = logs.map(l => `
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4 text-gray-500">${l.date}</td>
-                        <td class="p-4">
-                            <span class="font-bold text-gray-800">${l.department}</span><br>
-                            <span class="text-xs text-gray-500"><i class="fa-regular fa-user mr-1"></i>${l.driver}</span>
-                        </td>
+                        <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500"><i class="fa-regular fa-user mr-1"></i>${l.driver}</span></td>
                         <td class="p-4 text-gray-600 font-medium"><i class="fa-solid fa-car-side mr-1 text-gray-400"></i>${l.vehicle}</td>
                         <td class="p-4 text-right font-bold text-gray-800">₱${l.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `).join('');
-            }
+                    </tr>`).join('');
         }
 
+        // --- SUBMIT NEW TASK ---
+        async function submitTask(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
+            btn.disabled = true;
+
+            const taskData = {
+                driver: document.getElementById('tDriver').value,
+                vehicle: document.getElementById('tVehicle').value,
+                destination: document.getElementById('tDestination').value,
+                description: document.getElementById('tDescription').value,
+                date: document.getElementById('tDate').value,
+                status: 'Pending'
+            };
+
+            try {
+                const res = await fetch('http://localhost:5000/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData)
+                });
+                if (res.ok) {
+                    alert('Task dispatched successfully!');
+                    e.target.reset();
+                    document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
+                    loadDashboardData();
+                }
+            } catch (err) { alert('Failed to dispatch task.'); }
+            finally { btn.innerHTML = `Send to Driver`; btn.disabled = false; }
+        }
+
+        // --- SUBMIT NEW VEHICLE ---
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.querySelector('button[type="submit"]');
+            const btn = e.target.querySelector('button');
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
             btn.disabled = true;
 
@@ -328,15 +439,11 @@
                 });
                 if (res.ok) {
                     document.getElementById('vehicleForm').reset();
-                    document.getElementById('vPreset').value = ''; // Reset preset dropdown too
+                    document.getElementById('vPreset').value = ''; 
                     loadDashboardData();
                 }
-            } catch (err) {
-                console.error('Error saving vehicle:', err);
-            } finally {
-                btn.innerHTML = `Add to Fleet`;
-                btn.disabled = false;
-            }
+            } catch (err) { console.error('Error saving vehicle:', err); } 
+            finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
 
         async function deleteVehicle(id) {

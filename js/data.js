@@ -41,3 +41,15 @@ async function addLog(logData) {
         throw err;
     }
 }
+
+// 3. DRIVER FUNCTIONS (NEW)
+async function getDrivers() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/drivers`);
+        if (!res.ok) throw new Error("Failed to fetch drivers");
+        return await res.json();
+    } catch (err) {
+        console.error("Database Error:", err);
+        return [];
+    }
+}
