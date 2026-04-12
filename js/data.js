@@ -1,7 +1,7 @@
 // js/data.js
 // This file now acts as your central database bridge!
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://iacademy-rfid.onrender.com/api';
 
 // 1. VEHICLE FUNCTIONS
 async function getVehicles() {

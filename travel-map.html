@@ -189,7 +189,7 @@
 
         async function loadGoogleMaps() {
             try {
-                const response = await fetch('http://localhost:5000/api/config/maps');
+                const response = await fetch('https://iacademy-rfid.onrender.com//api/config/maps');
                 const data = await response.json();
                 
                 if (data.apiKey) {

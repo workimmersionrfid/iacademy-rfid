@@ -95,7 +95,7 @@
         async function loadMyTasks() {
             const myName = localStorage.getItem('username');
             try {
-                const res = await fetch('http://localhost:5000/api/tasks');
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
                 const allTasks = await res.json();
                 
                 // Filter tasks that belong to this specific driver
@@ -137,7 +137,7 @@
 
         async function updateTask(id, newStatus) {
             try {
-                await fetch(`http://localhost:5000/api/tasks/${id}`, {
+                await fetch(`https://iacademy-rfid.onrender.com/api/tasks/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
@@ -148,7 +148,7 @@
 
         async function loadFleetForFuel() {
             try {
-                const res = await fetch('http://localhost:5000/api/vehicles');
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/vehicles');
                 const vehicles = await res.json();
                 const select = document.getElementById('fVehicle');
                 select.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
@@ -173,7 +173,7 @@
             };
 
             try {
-                const res = await fetch('http://localhost:5000/api/logs', {
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/logs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(logData)

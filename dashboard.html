@@ -309,7 +309,7 @@
             // Load Tasks from Server
             let tasks = [];
             try {
-                const res = await fetch('http://localhost:5000/api/tasks');
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
                 tasks = await res.json();
             } catch(e) { console.error("Could not load tasks"); }
 
@@ -401,7 +401,7 @@
             };
 
             try {
-                const res = await fetch('http://localhost:5000/api/tasks', {
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(taskData)
@@ -432,7 +432,7 @@
             };
 
             try {
-                const res = await fetch('http://localhost:5000/api/vehicles', {
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/vehicles', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(vehicleData)
@@ -449,7 +449,7 @@
         async function deleteVehicle(id) {
             if (confirm("Are you sure you want to permanently delete this vehicle?")) {
                 try {
-                    const res = await fetch(`http://localhost:5000/api/vehicles/${id}`, { method: 'DELETE' });
+                    const res = await fetch(`https://iacademy-rfid.onrender.com/api/vehicles/${id}`, { method: 'DELETE' });
                     if (res.ok) loadDashboardData(); 
                 } catch (err) { console.error("Error deleting vehicle:", err); }
             }
