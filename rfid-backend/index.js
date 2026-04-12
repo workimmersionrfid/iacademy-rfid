@@ -101,6 +101,21 @@ app.get('/api/drivers', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// --- UPDATE DRIVER DEPARTMENT (Admin Route) ---
+app.put('/api/drivers/:id/department', async (req, res) => {
+    try {
+        const { department } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id, 
+            { department: department }, 
+            { new: true }
+        );
+        res.json({ message: 'Department updated successfully', user: updatedUser });
+    } catch (err) { 
+        res.status(500).json({ message: err.message }); 
+    }
+});
+
 // --- VEHICLE ROUTES ---
 app.get('/api/vehicles', async (req, res) => {
     try {

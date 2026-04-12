@@ -88,11 +88,11 @@
                 <h3 class="font-bold text-lg mb-4 flex items-center text-orange-500"><i class="fa-solid fa-paper-plane mr-2"></i> Dispatch a Task</h3>
                 <form id="taskForm" onsubmit="submitTask(event)" class="space-y-4">
                     <div>
-    <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Driver Username</label>
-    <select id="tDriver" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
-        <option value="" disabled selected>Loading drivers...</option>
-    </select>
-</div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Driver Username</label>
+                        <select id="tDriver" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
+                            <option value="" disabled selected>Loading drivers...</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Assign Vehicle</label>
                         <select id="tVehicle" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
@@ -255,6 +255,28 @@
 
             </div>
         </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden flex flex-col mt-8">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="font-bold text-sm text-gray-600 uppercase tracking-wider"><i class="fa-solid fa-users-gear text-brand-blue mr-2"></i>Driver & Department Management</h2>
+            </div>
+            <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                        <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wider">
+                            <th class="p-4 font-bold">Driver Username</th>
+                            <th class="p-4 font-bold">Current Status</th>
+                            <th class="p-4 font-bold">Assign Department</th>
+                            <th class="p-4 font-bold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminDriverList" class="text-sm divide-y divide-gray-100">
+                        <tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br>Loading drivers...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 
     <script src="js/data.js"></script>
@@ -304,7 +326,7 @@
         async function loadDashboardData() {
             const vehicles = await getVehicles();
             const logs = await getLogs();
-            const drivers = await getDrivers(); // <-- NEW: Fetch drivers
+            const drivers = await getDrivers(); // <-- Fetch drivers
             
             // Load Tasks from Server
             let tasks = [];
@@ -313,14 +335,14 @@
                 tasks = await res.json();
             } catch(e) { console.error("Could not load tasks"); }
 
-            // NEW: Populate Dispatch Driver Dropdown
+            // Populate Dispatch Driver Dropdown
             const tDriverSelect = document.getElementById('tDriver');
             if (drivers.length === 0) {
                 tDriverSelect.innerHTML = '<option value="" disabled selected>No drivers registered</option>';
             } else {
                 tDriverSelect.innerHTML = '<option value="" disabled selected>Select a driver</option>';
                 drivers.forEach(d => {
-                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${d.department})</option>`;
+                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${d.department || 'Pending'})</option>`;
                 });
             }
 
@@ -382,6 +404,53 @@
                         <td class="p-4 text-gray-600 font-medium"><i class="fa-solid fa-car-side mr-1 text-gray-400"></i>${l.vehicle}</td>
                         <td class="p-4 text-right font-bold text-gray-800">₱${l.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     </tr>`).join('');
+
+            // Render Driver Management Table
+            const dList = document.getElementById('adminDriverList');
+            const deptOptions = `
+                <option value="" disabled selected>Select Department</option>
+                <option value="ELPD">ELPD</option>
+                <option value="OSAS">OSAS</option>
+                <option value="IT">IT</option>
+                <option value="REGISTRAR">REGISTRAR</option>
+                <option value="FINANCE">FINANCE</option>
+                <option value="ADMISSIONS">ADMISSIONS</option>
+                <option value="ADCOM">ADCOM</option>
+                <option value="CLINIC">CLINIC</option>
+                <option value="PURCHASING">PURCHASING</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="SHS">SHS</option>
+                <option value="COLLEGE">COLLEGE</option>
+                <option value="LIBRARY">LIBRARY</option>
+            `;
+
+            if (drivers.length === 0) {
+                dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
+            } else {
+                dList.innerHTML = drivers.map(d => {
+                    const isPending = d.department === 'Pending Assignment' || !d.department;
+                    const deptText = d.department || 'Pending Assignment';
+                    const deptBadge = isPending 
+                        ? `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Pending</span>`
+                        : `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-building-user mr-1"></i> ${deptText}</span>`;
+                    
+                    return `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-800"><i class="fa-solid fa-user mr-2 text-gray-400"></i>${d.username}</td>
+                        <td class="p-4">${deptBadge}</td>
+                        <td class="p-4">
+                            <select id="dept-select-${d._id}" class="border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-brand-blue bg-white w-full max-w-[200px]">
+                                ${deptOptions}
+                            </select>
+                        </td>
+                        <td class="p-4 text-right">
+                            <button onclick="updateDriverDepartment('${d._id}')" class="bg-brand-blue hover:bg-brand-blueHover text-white px-4 py-2 rounded-lg transition-colors text-xs font-bold shadow-sm">
+                                Save
+                            </button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
         }
 
         // --- SUBMIT NEW TASK ---
@@ -445,6 +514,35 @@
             } catch (err) { console.error('Error saving vehicle:', err); } 
             finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
+
+        // --- UPDATE DRIVER DEPARTMENT ---
+        async function updateDriverDepartment(driverId) {
+            const selectEl = document.getElementById(`dept-select-${driverId}`);
+            const newDept = selectEl.value;
+
+            if (!newDept) {
+                alert("Please select a department from the dropdown first.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://iacademy-rfid.onrender.com/api/drivers/${driverId}/department`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ department: newDept })
+                });
+
+                if (res.ok) {
+                    alert("Department updated successfully!");
+                    loadDashboardData(); // Refresh the tables and dropdowns
+                } else {
+                    alert("Failed to update department.");
+                }
+            } catch (err) {
+                console.error("Error updating department:", err);
+                alert("Network error.");
+            }
+        }
 
         async function deleteVehicle(id) {
             if (confirm("Are you sure you want to permanently delete this vehicle?")) {
