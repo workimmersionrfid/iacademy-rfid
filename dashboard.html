@@ -26,6 +26,14 @@
             }
         });
     </script>
+    <style>
+        select.preset-dropdown {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233674FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1em 1em;
+        }
+    </style>
 </head>
 <body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
 
@@ -71,23 +79,58 @@
             
             <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit">
                 <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fa-solid fa-circle-plus text-brand-blue mr-2"></i> Register New Vehicle</h3>
+                
+                <div class="mb-5 pb-5 border-b border-gray-100">
+                    <label class="block text-xs font-bold text-brand-blue uppercase mb-1.5"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Quick Fill Preset</label>
+                    <select id="vPreset" onchange="applyPreset()" class="preset-dropdown appearance-none w-full border border-blue-200 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-blue-50/30 text-brand-blue font-medium transition-colors cursor-pointer">
+    <option value="" class="text-gray-800">-- Select a vehicle or type manually --</option>
+    <option value="Toyota Vios" class="text-gray-800">Toyota Vios (14 km/L - Gas)</option>
+    <option value="Toyota Wigo" class="text-gray-800">Toyota Wigo (16 km/L - Gas)</option>
+    <option value="Toyota Innova" class="text-gray-800">Toyota Innova (11 km/L - Diesel)</option>
+    <option value="Toyota Fortuner" class="text-gray-800">Toyota Fortuner (10 km/L - Diesel)</option>
+    <option value="Toyota Hilux" class="text-gray-800">Toyota Hilux (11 km/L - Diesel)</option>
+    <option value="Toyota Hi-Ace" class="text-gray-800">Toyota Hi-Ace (10 km/L - Diesel)</option>
+    <option value="Mitsubishi Mirage" class="text-gray-800">Mitsubishi Mirage (16 km/L - Gas)</option>
+    <option value="Mitsubishi Xpander" class="text-gray-800">Mitsubishi Xpander (13 km/L - Gas)</option>
+    <option value="Mitsubishi Montero Sport" class="text-gray-800">Mitsubishi Montero (11 km/L - Diesel)</option>
+    <option value="Mitsubishi L300" class="text-gray-800">Mitsubishi L300 (10 km/L - Diesel)</option>
+    <option value="Honda Brio" class="text-gray-800">Honda Brio (16 km/L - Gas)</option>
+    <option value="Honda City" class="text-gray-800">Honda City (15 km/L - Gas)</option>
+    <option value="Honda Civic" class="text-gray-800">Honda Civic (12 km/L - Gas)</option>
+    <option value="Honda BR-V" class="text-gray-800">Honda BR-V (14 km/L - Gas)</option>
+    <option value="Nissan Navara" class="text-gray-800">Nissan Navara (11 km/L - Diesel)</option>
+    <option value="Nissan NV350 Urvan" class="text-gray-800">Nissan NV350 Urvan (9 km/L - Diesel)</option>
+    <option value="Isuzu mu-X" class="text-gray-800">Isuzu mu-X (11 km/L - Diesel)</option>
+    <option value="Isuzu D-Max" class="text-gray-800">Isuzu D-Max (12 km/L - Diesel)</option>
+    <option value="Ford Ranger" class="text-gray-800">Ford Ranger (11 km/L - Diesel)</option>
+    <option value="Ford Everest" class="text-gray-800">Ford Everest (10 km/L - Diesel)</option>
+    <option value="Suzuki Carry" class="text-gray-800">Suzuki Carry (12 km/L - Diesel)</option>
+    <option value="Suzuki Ertiga" class="text-gray-800">Suzuki Ertiga (14 km/L - Gas)</option>
+    <option value="Hyundai Tucson" class="text-gray-800">Hyundai Tucson (12 km/L - Gas)</option>
+    <option value="Kia Picanto" class="text-gray-800">Kia Picanto (18 km/L - Gas)</option>
+    <option value="Geely Coolray" class="text-gray-800">Geely Coolray (14 km/L - Gas)</option>
+    <option value="Honda Beat" class="text-gray-800">Honda Beat (50 km/L - Gas)</option>
+    <option value="Yamaha Mio" class="text-gray-800">Yamaha Mio (55 km/L - Gas)</option>
+</select>
+                </div>
+
                 <form id="vehicleForm" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Make & Model</label>
-                        <input type="text" id="vModel" placeholder="e.g. Toyota Hiace" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <input type="text" id="vModel" placeholder="e.g. Toyota Hiace" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue transition-colors">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Plate Number</label>
-                        <input type="text" id="vPlate" placeholder="e.g. ABC 1234" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue uppercase">
+                        <input type="text" id="vPlate" placeholder="e.g. ABC 1234" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue uppercase transition-colors">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Year</label>
-                            <input type="number" id="vYear" placeholder="2022" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                            <input type="number" id="vYear" placeholder="2022" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue transition-colors">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Fuel Type</label>
-                            <select id="vFuel" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
+                            <select id="vFuel" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white transition-colors">
                                 <option value="Diesel">Diesel</option>
                                 <option value="Gasoline">Gasoline</option>
                             </select>
@@ -95,7 +138,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Fuel Efficiency (km/L)</label>
-                        <input type="number" id="vEfficiency" step="0.1" placeholder="e.g. 12.5" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <input type="number" id="vEfficiency" step="0.1" placeholder="e.g. 12.5" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue transition-colors">
                     </div>
                     <button type="submit" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white font-bold py-3 rounded-lg shadow-sm transition-colors mt-2">
                         Add to Fleet
@@ -154,7 +197,59 @@
     <script src="js/app.js"></script>
     
     <script>
-        // Initialize Navigation from app.js
+        // --- PRESET DATABASE ---
+        const vehiclePresets = {
+            "Toyota Vios": { eff: 14, fuel: "Gasoline" },
+            "Toyota Wigo": { eff: 16, fuel: "Gasoline" },
+            "Toyota Innova": { eff: 11, fuel: "Diesel" },
+            "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
+            "Toyota Hilux": { eff: 11, fuel: "Diesel" },
+            "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" },
+            "Mitsubishi Mirage": { eff: 16, fuel: "Gasoline" },
+            "Mitsubishi Xpander": { eff: 13, fuel: "Gasoline" },
+            "Mitsubishi Montero Sport": { eff: 11, fuel: "Diesel" },
+            "Mitsubishi L300": { eff: 10, fuel: "Diesel" },
+            "Honda Brio": { eff: 16, fuel: "Gasoline" },
+            "Honda City": { eff: 15, fuel: "Gasoline" },
+            "Honda Civic": { eff: 12, fuel: "Gasoline" },
+            "Honda BR-V": { eff: 14, fuel: "Gasoline" },
+            "Nissan Navara": { eff: 11, fuel: "Diesel" },
+            "Nissan NV350 Urvan": { eff: 9, fuel: "Diesel" },
+            "Isuzu mu-X": { eff: 11, fuel: "Diesel" },
+            "Isuzu D-Max": { eff: 12, fuel: "Diesel" },
+            "Ford Ranger": { eff: 11, fuel: "Diesel" },
+            "Ford Everest": { eff: 10, fuel: "Diesel" },
+            "Suzuki Carry": { eff: 12, fuel: "Diesel" },
+            "Suzuki Ertiga": { eff: 14, fuel: "Gasoline" },
+            "Hyundai Tucson": { eff: 12, fuel: "Gasoline" },
+            "Kia Picanto": { eff: 18, fuel: "Gasoline" },
+            "Geely Coolray": { eff: 14, fuel: "Gasoline" },
+            "Honda Beat": { eff: 50, fuel: "Gasoline" },
+            "Yamaha Mio": { eff: 55, fuel: "Gasoline" }
+        };
+        
+        // --- PRESET FUNCTION ---
+        function applyPreset() {
+            const presetName = document.getElementById('vPreset').value;
+            if (presetName && vehiclePresets[presetName]) {
+                const data = vehiclePresets[presetName];
+                
+                // Auto-fill fields
+                document.getElementById('vModel').value = presetName;
+                document.getElementById('vEfficiency').value = data.eff;
+                document.getElementById('vFuel').value = data.fuel;
+                
+                // Add brief highlight animation
+                const fields = ['vModel', 'vEfficiency', 'vFuel'];
+                fields.forEach(f => {
+                    const el = document.getElementById(f);
+                    el.classList.add('bg-blue-50', 'border-brand-blue');
+                    setTimeout(() => el.classList.remove('bg-blue-50', 'border-brand-blue'), 800);
+                });
+            }
+        }
+
+        // --- DASHBOARD LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
             renderNavigation('dashboard');
             loadDashboardData();
@@ -165,7 +260,6 @@
             window.location.href = 'login.html';
         }
 
-        // Load all data from MongoDB via data.js
         async function loadDashboardData() {
             const vehicles = await getVehicles();
             const logs = await getLogs();
@@ -212,7 +306,6 @@
             }
         }
 
-        // Add a new vehicle to MongoDB
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('button[type="submit"]');
@@ -235,7 +328,8 @@
                 });
                 if (res.ok) {
                     document.getElementById('vehicleForm').reset();
-                    loadDashboardData(); // Refresh all tables & stats
+                    document.getElementById('vPreset').value = ''; // Reset preset dropdown too
+                    loadDashboardData();
                 }
             } catch (err) {
                 console.error('Error saving vehicle:', err);
@@ -245,7 +339,6 @@
             }
         });
 
-        // Delete vehicle from MongoDB
         async function deleteVehicle(id) {
             if (confirm("Are you sure you want to permanently delete this vehicle?")) {
                 try {
