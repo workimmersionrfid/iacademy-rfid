@@ -12,26 +12,25 @@
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { blue: '#3674FF', blueHover: '#1349CC', bg: '#f4f5f7', border: '#e5e7eb' } }
+                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
                 }
             }
         }
-
-        // SECURITY CHECK
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('userRole');
-            if (!token || role !== 'admin') {
-                window.location.href = 'login.html';
-            }
+            if (!token || role !== 'admin') window.location.href = 'login.html';
         });
     </script>
     <style>
         select.preset-dropdown {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233674FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231e3a8a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.75rem center;
             background-repeat: no-repeat;
             background-size: 1em 1em;
+        }
+        .dpd-card-accent {
+            border-bottom-left-radius: 100%;
         }
     </style>
 </head>
@@ -39,100 +38,116 @@
 
     <div id="shared-nav"></div>
 
-    <main class="max-w-[1400px] mx-auto px-6 py-8">
+    <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Master Dispatch & Fleet Overview</h1>
-                <p class="text-sm text-gray-500 mt-1">Manage fleet, dispatch driver tasks, and monitor fuel consumption.</p>
+        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between">
+            <div class="relative z-10">
+                <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide">Administrator Portal</p>
+                <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Welcome To Control Center</h1>
+                <button onclick="globalLogout()" class="mt-6 bg-white text-blue-800 font-bold px-6 py-2 rounded-full shadow hover:bg-blue-50 transition-colors text-sm">
+                    Log Out
+                </button>
             </div>
-            <button onclick="logout()" class="text-sm font-medium text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors">
-                <i class="fa-solid fa-right-from-bracket mr-2"></i> Log Out
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
-                <div class="bg-blue-50 text-brand-blue w-12 h-12 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-car"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Fleet</p>
-                    <h3 id="statVehicles" class="text-2xl font-black text-gray-800">0</h3>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
-                <div class="bg-orange-50 text-orange-500 w-12 h-12 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-list"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Tasks</p>
-                    <h3 id="statTasks" class="text-2xl font-black text-gray-800">0</h3>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
-                <div class="bg-green-50 text-green-600 w-12 h-12 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-file-invoice"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Logs</p>
-                    <h3 id="statLogs" class="text-2xl font-black text-gray-800">0</h3>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-xl border border-brand-border shadow-sm flex items-center gap-4">
-                <div class="bg-purple-50 text-purple-600 w-12 h-12 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-peso-sign"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Fuel Spent</p>
-                    <h3 id="statSpent" class="text-2xl font-black text-gray-800">₱0.00</h3>
-                </div>
+            <div class="hidden md:block relative z-10 text-white/20">
+                <i class="fa-solid fa-truck-fast text-9xl"></i>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
+                    <i class="fa-solid fa-car text-blue-500 text-xl"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Active Fleet</p>
+                    <h3 id="statVehicles" class="text-3xl font-black text-blue-900">0</h3>
+                </div>
+            </div>
             
-            <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit xl:col-span-1">
-                <h3 class="font-bold text-lg mb-4 flex items-center text-orange-500"><i class="fa-solid fa-paper-plane mr-2"></i> Dispatch a Task</h3>
-                <form id="taskForm" onsubmit="submitTask(event)" class="space-y-4">
+            <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
+                    <i class="fa-solid fa-clipboard-list text-blue-500 text-xl"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Tasks</p>
+                    <h3 id="statTasks" class="text-3xl font-black text-blue-900">0</h3>
+                </div>
+            </div>
+
+            <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
+                    <i class="fa-solid fa-file-invoice text-blue-500 text-xl"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Logs</p>
+                    <h3 id="statLogs" class="text-3xl font-black text-blue-900">0</h3>
+                </div>
+            </div>
+
+            <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
+                    <i class="fa-solid fa-peso-sign text-blue-500 text-xl"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Fuel Spent</p>
+                    <h3 id="statSpent" class="text-3xl font-black text-blue-900">₱0.00</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit xl:col-span-1 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                <h3 class="font-bold text-xl mb-6 text-blue-900">Dispatch a Task</h3>
+                <form id="taskForm" onsubmit="submitTask(event)" class="space-y-5">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Driver Username</label>
-                        <select id="tDriver" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
+                        <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
                             <option value="" disabled selected>Loading drivers...</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Assign Vehicle</label>
-                        <select id="tVehicle" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
+                        <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
                             <option value="" disabled selected>Loading fleet...</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Destination</label>
-                        <input type="text" id="tDestination" placeholder="e.g. Makati Campus" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Destination</label>
+                        <input type="text" id="tDestination" placeholder="e.g. Makati Campus" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Task Description</label>
-                        <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Description</label>
+                        <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Date</label>
-                        <input type="date" id="tDate" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
+                        <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
-                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-sm transition-colors mt-2">
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
                         Send to Driver
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden flex flex-col xl:col-span-2">
-                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h2 class="font-bold text-sm text-gray-600 uppercase tracking-wider"><i class="fa-solid fa-satellite-dish text-orange-400 mr-2"></i>Live Dispatch Board</h2>
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col xl:col-span-2 relative">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+                <div class="p-6 border-b border-gray-100">
+                    <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
                 </div>
-                <div class="overflow-x-auto max-h-[450px] overflow-y-auto custom-scrollbar">
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                            <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wider">
+                            <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                                 <th class="p-4 font-bold">Status</th>
                                 <th class="p-4 font-bold">Date & Driver</th>
                                 <th class="p-4 font-bold">Vehicle</th>
                                 <th class="p-4 font-bold">Itinerary</th>
                             </tr>
                         </thead>
-                        <tbody id="taskBoard" class="text-sm divide-y divide-gray-100">
-                            <tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br>Loading tasks...</td></tr>
+                        <tbody id="taskBoard" class="text-sm divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading tasks...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -141,137 +156,117 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
-            <div class="bg-white rounded-xl shadow-sm border border-brand-border p-6 h-fit">
-                <h3 class="font-bold text-lg mb-4 flex items-center"><i class="fa-solid fa-circle-plus text-brand-blue mr-2"></i> Register New Vehicle</h3>
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                <h3 class="font-bold text-xl mb-6 text-blue-900">Register Vehicle</h3>
                 
-                <div class="mb-5 pb-5 border-b border-gray-100">
-                    <label class="block text-xs font-bold text-brand-blue uppercase mb-1.5"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Quick Fill Preset</label>
-                    <select id="vPreset" onchange="applyPreset()" class="preset-dropdown appearance-none w-full border border-blue-200 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-blue-50/30 text-brand-blue font-medium transition-colors cursor-pointer">
-                        <option value="" class="text-gray-800">-- Select a vehicle or type manually --</option>
+                <div class="mb-6 pb-6 border-b border-gray-100">
+                    <label class="block text-xs font-bold text-blue-600 uppercase mb-2">Quick Fill Preset</label>
+                    <select id="vPreset" onchange="applyPreset()" class="preset-dropdown appearance-none w-full border border-blue-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-blue-50/50 text-blue-800 font-medium transition-colors cursor-pointer">
+                        <option value="" class="text-gray-800">-- Select preset or type manually --</option>
                         <option value="Toyota Vios" class="text-gray-800">Toyota Vios (14 km/L - Gas)</option>
                         <option value="Toyota Wigo" class="text-gray-800">Toyota Wigo (16 km/L - Gas)</option>
                         <option value="Toyota Innova" class="text-gray-800">Toyota Innova (11 km/L - Diesel)</option>
-                        <option value="Toyota Fortuner" class="text-gray-800">Toyota Fortuner (10 km/L - Diesel)</option>
-                        <option value="Toyota Hilux" class="text-gray-800">Toyota Hilux (11 km/L - Diesel)</option>
-                        <option value="Toyota Hi-Ace" class="text-gray-800">Toyota Hi-Ace (10 km/L - Diesel)</option>
                         <option value="Mitsubishi Mirage" class="text-gray-800">Mitsubishi Mirage (16 km/L - Gas)</option>
-                        <option value="Mitsubishi Xpander" class="text-gray-800">Mitsubishi Xpander (13 km/L - Gas)</option>
-                        <option value="Mitsubishi Montero Sport" class="text-gray-800">Mitsubishi Montero (11 km/L - Diesel)</option>
-                        <option value="Mitsubishi L300" class="text-gray-800">Mitsubishi L300 (10 km/L - Diesel)</option>
-                        <option value="Honda Brio" class="text-gray-800">Honda Brio (16 km/L - Gas)</option>
                         <option value="Honda City" class="text-gray-800">Honda City (15 km/L - Gas)</option>
-                        <option value="Honda Civic" class="text-gray-800">Honda Civic (12 km/L - Gas)</option>
-                        <option value="Honda BR-V" class="text-gray-800">Honda BR-V (14 km/L - Gas)</option>
-                        <option value="Nissan Navara" class="text-gray-800">Nissan Navara (11 km/L - Diesel)</option>
-                        <option value="Nissan NV350 Urvan" class="text-gray-800">Nissan NV350 Urvan (9 km/L - Diesel)</option>
-                        <option value="Isuzu mu-X" class="text-gray-800">Isuzu mu-X (11 km/L - Diesel)</option>
-                        <option value="Isuzu D-Max" class="text-gray-800">Isuzu D-Max (12 km/L - Diesel)</option>
-                        <option value="Ford Ranger" class="text-gray-800">Ford Ranger (11 km/L - Diesel)</option>
-                        <option value="Ford Everest" class="text-gray-800">Ford Everest (10 km/L - Diesel)</option>
-                        <option value="Suzuki Carry" class="text-gray-800">Suzuki Carry (12 km/L - Diesel)</option>
-                        <option value="Suzuki Ertiga" class="text-gray-800">Suzuki Ertiga (14 km/L - Gas)</option>
-                        <option value="Hyundai Tucson" class="text-gray-800">Hyundai Tucson (12 km/L - Gas)</option>
-                        <option value="Kia Picanto" class="text-gray-800">Kia Picanto (18 km/L - Gas)</option>
-                        <option value="Geely Coolray" class="text-gray-800">Geely Coolray (14 km/L - Gas)</option>
-                        <option value="Honda Beat" class="text-gray-800">Honda Beat (50 km/L - Gas)</option>
-                        <option value="Yamaha Mio" class="text-gray-800">Yamaha Mio (55 km/L - Gas)</option>
                     </select>
                 </div>
 
-                <form id="vehicleForm" class="space-y-4">
+                <form id="vehicleForm" class="space-y-5">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Make & Model</label>
-                        <input type="text" id="vModel" placeholder="e.g. Toyota Hiace" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue transition-colors">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Make & Model</label>
+                        <input type="text" id="vModel" placeholder="e.g. Toyota Hiace" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Plate Number</label>
-                        <input type="text" id="vPlate" placeholder="e.g. ABC 1234" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue uppercase transition-colors">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Plate Number</label>
+                        <input type="text" id="vPlate" placeholder="e.g. ABC 1234" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 uppercase transition-all">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Year</label>
-                            <input type="number" id="vYear" placeholder="2022" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue transition-colors">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Year</label>
+                            <input type="number" id="vYear" placeholder="2022" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Fuel Type</label>
-                            <select id="vFuel" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue bg-white transition-colors">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fuel Type</label>
+                            <select id="vFuel" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
                                 <option value="Diesel">Diesel</option>
                                 <option value="Gasoline">Gasoline</option>
                             </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Fuel Efficiency (km/L)</label>
-                        <input type="number" id="vEfficiency" step="0.1" placeholder="e.g. 12.5" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-brand-blue transition-colors">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fuel Efficiency (km/L)</label>
+                        <input type="number" id="vEfficiency" step="0.1" placeholder="e.g. 12.5" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
-                    <button type="submit" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white font-bold py-3 rounded-lg shadow-sm transition-colors mt-2">
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
                         Add to Fleet
                     </button>
                 </form>
             </div>
 
             <div class="xl:col-span-2 space-y-8">
-                
-                <div class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden flex flex-col">
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                        <h2 class="font-bold text-sm text-gray-600 uppercase tracking-wider"><i class="fa-solid fa-car text-gray-400 mr-2"></i>Active Fleet</h2>
+                <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="font-bold text-xl text-blue-900">Active Fleet</h2>
                     </div>
-                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar">
+                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar p-2">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                                <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wider">
+                                <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                                     <th class="p-4 font-bold">Plate Number</th>
                                     <th class="p-4 font-bold">Make & Model</th>
                                     <th class="p-4 font-bold text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="vehicleList" class="text-sm divide-y divide-gray-100">
-                                <tr><td colspan="3" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br>Loading fleet...</td></tr>
+                            <tbody id="vehicleList" class="text-sm divide-y divide-gray-50">
+                                <tr><td colspan="3" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading fleet...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden flex flex-col">
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                        <h2 class="font-bold text-sm text-gray-600 uppercase tracking-wider"><i class="fa-solid fa-clock-rotate-left text-gray-400 mr-2"></i>Recent Fuel Logs</h2>
+                <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="font-bold text-xl text-blue-900">Recent Fuel Logs</h2>
                     </div>
-                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
+                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar p-2">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                                <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wider">
+                                <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                                     <th class="p-4 font-bold">Date</th>
                                     <th class="p-4 font-bold">Dept / Driver</th>
                                     <th class="p-4 font-bold">Vehicle</th>
                                     <th class="p-4 font-bold text-right">Total Cost</th>
                                 </tr>
                             </thead>
-                            <tbody id="logsList" class="text-sm divide-y divide-gray-100">
-                                <tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br>Loading logs...</td></tr>
+                            <tbody id="logsList" class="text-sm divide-y divide-gray-50">
+                                <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading logs...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-brand-border overflow-hidden flex flex-col mt-8">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h2 class="font-bold text-sm text-gray-600 uppercase tracking-wider"><i class="fa-solid fa-users-gear text-brand-blue mr-2"></i>Driver & Department Management</h2>
+        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="font-bold text-xl text-blue-900">Driver & Department Management</h2>
             </div>
-            <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
+            <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                 <table class="w-full text-left border-collapse">
                     <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                        <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wider">
+                        <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                             <th class="p-4 font-bold">Driver Username</th>
                             <th class="p-4 font-bold">Current Status</th>
                             <th class="p-4 font-bold">Assign Department</th>
                             <th class="p-4 font-bold text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="adminDriverList" class="text-sm divide-y divide-gray-100">
-                        <tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i><br>Loading drivers...</td></tr>
+                    <tbody id="adminDriverList" class="text-sm divide-y divide-gray-50">
+                        <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading drivers...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -285,19 +280,8 @@
     <script>
         const vehiclePresets = {
             "Toyota Vios": { eff: 14, fuel: "Gasoline" }, "Toyota Wigo": { eff: 16, fuel: "Gasoline" },
-            "Toyota Innova": { eff: 11, fuel: "Diesel" }, "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
-            "Toyota Hilux": { eff: 11, fuel: "Diesel" }, "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" },
-            "Mitsubishi Mirage": { eff: 16, fuel: "Gasoline" }, "Mitsubishi Xpander": { eff: 13, fuel: "Gasoline" },
-            "Mitsubishi Montero Sport": { eff: 11, fuel: "Diesel" }, "Mitsubishi L300": { eff: 10, fuel: "Diesel" },
-            "Honda Brio": { eff: 16, fuel: "Gasoline" }, "Honda City": { eff: 15, fuel: "Gasoline" },
-            "Honda Civic": { eff: 12, fuel: "Gasoline" }, "Honda BR-V": { eff: 14, fuel: "Gasoline" },
-            "Nissan Navara": { eff: 11, fuel: "Diesel" }, "Nissan NV350 Urvan": { eff: 9, fuel: "Diesel" },
-            "Isuzu mu-X": { eff: 11, fuel: "Diesel" }, "Isuzu D-Max": { eff: 12, fuel: "Diesel" },
-            "Ford Ranger": { eff: 11, fuel: "Diesel" }, "Ford Everest": { eff: 10, fuel: "Diesel" },
-            "Suzuki Carry": { eff: 12, fuel: "Diesel" }, "Suzuki Ertiga": { eff: 14, fuel: "Gasoline" },
-            "Hyundai Tucson": { eff: 12, fuel: "Gasoline" }, "Kia Picanto": { eff: 18, fuel: "Gasoline" },
-            "Geely Coolray": { eff: 14, fuel: "Gasoline" }, "Honda Beat": { eff: 50, fuel: "Gasoline" },
-            "Yamaha Mio": { eff: 55, fuel: "Gasoline" }
+            "Toyota Innova": { eff: 11, fuel: "Diesel" }, "Mitsubishi Mirage": { eff: 16, fuel: "Gasoline" },
+            "Honda City": { eff: 15, fuel: "Gasoline" }
         };
 
         function applyPreset() {
@@ -307,11 +291,6 @@
                 document.getElementById('vModel').value = presetName;
                 document.getElementById('vEfficiency').value = data.eff;
                 document.getElementById('vFuel').value = data.fuel;
-                ['vModel', 'vEfficiency', 'vFuel'].forEach(f => {
-                    const el = document.getElementById(f);
-                    el.classList.add('bg-blue-50', 'border-brand-blue');
-                    setTimeout(() => el.classList.remove('bg-blue-50', 'border-brand-blue'), 800);
-                });
             }
         }
 
@@ -320,8 +299,6 @@
             document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
             loadDashboardData();
         });
-
-        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
 
         async function loadDashboardData() {
             const vehicles = await getVehicles();
@@ -365,16 +342,16 @@
                 tBoard.innerHTML = tasks.map(t => {
                     const isDone = t.status === 'Completed';
                     const statusHtml = isDone 
-                        ? `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-check mr-1"></i>Completed</span>`
-                        : `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-regular fa-clock mr-1"></i>Pending</span>`;
+                        ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-xs border border-blue-100">Completed</span>`
+                        : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-xs border border-gray-200">Pending</span>`;
                     return `
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4">${statusHtml}</td>
-                        <td class="p-4"><div class="font-medium text-gray-800">${t.date}</div><div class="text-xs text-gray-500"><i class="fa-regular fa-user mr-1 text-brand-blue"></i>${t.driver}</div></td>
-                        <td class="p-4 text-gray-600 font-medium"><i class="fa-solid fa-car-side mr-1 text-gray-400"></i>${t.vehicle}</td>
+                        <td class="p-4"><div class="font-medium text-gray-800">${t.date}</div><div class="text-xs text-gray-500 mt-1">${t.driver}</div></td>
+                        <td class="p-4 text-gray-600 font-medium">${t.vehicle}</td>
                         <td class="p-4">
-                            <div class="font-bold text-gray-800">${t.destination}</div>
-                            <div class="text-xs text-gray-500 truncate max-w-[200px]">${t.description}</div>
+                            <div class="font-bold text-blue-900">${t.destination}</div>
+                            <div class="text-xs text-gray-500 truncate max-w-[200px] mt-1">${t.description}</div>
                         </td>
                     </tr>
                 `}).join('');
@@ -383,27 +360,24 @@
             const vList = document.getElementById('vehicleList');
             if (vehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
             else vList.innerHTML = vehicles.map(v => `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4"><span class="bg-blue-50 text-brand-blue font-bold px-3 py-1.5 rounded border border-blue-100 tracking-wider">${v.plateNumber}</span></td>
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4"><span class="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-md border border-blue-100 tracking-wider">${v.plateNumber}</span></td>
                         <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
-                        <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-red-500 hover:text-red-700 bg-white border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm"><i class="fa-solid fa-trash-can"></i> Delete</button></td>
+                        <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-lg"></i></button></td>
                     </tr>`).join('');
 
             const lList = document.getElementById('logsList');
             if (logs.length === 0) lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
             else lList.innerHTML = logs.map(l => `
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4 text-gray-500">${l.date}</td>
-                        <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500"><i class="fa-regular fa-user mr-1"></i>${l.driver}</span></td>
-                        <td class="p-4 text-gray-600 font-medium"><i class="fa-solid fa-car-side mr-1 text-gray-400"></i>${l.vehicle}</td>
-                        <td class="p-4 text-right font-bold text-gray-800">₱${l.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500 mt-1">${l.driver}</span></td>
+                        <td class="p-4 text-gray-600 font-medium">${l.vehicle}</td>
+                        <td class="p-4 text-right font-bold text-blue-900">₱${l.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                     </tr>`).join('');
 
             const dList = document.getElementById('adminDriverList');
-            const departmentsList = [
-                "ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", 
-                "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"
-            ];
+            const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
 
             if (drivers.length === 0) {
                 dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
@@ -413,8 +387,8 @@
                     const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
                     
                     const deptBadge = isPending 
-                        ? `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs inline-block m-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Pending</span>`
-                        : deptArray.map(dept => `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs inline-block m-0.5"><i class="fa-solid fa-building-user mr-1"></i> ${dept}</span>`).join('');
+                        ? `<span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-md text-xs inline-block m-0.5 border border-gray-200">Pending</span>`
+                        : deptArray.map(dept => `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-md text-xs inline-block m-0.5 border border-blue-100">${dept}</span>`).join('');
                     
                     const deptOptions = departmentsList.map(dept => {
                         const isSelected = deptArray.includes(dept) ? 'selected' : '';
@@ -422,17 +396,16 @@
                     }).join('');
                     
                     return `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 font-bold text-gray-800"><i class="fa-solid fa-user mr-2 text-gray-400"></i>${d.username}</td>
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4 font-bold text-gray-800">${d.username}</td>
                         <td class="p-4 max-w-[250px]">${deptBadge}</td>
                         <td class="p-4">
-                            <select id="dept-select-${d._id}" multiple class="border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-brand-blue bg-white w-full max-w-[200px] h-24 overflow-y-auto custom-scrollbar">
+                            <select id="dept-select-${d._id}" multiple class="border border-gray-200 rounded-xl p-2 text-sm outline-none focus:border-blue-500 bg-white w-full max-w-[200px] h-24 overflow-y-auto custom-scrollbar">
                                 ${deptOptions}
                             </select>
-                            <p class="text-[10px] text-gray-400 mt-1">Hold Ctrl/Cmd to select multiple</p>
                         </td>
                         <td class="p-4 text-right align-top">
-                            <button onclick="updateDriverDepartment('${d._id}')" class="bg-brand-blue hover:bg-brand-blueHover text-white px-4 py-2 rounded-lg transition-colors text-xs font-bold shadow-sm mt-1">
+                            <button onclick="updateDriverDepartment('${d._id}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-xl transition-colors text-xs font-bold mt-1">
                                 Save
                             </button>
                         </td>
@@ -505,10 +478,7 @@
             const selectEl = document.getElementById(`dept-select-${driverId}`);
             const selectedDepartments = Array.from(selectEl.selectedOptions).map(option => option.value);
 
-            if (selectedDepartments.length === 0) {
-                alert("Please select at least one department.");
-                return;
-            }
+            if (selectedDepartments.length === 0) return alert("Please select at least one department.");
 
             try {
                 const res = await fetch(`https://iacademy-rfid.onrender.com/api/drivers/${driverId}/department`, {
@@ -520,13 +490,8 @@
                 if (res.ok) {
                     alert("Departments updated successfully!");
                     loadDashboardData(); 
-                } else {
-                    alert("Failed to update departments.");
-                }
-            } catch (err) {
-                console.error("Error updating departments:", err);
-                alert("Network error.");
-            }
+                } else alert("Failed to update departments.");
+            } catch (err) { alert("Network error."); }
         }
 
         async function deleteVehicle(id) {
