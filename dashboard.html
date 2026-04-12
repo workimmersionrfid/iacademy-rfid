@@ -407,51 +407,48 @@
 
             // Render Driver Management Table
             const dList = document.getElementById('adminDriverList');
-            const deptOptions = `
-                <option value="" disabled selected>Select Department</option>
-                <option value="ELPD">ELPD</option>
-                <option value="OSAS">OSAS</option>
-                <option value="IT">IT</option>
-                <option value="REGISTRAR">REGISTRAR</option>
-                <option value="FINANCE">FINANCE</option>
-                <option value="ADMISSIONS">ADMISSIONS</option>
-                <option value="ADCOM">ADCOM</option>
-                <option value="CLINIC">CLINIC</option>
-                <option value="PURCHASING">PURCHASING</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="SHS">SHS</option>
-                <option value="COLLEGE">COLLEGE</option>
-                <option value="LIBRARY">LIBRARY</option>
-            `;
+            const departmentsList = [
+                "ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", 
+                "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"
+            ];
 
             if (drivers.length === 0) {
                 dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
             } else {
                 dList.innerHTML = drivers.map(d => {
-                    const isPending = d.department === 'Pending Assignment' || !d.department;
-                    const deptText = d.department || 'Pending Assignment';
+                    // Ensure department is treated as an array
+                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
+                    const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
+                    
+                    // Generate multiple badges if they have multiple departments
                     const deptBadge = isPending 
-                        ? `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Pending</span>`
-                        : `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-building-user mr-1"></i> ${deptText}</span>`;
+                        ? `<span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs inline-block m-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Pending</span>`
+                        : deptArray.map(dept => `<span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-xs inline-block m-0.5"><i class="fa-solid fa-building-user mr-1"></i> ${dept}</span>`).join('');
+                    
+                    // Generate options and mark previously selected ones
+                    const deptOptions = departmentsList.map(dept => {
+                        const isSelected = deptArray.includes(dept) ? 'selected' : '';
+                        return `<option value="${dept}" ${isSelected}>${dept}</option>`;
+                    }).join('');
                     
                     return `
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4 font-bold text-gray-800"><i class="fa-solid fa-user mr-2 text-gray-400"></i>${d.username}</td>
-                        <td class="p-4">${deptBadge}</td>
+                        <td class="p-4 max-w-[250px]">${deptBadge}</td>
                         <td class="p-4">
-                            <select id="dept-select-${d._id}" class="border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-brand-blue bg-white w-full max-w-[200px]">
+                            <select id="dept-select-${d._id}" multiple class="border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-brand-blue bg-white w-full max-w-[200px] h-24 overflow-y-auto custom-scrollbar">
                                 ${deptOptions}
                             </select>
+                            <p class="text-[10px] text-gray-400 mt-1">Hold Ctrl/Cmd to select multiple</p>
                         </td>
-                        <td class="p-4 text-right">
-                            <button onclick="updateDriverDepartment('${d._id}')" class="bg-brand-blue hover:bg-brand-blueHover text-white px-4 py-2 rounded-lg transition-colors text-xs font-bold shadow-sm">
+                        <td class="p-4 text-right align-top">
+                            <button onclick="updateDriverDepartment('${d._id}')" class="bg-brand-blue hover:bg-brand-blueHover text-white px-4 py-2 rounded-lg transition-colors text-xs font-bold shadow-sm mt-1">
                                 Save
                             </button>
                         </td>
                     </tr>`;
                 }).join('');
             }
-        }
 
         // --- SUBMIT NEW TASK ---
         async function submitTask(e) {
@@ -515,13 +512,15 @@
             finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
 
-        // --- UPDATE DRIVER DEPARTMENT ---
+        // --- UPDATE DRIVER DEPARTMENT (MULTIPLE) ---
         async function updateDriverDepartment(driverId) {
             const selectEl = document.getElementById(`dept-select-${driverId}`);
-            const newDept = selectEl.value;
+            
+            // Extract all selected values from the multi-select box
+            const selectedDepartments = Array.from(selectEl.selectedOptions).map(option => option.value);
 
-            if (!newDept) {
-                alert("Please select a department from the dropdown first.");
+            if (selectedDepartments.length === 0) {
+                alert("Please select at least one department.");
                 return;
             }
 
@@ -529,17 +528,17 @@
                 const res = await fetch(`https://iacademy-rfid.onrender.com/api/drivers/${driverId}/department`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ department: newDept })
+                    body: JSON.stringify({ department: selectedDepartments }) // Sends the array to backend
                 });
 
                 if (res.ok) {
-                    alert("Department updated successfully!");
-                    loadDashboardData(); // Refresh the tables and dropdowns
+                    alert("Departments updated successfully!");
+                    loadDashboardData(); // Refresh to show new badges
                 } else {
-                    alert("Failed to update department.");
+                    alert("Failed to update departments.");
                 }
             } catch (err) {
-                console.error("Error updating department:", err);
+                console.error("Error updating departments:", err);
                 alert("Network error.");
             }
         }

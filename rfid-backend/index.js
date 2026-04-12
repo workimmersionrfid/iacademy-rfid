@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'driver'], default: 'driver' },
-    department: String
+    department: { type: [String], default: ['Pending Assignment'] } // <-- Updated to Array
 });
 
 const vehicleSchema = new mongoose.Schema({
