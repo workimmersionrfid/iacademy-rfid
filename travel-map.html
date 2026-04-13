@@ -115,7 +115,7 @@
                         </button>
                     </div>
 
-                    <button id="planRouteBtn" onclick="simulateRouting()" disabled class="w-full bg-blue-700 text-white py-4 rounded-xl font-bold transition-colors shadow-md mt-auto opacity-50 cursor-not-allowed">
+                    <button id="planRouteBtn" onclick="simulateRouting()" disabled class="w-full bg-slate-200 text-slate-400 py-4 rounded-xl font-bold transition-colors shadow-md mt-auto uppercase tracking-widest text-xs cursor-not-allowed">
                         <i class="fa-solid fa-spinner fa-spin mr-2"></i> Initializing Map...
                     </button>
                 </div>
@@ -210,26 +210,14 @@
         let directionsRenderer;
         let trafficLayer;
 
-        // 1. Fetch Key & Load Map Safely
-        async function loadGoogleMaps() {
-            const btn = document.getElementById('planRouteBtn');
-            try {
-                const response = await fetch('https://iacademy-rfid.onrender.com/api/config/maps');
-                if(!response.ok) throw new Error("Backend unavailable");
-                const data = await response.json();
-                
-                if (data.apiKey) {
-                    const script = document.createElement('script');
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places&callback=initGooglePlaces`;
-                    script.async = true;
-                    script.defer = true;
-                    document.head.appendChild(script);
-                }
-            } catch (error) { 
-                console.error("Map Load Error:", error); 
-                btn.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i> Backend Offline - Refresh Page`;
-                btn.classList.replace('bg-blue-700', 'bg-red-500');
-            }
+        // 1. Instant Load Map Using Your Direct API Key
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            // Using the key you provided in your .env file to bypass backend sleep delays!
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initGooglePlaces`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
         }
 
         // Callback when map is ready
@@ -237,7 +225,7 @@
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 14.5632, lng: 121.0142 }, 
                 zoom: 13, 
-                disableDefaultUI: false, // Re-enabled standard UI so map controls work
+                disableDefaultUI: false, 
                 zoomControl: true,
                 mapTypeControl: true
             });
@@ -262,8 +250,8 @@
             const btn = document.getElementById('planRouteBtn');
             btn.disabled = false;
             btn.innerHTML = `Plan Route`;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.classList.add('hover:bg-blue-800');
+            btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-200', 'text-slate-400');
+            btn.classList.add('bg-blue-700', 'text-white', 'hover:bg-blue-800');
         }
 
         // Fetch DB Vehicles to populate dropdown
@@ -367,6 +355,7 @@
                 priceText.setAttribute('data-cost', cost);
                 priceText.classList.remove('hidden');
             }
+            updateTotalToll();
         }
 
         // --- ROUTING & SIMULATION LOGIC ---
@@ -455,6 +444,12 @@
 
             document.getElementById('summaryTotalToll').innerText = `₱${totalToll.toFixed(2)}`;
             document.getElementById('grandTotalCost').innerText = `₱${(fuelCost + totalToll).toFixed(2)}`;
+        }
+
+        function updateTotalToll() {
+            let total = 0;
+            document.querySelectorAll('[id^="price-text-"]').forEach(span => total += parseFloat(span.getAttribute('data-cost') || 0));
+            document.getElementById('totalTollCost').innerText = `₱${total.toFixed(2)}`;
         }
 
         window.resetPlanner = function() {
