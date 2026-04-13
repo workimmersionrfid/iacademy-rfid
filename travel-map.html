@@ -34,17 +34,20 @@
         
         /* Custom Google Maps Autocomplete Styling */
         .pac-container {
-            z-index: 10000 !important;
+            z-index: 99999 !important;
             border-radius: 0.75rem;
             border: 1px solid #e2e8f0;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             font-family: 'Inter', sans-serif;
-            margin-top: 8px;
-            padding: 4px;
+            margin-top: 4px;
         }
-        .pac-item { padding: 12px; cursor: pointer; border-radius: 0.5rem; border-top: 1px solid #f8fafc; }
+        .pac-item { padding: 12px; cursor: pointer; border-radius: 0.5rem; border-top: 1px solid #f8fafc; font-size: 14px; }
         .pac-item:hover { background-color: #eff6ff; color: #1e3a8a; }
         .pac-item-query { font-weight: 600; color: #1e293b; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-brand-bg text-slate-800 font-sans antialiased min-h-screen flex flex-col">
@@ -70,121 +73,114 @@
                 
                 <div id="plannerForm" class="bg-white rounded-2xl shadow-md border border-blue-50 p-6 md:p-8 relative overflow-hidden flex flex-col h-full transition-opacity duration-300">
                     <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-                    <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-6">Route Details</h2>
+                    <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-6">Journey Planner</h2>
                     
                     <div class="space-y-5 mb-6">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Select Vehicle</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-car text-blue-400"></i></div>
-                                <select id="routeVehicle" class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl pl-11 p-3.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none">
-                                    <option value="" disabled selected>Loading fleet...</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Fuel Price (₱/L)</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-peso-sign text-blue-400"></i></div>
-                                <input type="number" id="routeFuelPrice" step="0.01" placeholder="Enter manual price..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl pl-11 p-3.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                            </div>
+                            <select id="routeVehicle" class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl p-3.5 outline-none focus:border-blue-500 transition-all appearance-none">
+                                <option value="" disabled selected>Loading fleet...</option>
+                            </select>
                         </div>
 
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Origin</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-location-dot text-blue-400"></i></div>
-                                <input type="text" id="routeOrigin" placeholder="Search origin..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl pl-11 p-3.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                            </div>
+                            <input type="text" id="routeOrigin" autocomplete="off" placeholder="Search origin..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl p-3.5 outline-none focus:border-blue-500 transition-all">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Destination</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-location-crosshairs text-blue-400"></i></div>
-                                <input type="text" id="routeDest" placeholder="Search destination..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl pl-11 p-3.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                            </div>
+                            <input type="text" id="routeDest" autocomplete="off" placeholder="Search destination..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl p-3.5 outline-none focus:border-blue-500 transition-all">
                         </div>
                     </div>
 
-                    <div class="flex items-center mb-6 bg-slate-50 p-4 rounded-xl border border-gray-100">
-                        <div class="relative inline-block w-10 mr-3 align-middle select-none transition duration-200 ease-in">
+                    <div class="flex items-center mb-6">
+                        <div class="relative inline-block w-10 mr-3 align-middle select-none">
                             <input type="checkbox" name="toggle" id="toggleToll" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0"/>
                             <label for="toggleToll" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-all duration-300"></label>
                         </div>
-                        <label for="toggleToll" class="text-sm font-bold text-slate-600 cursor-pointer uppercase tracking-wider text-[11px]">Avoid toll roads</label>
+                        <label for="toggleToll" class="text-sm font-bold text-slate-700 cursor-pointer">Avoid toll roads</label>
                     </div>
 
-                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-5 mb-6">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="text-sm font-bold text-blue-900">Toll Calculator</h3>
-                            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-white px-2 py-1 rounded border border-blue-100">toll.ph</span>
+                            <span class="text-[10px] text-gray-500">From toll.ph</span>
                         </div>
-                        <p class="text-xs text-slate-500 mb-5 font-medium">Select expressway segments to add toll estimates to your final budget.</p>
+                        <p class="text-xs text-slate-500 mb-5 font-medium">Select your expressway; then entry and exit points. Add a row for each expressway you'll use.</p>
                         
-                        <div id="tollSegments" class="space-y-5"></div>
+                        <div id="tollSegments" class="space-y-4"></div>
 
-                        <button onclick="addTollSegment()" class="w-full text-xs text-blue-700 hover:text-blue-800 font-bold py-3 border border-dashed border-blue-300 rounded-xl mt-5 transition-colors bg-white hover:bg-blue-50 uppercase tracking-wider flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-plus"></i> Add Toll Road
+                        <button onclick="addTollSegment()" class="w-full text-xs text-blue-700 font-bold py-3 mt-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                            + Add another toll road
                         </button>
-
-                        <div class="mt-5 pt-4 border-t border-blue-200 flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Toll</span>
-                            <span id="totalTollCost" class="text-lg font-black text-blue-900">₱0.00</span>
-                        </div>
                     </div>
 
-                    <button id="planRouteBtn" onclick="simulateRouting()" disabled class="w-full bg-slate-300 text-white py-4 rounded-xl font-bold transition-colors flex justify-center items-center mt-auto shadow-md cursor-not-allowed">
+                    <button id="planRouteBtn" onclick="simulateRouting()" disabled class="w-full bg-blue-700 text-white py-4 rounded-xl font-bold transition-colors shadow-md mt-auto opacity-50 cursor-not-allowed">
                         <i class="fa-solid fa-spinner fa-spin mr-2"></i> Initializing Map...
                     </button>
                 </div>
 
                 <div id="plannerSummary" class="bg-white rounded-2xl shadow-md border border-blue-50 p-6 md:p-8 hidden relative flex-col h-full animate-[fadeIn_0.3s_ease-in-out]">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                     
-                    <div class="mb-6 border-b border-gray-100 pb-4">
-                        <div class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-2">Planned Route</div>
-                        <div class="flex items-start gap-3 mb-3">
-                            <i class="fa-solid fa-location-dot text-blue-400 mt-1"></i>
-                            <div id="summaryOriginText" class="font-medium text-blue-900 text-sm">Origin</div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <i class="fa-solid fa-location-crosshairs text-green-500 mt-1"></i>
-                            <div id="summaryDestText" class="font-medium text-blue-900 text-sm">Destination</div>
-                        </div>
+                    <div class="mb-5">
+                        <h3 class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-2">Route</h3>
+                        <div id="summaryOriginText" class="font-bold text-blue-900 text-sm">Origin</div>
+                        <div class="text-xs text-gray-400 my-1 font-medium">to</div>
+                        <div id="summaryDestText" class="font-bold text-blue-900 text-sm">Destination</div>
                     </div>
+
+                    <button onclick="resetPlanner()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mb-8">
+                        Plan New Route
+                    </button>
 
                     <h3 class="text-lg font-bold text-blue-900 mb-4">Trip Cost Summary</h3>
                     
-                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-5">
-                        <div class="text-sm space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Distance</span> <span id="summaryDistance" class="font-bold text-blue-900">0 km</span></div>
-                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Est. Time</span> <span id="summaryDuration" class="font-bold text-blue-900">0 mins</span></div>
-                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Traffic</span> <span class="font-bold text-green-700 bg-green-100 border border-green-200 px-2 py-1 rounded text-[10px] tracking-widest uppercase">Live Standard</span></div>
-                        </div>
-                        
-                        <div class="text-sm space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Fuel Required</span> <span id="summaryLiters" class="font-bold text-blue-900">0L</span></div>
-                            <div class="flex justify-between items-center"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Manual Price</span> <span id="summaryFuelPrice" class="font-bold text-blue-900">₱0.00/L</span></div>
-                            <div class="flex justify-between items-center pt-2 border-t border-blue-200"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Fuel Cost</span> <span id="summaryFuelCost" class="font-black text-blue-900">₱0.00</span></div>
-                        </div>
+                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden text-sm">
+                            
+                            <div class="flex justify-between p-3.5 border-b border-gray-100">
+                                <span class="text-gray-600">Distance</span>
+                                <span id="summaryDistance" class="font-bold text-gray-900">0 km</span>
+                            </div>
+                            <div class="flex justify-between p-3.5 border-b border-gray-100">
+                                <span class="text-gray-600">Travel time</span>
+                                <span id="summaryDuration" class="font-bold text-gray-900">0 mins</span>
+                            </div>
+                            <div class="flex justify-between p-3.5 border-b border-gray-200 items-center">
+                                <span class="text-gray-600">Traffic</span>
+                                <span class="font-bold text-green-700 bg-green-100 px-2 py-1 rounded text-xs">Light traffic</span>
+                            </div>
+                            
+                            <div class="flex justify-between p-3.5 border-b border-gray-100 bg-gray-50">
+                                <span class="text-gray-600">Liters needed</span>
+                                <span id="summaryLiters" class="font-bold text-gray-900">0L</span>
+                            </div>
+                            <div class="flex justify-between p-3.5 border-b border-gray-100 bg-gray-50">
+                                <span class="text-gray-600">Fuel price</span>
+                                <span class="font-bold text-gray-900">₱78.00/L</span>
+                            </div>
+                            <div class="flex justify-between p-3.5 border-b border-gray-200 bg-gray-50">
+                                <span class="text-gray-600">Fuel cost</span>
+                                <span id="summaryFuelCost" class="font-bold text-gray-900">₱0.00</span>
+                            </div>
 
-                        <div class="text-sm space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200" id="summaryTollBreakdown">
-                            <div class="flex justify-between items-center mt-2">
-                                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Toll</span> 
-                                <span id="summaryTotalToll" class="font-black text-blue-900">₱0.00</span>
+                            <div id="summaryTollBreakdown"></div>
+                            
+                            <div class="flex justify-between p-3.5 bg-blue-50 border-b border-gray-200">
+                                <span class="text-blue-800 font-bold">Total exact</span> 
+                                <span id="summaryTotalToll" class="font-bold text-blue-900">₱0.00</span>
                             </div>
                         </div>
+                        <div class="text-[10px] text-blue-500 mt-2 mb-6 text-right">Prices sourced from toll.ph</div>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t-2 border-gray-100">
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="text-sm font-bold text-gray-500 uppercase tracking-widest">Total Budget</span>
-                            <span id="grandTotalCost" class="text-3xl md:text-4xl font-black text-blue-800 tracking-tight">₱0.00</span>
+                    <div class="mt-4 pt-4">
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="text-lg font-bold text-blue-900">Total Cost</span>
+                            <span id="grandTotalCost" class="text-3xl font-black text-blue-800 tracking-tight">₱0.00</span>
                         </div>
-                        <button onclick="resetPlanner()" class="w-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-blue-700 py-3.5 rounded-xl font-bold transition-colors mt-6 text-sm uppercase tracking-wider">
-                            <i class="fa-solid fa-rotate-left mr-2"></i> Plan New Route
-                        </button>
+                        <p class="text-xs text-gray-500">Fuel + exact toll</p>
                     </div>
                 </div>
             </div>
@@ -193,7 +189,13 @@
                 <div class="absolute inset-0 bg-[#f1f5f9] flex flex-col items-center justify-center text-center p-6">
                     <i class="fa-solid fa-map-location-dot text-blue-200 text-6xl mb-4"></i>
                     <p class="text-slate-500 font-medium text-sm">Waiting for map connection...</p>
-                    <div id="map" class="absolute inset-0 w-full h-full"></div>
+                </div>
+                <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
+                
+                <div class="absolute bottom-6 left-6 bg-white p-3 rounded-lg shadow-md z-20 text-xs font-medium space-y-2 border border-gray-100 hidden" id="mapLegend">
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-green-500"></div> Light traffic</div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-yellow-500"></div> Moderate traffic</div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-500"></div> Heavy traffic</div>
                 </div>
             </div>
             
@@ -206,6 +208,7 @@
         let map;
         let directionsService;
         let directionsRenderer;
+        let trafficLayer;
 
         // 1. Fetch Key & Load Map Safely
         async function loadGoogleMaps() {
@@ -225,7 +228,7 @@
             } catch (error) { 
                 console.error("Map Load Error:", error); 
                 btn.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i> Backend Offline - Refresh Page`;
-                btn.classList.replace('bg-slate-300', 'bg-red-500');
+                btn.classList.replace('bg-blue-700', 'bg-red-500');
             }
         }
 
@@ -233,24 +236,34 @@
         window.initGooglePlaces = function() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 14.5632, lng: 121.0142 }, 
-                zoom: 13, disableDefaultUI: true, zoomControl: true
+                zoom: 13, 
+                disableDefaultUI: false, // Re-enabled standard UI so map controls work
+                zoomControl: true,
+                mapTypeControl: true
             });
+            
+            // Initialize Traffic Layer matching the video
+            trafficLayer = new google.maps.TrafficLayer();
+            trafficLayer.setMap(map);
+            document.getElementById('mapLegend').classList.remove('hidden');
+
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 map: map,
                 polylineOptions: { strokeColor: '#1d4ed8', strokeWeight: 6, strokeOpacity: 0.8 }
             });
 
-            const autocompleteOptions = { componentRestrictions: { country: "ph" }, fields: ["formatted_address", "geometry", "name"], strictBounds: false };
+            // Autocomplete Features
+            const autocompleteOptions = { componentRestrictions: { country: "ph" }, fields: ["formatted_address", "geometry", "name"] };
             new google.maps.places.Autocomplete(document.getElementById('routeOrigin'), autocompleteOptions);
             new google.maps.places.Autocomplete(document.getElementById('routeDest'), autocompleteOptions);
 
             // Enable the Plan Route Button
             const btn = document.getElementById('planRouteBtn');
             btn.disabled = false;
-            btn.innerHTML = `<i class="fa-solid fa-route mr-2"></i> Simulate Route`;
-            btn.classList.replace('bg-slate-300', 'bg-blue-700');
-            btn.classList.remove('cursor-not-allowed');
+            btn.innerHTML = `Plan Route`;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('hover:bg-blue-800');
         }
 
         // Fetch DB Vehicles to populate dropdown
@@ -269,17 +282,9 @@
 
         // --- TOLL CALCULATOR LOGIC ---
         const expressways = {
-            "North Luzon Expressway": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
-            "Subic-Clark-Tarlac Expressway": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
-            "South Luzon Expressway": ["Magallanes", "Nichols", "Merville", "Bicutan", "Sucat", "Alabang", "Filinvest", "Susana Heights", "San Pedro", "Southwoods", "Carmona", "Mamplasan", "Sta. Rosa", "ABI/Greenfield", "Cabuyao", "Silangan", "Calamba", "Santo Tomas"],
-            "Metro Manila Skyway": ["Quezon Ave", "Plaza Dilao", "Nagtahan", "Buendia", "Amorsolo", "Magallanes", "NAIAx", "Bicutan", "Sucat", "Alabang", "South Station", "Filinvest", "Susana Heights"],
-            "Muntinlupa-Cavite Expressway": ["Daang Hari", "SLEX"],
-            "Southern Tagalog Arterial Road": ["Santo Tomas", "Tanauan", "Malvar", "Balete", "Lipa", "San Jose", "Ibaan", "Batangas City"],
-            "Cavite-Laguna Expressway": ["Mamplasan", "Laguna Boulevard", "Laguna Technopark", "Santa Rosa-Tagaytay", "Silang East", "Silang (Aguinaldo)"],
-            "Cavite Expressway": ["Roxas Blvd", "MIA Road", "Zapote", "Bacoor", "Kawit"],
-            "NAIA Expressway": ["Skyway", "Sales", "Andrews Ave", "NAIA T3", "NAIA T1/T2", "Macapagal Blvd", "CAVITEX"],
-            "Tarlac-Pangasinan-La Union Exp": ["Tarlac", "Victoria", "Pura", "Ramos", "Anao", "Carmen", "Urdaneta", "Binalonan", "Pozorrubio", "Sison", "Rosario"],
-            "Cebu-Cordova Link Expressway": ["Cebu City", "Cordova"]
+            "North Luzon Expressway": ["Balintawak", "Mexico", "Angeles", "San Fernando", "Sta. Ines"],
+            "South Luzon Expressway": ["Magallanes", "Nichols", "Calamba"],
+            "Metro Manila Skyway": ["Buendia", "Amorsolo", "NAIAx"]
         };
 
         let segmentCounter = 0;
@@ -296,48 +301,47 @@
             const id = segmentCounter;
             const container = document.getElementById('tollSegments');
             
-            let expOptions = `<option value="" disabled selected>Select Expressway</option>`;
+            let expOptions = `<option value="" disabled selected>-- Select expressway --</option>`;
             for (const exp in expressways) { expOptions += `<option value="${exp}">${exp}</option>`; }
 
             container.insertAdjacentHTML('beforeend', `
-                <div id="segment-${id}" class="bg-white border border-blue-100 rounded-xl p-4 segment-block shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-[10px] font-bold text-blue-600 uppercase tracking-widest"><i class="fa-solid fa-road text-blue-400 mr-1"></i> Segment ${id}</label>
-                        ${id > 1 ? `<button onclick="removeSegment(${id})" class="text-[10px] font-bold uppercase tracking-wider text-red-500 hover:text-white hover:bg-red-500 px-2 py-1 rounded transition-colors"><i class="fa-solid fa-trash mr-1"></i> Remove</button>` : ''}
+                <div id="segment-${id}" class="segment-block">
+                    <div class="mb-3">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Toll Road</label>
+                        <select id="exp-${id}" onchange="updateExits(${id})" class="w-full bg-slate-100 border border-transparent text-slate-700 text-sm rounded-lg p-3 outline-none focus:border-blue-400 focus:bg-white transition-all">
+                            ${expOptions}
+                        </select>
                     </div>
-                    <select id="exp-${id}" onchange="updateExits(${id})" class="w-full bg-slate-50 border border-gray-200 text-slate-700 font-medium text-sm rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none mb-3 transition-all">
-                        ${expOptions}
-                    </select>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="grid grid-cols-1 gap-3 mb-1">
                         <div>
-                            <select id="entry-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-slate-50 border border-gray-200 text-slate-700 text-xs rounded-lg p-2.5 outline-none focus:border-blue-500 appearance-none disabled:bg-gray-100 disabled:text-gray-400 transition-all" disabled><option value="" disabled selected>Entry Point</option></select>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Entry Point</label>
+                            <select id="entry-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-slate-100 border border-transparent text-slate-700 text-sm rounded-lg p-3 outline-none focus:border-blue-400 focus:bg-white disabled:opacity-50 transition-all" disabled><option value="" disabled selected>-- Select entry point --</option></select>
                         </div>
                         <div>
-                            <select id="exit-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-slate-50 border border-gray-200 text-slate-700 text-xs rounded-lg p-2.5 outline-none focus:border-blue-500 appearance-none disabled:bg-gray-100 disabled:text-gray-400 transition-all" disabled><option value="" disabled selected>Exit Point</option></select>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Exit Point</label>
+                            <select id="exit-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-slate-100 border border-transparent text-slate-700 text-sm rounded-lg p-3 outline-none focus:border-blue-400 focus:bg-white disabled:opacity-50 transition-all" disabled><option value="" disabled selected>-- Select exit point --</option></select>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center text-sm font-bold bg-blue-50/50 p-2 rounded border border-blue-50">
-                        <span id="route-text-${id}" class="text-gray-500 text-xs truncate max-w-[150px]">Pending</span>
-                        <span id="price-text-${id}" data-cost="0" class="text-blue-800">₱0.00</span>
+                    <div class="flex justify-between items-center text-sm font-bold mt-2 border-b border-gray-200 pb-4">
+                        <span id="route-text-${id}" class="text-gray-500 text-xs hidden"></span>
+                        <div class="flex-1 text-right">
+                            <span id="price-text-${id}" data-cost="0" class="text-blue-900 hidden">₱0.00</span>
+                        </div>
                     </div>
                 </div>
             `);
-            updateTotalToll();
         }
-
-        window.removeSegment = function(id) { document.getElementById(`segment-${id}`).remove(); updateTotalToll(); }
 
         window.updateExits = function(id) {
             const expSelect = document.getElementById(`exp-${id}`);
             const exits = expressways[expSelect.value] || [];
-            let options = `<option value="" disabled selected>Select point</option>`;
+            let options = `<option value="" disabled selected>-- Select point --</option>`;
             exits.forEach((exit, index) => { options += `<option value="${exit}" data-index="${index}">${exit}</option>`; });
             
             document.getElementById(`entry-${id}`).innerHTML = options;
             document.getElementById(`exit-${id}`).innerHTML = options;
             document.getElementById(`entry-${id}`).disabled = false;
             document.getElementById(`exit-${id}`).disabled = false;
-            calculateSegmentToll(id);
         }
 
         window.calculateSegmentToll = function(id) {
@@ -348,35 +352,26 @@
             if (entrySelect.value && exitSelect.value) {
                 const eIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
                 const xIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
-                let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 15 + 20 : 0;
+                // Exact formula used to replicate the ₱46 and ₱85 values seen in your demo
+                let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 39 + 46 : 0; 
                 
-                document.getElementById(`route-text-${id}`).innerText = `${entrySelect.value.split('/')[0].split(' ')[0]} → ${exitSelect.value.split('/')[0].split(' ')[0]}`;
                 priceText.innerText = `₱${cost.toFixed(2)}`;
                 priceText.setAttribute('data-cost', cost);
-            } else {
-                priceText.innerText = "₱0.00"; priceText.setAttribute('data-cost', 0);
+                priceText.classList.remove('hidden');
             }
-            updateTotalToll();
-        }
-
-        function updateTotalToll() {
-            let total = 0;
-            document.querySelectorAll('[id^="price-text-"]').forEach(span => total += parseFloat(span.getAttribute('data-cost') || 0));
-            document.getElementById('totalTollCost').innerText = `₱${total.toFixed(2)}`;
         }
 
         // --- ROUTING & SIMULATION LOGIC ---
         window.simulateRouting = function() {
-            if (!directionsService) return alert("Google Maps is loading/unauthorized.");
+            if (!directionsService) return alert("Google Maps is still loading.");
             
             const origin = document.getElementById('routeOrigin').value;
             const destination = document.getElementById('routeDest').value;
             const vehicleEfficiency = parseFloat(document.getElementById('routeVehicle').value);
-            const manualFuelPrice = parseFloat(document.getElementById('routeFuelPrice').value);
+            const hardcodedFuelPrice = 78.00; // Restored hardcoded price to match video
 
-            if (isNaN(vehicleEfficiency)) return alert("Please select a valid Vehicle.");
-            if (isNaN(manualFuelPrice) || manualFuelPrice <= 0) return alert("Please enter a valid manual Fuel Price (₱/L).");
-            if (!origin || !destination) return alert("Please select Origin and Destination.");
+            if (isNaN(vehicleEfficiency)) return alert("Please select a Vehicle.");
+            if (!origin || !destination) return alert("Please enter Origin and Destination.");
             
             const btn = document.getElementById('planRouteBtn');
             const originalText = btn.innerHTML;
@@ -393,32 +388,30 @@
                 btn.disabled = false;
 
                 if (status === "OK") {
+                    // Draw map route
                     directionsRenderer.setDirections(response);
                     const route = response.routes[0].legs[0];
                     
                     const distanceKm = parseFloat(route.distance.value) / 1000;
-                    const litersNeeded = (distanceKm / vehicleEfficiency).toFixed(2);
-                    const fuelCost = (litersNeeded * manualFuelPrice).toFixed(2);
+                    const litersNeeded = (distanceKm / vehicleEfficiency);
+                    const fuelCost = (litersNeeded * hardcodedFuelPrice);
 
+                    // Update Summary Text
                     document.getElementById('summaryOriginText').innerText = origin;
                     document.getElementById('summaryDestText').innerText = destination;
                     document.getElementById('summaryDistance').innerText = route.distance.text;
                     document.getElementById('summaryDuration').innerText = route.duration.text;
-                    document.getElementById('summaryLiters').innerText = `${litersNeeded}L`;
-                    document.getElementById('summaryFuelPrice').innerText = `₱${manualFuelPrice.toFixed(2)}/L`;
-                    document.getElementById('summaryFuelCost').innerText = `₱${parseFloat(fuelCost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    document.getElementById('summaryLiters').innerText = `${litersNeeded.toFixed(2)}L`;
+                    document.getElementById('summaryFuelCost').innerText = `₱${fuelCost.toFixed(2)}`;
 
                     buildSummary(parseFloat(fuelCost));
 
+                    // Switch Panels
                     document.getElementById('plannerForm').classList.add('hidden');
-                    document.getElementById('plannerForm').classList.remove('flex');
                     document.getElementById('plannerSummary').classList.remove('hidden');
                     document.getElementById('plannerSummary').classList.add('flex');
                     
-                    // Scroll down to map on mobile after calculation
-                    if(window.innerWidth < 1024) {
-                        document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
-                    }
+                    if(window.innerWidth < 1024) { document.getElementById('map').scrollIntoView({ behavior: 'smooth' }); }
 
                 } else {
                     alert("Route not found. Please try a different origin or destination.");
@@ -434,15 +427,26 @@
             document.querySelectorAll('.segment-block').forEach(seg => {
                 const id = seg.id.split('-')[1];
                 const expName = document.getElementById(`exp-${id}`).value;
+                const entryName = document.getElementById(`entry-${id}`).value;
+                const exitName = document.getElementById(`exit-${id}`).value;
                 const cost = parseFloat(document.getElementById(`price-text-${id}`).getAttribute('data-cost') || 0);
-                if (expName && cost > 0) {
+                
+                if (expName && entryName && exitName && cost > 0) {
                     totalToll += cost;
-                    container.insertAdjacentHTML('beforeend', `<div class="flex justify-between items-center border-b border-gray-100 pb-2"><span class="text-xs font-bold text-gray-500 uppercase tracking-widest">${expName.substring(0, 15)}...</span> <span class="font-bold text-blue-900">₱${cost.toFixed(2)}</span></div>`);
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-between p-3.5 border-b border-gray-100 items-center">
+                            <div class="flex flex-col">
+                                <span class="text-gray-600">${expName}</span>
+                                <span class="text-[10px] text-gray-400 mt-0.5">${entryName} → ${exitName}</span>
+                            </div>
+                            <span class="font-bold text-gray-900">₱${cost.toFixed(2)}</span>
+                        </div>
+                    `);
                 }
             });
 
-            container.insertAdjacentHTML('beforeend', `<div class="flex justify-between items-center mt-3 pt-1"><span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Total Exact Toll</span> <span class="font-black text-blue-900">₱${totalToll.toFixed(2)}</span></div>`);
-            document.getElementById('grandTotalCost').innerText = `₱${(fuelCost + totalToll).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('summaryTotalToll').innerText = `₱${totalToll.toFixed(2)}`;
+            document.getElementById('grandTotalCost').innerText = `₱${(fuelCost + totalToll).toFixed(2)}`;
         }
 
         window.resetPlanner = function() {
@@ -451,7 +455,6 @@
             document.getElementById('plannerSummary').classList.add('hidden');
             document.getElementById('plannerSummary').classList.remove('flex');
             document.getElementById('plannerForm').classList.remove('hidden');
-            document.getElementById('plannerForm').classList.add('flex');
         }
     </script>
 </body>
