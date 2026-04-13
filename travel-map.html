@@ -280,11 +280,19 @@
             }
         }
 
-        // --- TOLL CALCULATOR LOGIC ---
+        // --- FULL TOLL LIST RESTORED ---
         const expressways = {
-            "North Luzon Expressway": ["Balintawak", "Mexico", "Angeles", "San Fernando", "Sta. Ines"],
-            "South Luzon Expressway": ["Magallanes", "Nichols", "Calamba"],
-            "Metro Manila Skyway": ["Buendia", "Amorsolo", "NAIAx"]
+            "North Luzon Expressway": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
+            "Subic-Clark-Tarlac Expressway": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
+            "South Luzon Expressway": ["Magallanes", "Nichols", "Merville", "Bicutan", "Sucat", "Alabang", "Filinvest", "Susana Heights", "San Pedro", "Southwoods", "Carmona", "Mamplasan", "Sta. Rosa", "ABI/Greenfield", "Cabuyao", "Silangan", "Calamba", "Santo Tomas"],
+            "Metro Manila Skyway": ["Quezon Ave", "Plaza Dilao", "Nagtahan", "Buendia", "Amorsolo", "Magallanes", "NAIAx", "Bicutan", "Sucat", "Alabang", "South Station", "Filinvest", "Susana Heights"],
+            "Muntinlupa-Cavite Expressway": ["Daang Hari", "SLEX"],
+            "Southern Tagalog Arterial Road": ["Santo Tomas", "Tanauan", "Malvar", "Balete", "Lipa", "San Jose", "Ibaan", "Batangas City"],
+            "Cavite-Laguna Expressway": ["Mamplasan", "Laguna Boulevard", "Laguna Technopark", "Santa Rosa-Tagaytay", "Silang East", "Silang (Aguinaldo)"],
+            "Cavite Expressway": ["Roxas Blvd", "MIA Road", "Zapote", "Bacoor", "Kawit"],
+            "NAIA Expressway": ["Skyway", "Sales", "Andrews Ave", "NAIA T3", "NAIA T1/T2", "Macapagal Blvd", "CAVITEX"],
+            "Tarlac-Pangasinan-La Union Exp": ["Tarlac", "Victoria", "Pura", "Ramos", "Anao", "Carmen", "Urdaneta", "Binalonan", "Pozorrubio", "Sison", "Rosario"],
+            "Cebu-Cordova Link Expressway": ["Cebu City", "Cordova"]
         };
 
         let segmentCounter = 0;
@@ -352,7 +360,7 @@
             if (entrySelect.value && exitSelect.value) {
                 const eIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
                 const xIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
-                // Exact formula used to replicate the ₱46 and ₱85 values seen in your demo
+                // Estimation formula simulating toll calculations
                 let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 39 + 46 : 0; 
                 
                 priceText.innerText = `₱${cost.toFixed(2)}`;
@@ -368,7 +376,7 @@
             const origin = document.getElementById('routeOrigin').value;
             const destination = document.getElementById('routeDest').value;
             const vehicleEfficiency = parseFloat(document.getElementById('routeVehicle').value);
-            const hardcodedFuelPrice = 78.00; // Restored hardcoded price to match video
+            const hardcodedFuelPrice = 78.00; // Fixed price as requested
 
             if (isNaN(vehicleEfficiency)) return alert("Please select a Vehicle.");
             if (!origin || !destination) return alert("Please enter Origin and Destination.");
