@@ -34,6 +34,10 @@
                 }
 
                 loadMyTasks(); loadFleetForFuel();
+
+                // Pre-fill date input with today's date
+                const dateInput = document.getElementById('fDate');
+                if(dateInput) dateInput.valueAsDate = new Date();
             }
         });
     </script>
@@ -230,38 +234,80 @@
         </div>
     </main>
 
-    <div id="fuelModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-white">
-            <div class="p-6 bg-blue-800 border-b border-blue-900 flex justify-between items-center">
-                <h3 class="font-bold text-white text-sm uppercase tracking-widest">Submit Fuel Log</h3>
-                <button onclick="document.getElementById('fuelModal').classList.add('hidden')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div id="fuelModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 my-8">
+            <div class="p-5 bg-blue-900 flex justify-between items-center">
+                <h3 class="font-bold text-white text-base">Add Fuel Log</h3>
+                <button onclick="document.getElementById('fuelModal').classList.add('hidden')" class="text-blue-200 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
-            <form id="fuelForm" onsubmit="submitFuel(event)" class="p-8 space-y-5">
+            
+            <form id="fuelForm" onsubmit="submitFuel(event)" class="p-6 space-y-4">
+                
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Assigned Vehicle</label>
-                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-xl p-3.5 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Loading...</option>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
+                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Select vehicle</option>
                     </select>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Liters</label>
-                        <input type="number" id="fLiters" step="0.01" required class="w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Date</label>
+                        <input type="date" id="fDate" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price/Liter</label>
-                        <input type="number" id="fPrice" step="0.01" required class="w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Fuel Type</label>
+                        <select id="fFuelType" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                            <option value="" disabled selected>Select type</option>
+                            <option value="Ron91">Ron91</option>
+                            <option value="Ron95">Ron95</option>
+                            <option value="Ron97">Ron97</option>
+                            <option value="Diesel">Diesel</option>
+                        </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Gas Station</label>
-                    <input type="text" id="fStation" required class="w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Price per Liter (₱)</label>
+                        <input type="number" id="fPrice" step="0.01" value="0" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Liters</label>
+                        <input type="number" id="fLiters" step="0.01" value="0" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl shadow-md mt-6">Submit Log</button>
+
+                <div class="text-center py-2 bg-gray-50 rounded-lg border border-gray-100">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">Total Cost</p>
+                    <h3 id="fTotalCostDisplay" class="text-2xl font-black text-blue-900 tracking-tight">₱0.00</h3>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Odometer (km) (optional)</label>
+                    <input type="number" id="fOdo" step="0.1" class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Station (optional)</label>
+                    <input type="text" id="fStation" placeholder="Shell, Petron, Caltex..." class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Notes (optional)</label>
+                    <textarea id="fNotes" rows="2" class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 custom-scrollbar"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('fuelModal').classList.add('hidden')" class="w-1/3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold py-3.5 rounded-xl transition-colors text-sm">Cancel</button>
+                    <button type="submit" class="w-2/3 bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm">Save Log</button>
+                </div>
             </form>
         </div>
     </div>
-
+    
     <script src="js/app.js"></script>
 
     <script>
@@ -331,20 +377,36 @@
             } catch (err) { console.error(err); }
         }
 
+        // --- AUTO-CALCULATE TOTAL COST ---
+        function calculateTotalFuelCost() {
+            const price = parseFloat(document.getElementById('fPrice').value) || 0;
+            const liters = parseFloat(document.getElementById('fLiters').value) || 0;
+            const total = price * liters;
+            document.getElementById('fTotalCostDisplay').innerText = `₱${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
+        document.getElementById('fPrice').addEventListener('input', calculateTotalFuelCost);
+        document.getElementById('fLiters').addEventListener('input', calculateTotalFuelCost);
+
         async function submitFuel(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerText = "Saving..."; btn.disabled = true;
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...'; 
+            btn.disabled = true;
 
             const logData = {
                 vehicle: document.getElementById('fVehicle').value,
                 driver: localStorage.getItem('username'),
                 department: localStorage.getItem('userDept') || 'Unknown',
-                date: new Date().toLocaleDateString(),
+                date: document.getElementById('fDate').value,
+                fuelType: document.getElementById('fFuelType').value,
                 liters: parseFloat(document.getElementById('fLiters').value),
                 price: parseFloat(document.getElementById('fPrice').value),
                 total: parseFloat(document.getElementById('fLiters').value) * parseFloat(document.getElementById('fPrice').value),
-                station: document.getElementById('fStation').value
+                odo: document.getElementById('fOdo').value ? parseFloat(document.getElementById('fOdo').value) : null,
+                station: document.getElementById('fStation').value || 'N/A',
+                notes: document.getElementById('fNotes').value || ''
             };
 
             try {
@@ -353,13 +415,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(logData)
                 });
+                
                 if (res.ok) {
                     alert('Fuel log saved successfully!');
                     document.getElementById('fuelModal').classList.add('hidden');
                     e.target.reset();
+                    document.getElementById('fTotalCostDisplay').innerText = '₱0.00';
+                    document.getElementById('fDate').valueAsDate = new Date();
                 }
-            } catch (err) { alert('Server error'); }
-            finally { btn.innerText = "Submit Log"; btn.disabled = false; }
+            } catch (err) { 
+                alert('Server error saving fuel log.'); 
+            } finally { 
+                btn.innerHTML = originalText; 
+                btn.disabled = false; 
+            }
         }
 
         // --- ADVANCED TASK EXECUTION LOGIC ---
