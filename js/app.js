@@ -6,6 +6,7 @@ function renderNavigation(activePageId) {
 
     const navItems = [
         { id: 'dashboard', name: 'Dashboard', href: 'dashboard.html' },
+        { id: 'reports', name: 'Reports & Analytics', href: 'reports.html' }, // <-- ADD THIS LINE
         { id: 'fuel-log', name: 'Mileage and Fuel Log', href: 'fuel-log.html' },
         { id: 'calculator', name: 'Calculator', href: 'calculator.html' },
         { id: 'travel-map', name: 'Travel Map', href: 'travel-map.html' },
