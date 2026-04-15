@@ -60,7 +60,7 @@
             <div class="relative z-10">
                 <p class="text-blue-100 text-xs md:text-sm font-medium mb-1 tracking-wide uppercase">Route Optimization</p>
                 <h1 class="text-2xl md:text-4xl font-bold text-white tracking-tight">Journey Planner</h1>
-                <p class="text-blue-50 mt-2 max-w-lg text-xs md:text-sm">Simulate routes, calculate exact toll fees, and estimate fuel consumption.</p>
+                <p class="text-blue-50 mt-2 max-w-lg text-xs md:text-sm">Simulate routes, calculate exact toll fees, and estimate dynamic fuel consumption.</p>
             </div>
             <div class="hidden md:block relative z-10 text-white/20">
                 <i class="fa-solid fa-map-location-dot text-7xl md:text-9xl"></i>
@@ -157,8 +157,8 @@
                                 <span id="summaryLiters" class="font-bold text-gray-900">0L</span>
                             </div>
                             <div class="flex justify-between p-3.5 border-b border-gray-100 bg-gray-50">
-                                <span class="text-gray-600">Fuel price</span>
-                                <span class="font-bold text-gray-900">₱78.00/L</span>
+                                <span class="text-gray-600 flex items-center gap-2">Fuel price <span id="summaryFuelType" class="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded tracking-widest uppercase"></span></span>
+                                <span id="summaryPriceLabel" class="font-bold text-gray-900">₱0.00/L</span>
                             </div>
                             <div class="flex justify-between p-3.5 border-b border-gray-200 bg-gray-50">
                                 <span class="text-gray-600">Fuel cost</span>
@@ -209,12 +209,21 @@
         let directionsService;
         let directionsRenderer;
         let trafficLayer;
+        let fleetData = [];
+
+        // Simple lookup for estimated default prices per fuel type in the PH
+        const estimatedPrices = {
+            "Diesel": 65.00,
+            "Gasoline": 75.00,
+            "Ron91": 72.00,
+            "Ron95": 78.00,
+            "Ron97": 82.00
+        };
 
         // 1. Instant Load Map Using Your Direct API Key
         function loadGoogleMaps() {
             const script = document.createElement('script');
-            // Using the key you provided in your .env file to bypass backend sleep delays!
-            script.src = `https://maps.googleapis.com/maps/api/js?key=IzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initGooglePlaces`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initGooglePlaces`;
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
@@ -230,7 +239,7 @@
                 mapTypeControl: true
             });
             
-            // Initialize Traffic Layer matching the video
+            // Initialize Traffic Layer
             trafficLayer = new google.maps.TrafficLayer();
             trafficLayer.setMap(map);
             document.getElementById('mapLegend').classList.remove('hidden');
@@ -258,17 +267,17 @@
         async function loadFleetOptions() {
             const select = document.getElementById('routeVehicle');
             try {
-                const vehicles = await getVehicles();
+                fleetData = await getVehicles();
                 select.innerHTML = '<option value="" disabled selected>-- Select a Vehicle --</option>';
-                vehicles.forEach(v => {
-                    select.innerHTML += `<option value="${v.efficiency}">${v.plateNumber} - ${v.model} (${v.efficiency} km/L)</option>`;
+                fleetData.forEach(v => {
+                    const fuelText = v.fuelType ? ` - ${v.fuelType}` : '';
+                    select.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} - ${v.model} (${v.efficiency} km/L${fuelText})</option>`;
                 });
             } catch (err) {
-                select.innerHTML = '<option value="14">Standard Car (14km/L)</option>';
+                select.innerHTML = '<option value="">Standard Car (14km/L)</option>';
             }
         }
 
-        // --- FULL TOLL LIST RESTORED ---
         const expressways = {
             "North Luzon Expressway": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
             "Subic-Clark-Tarlac Expressway": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
@@ -364,11 +373,16 @@
             
             const origin = document.getElementById('routeOrigin').value;
             const destination = document.getElementById('routeDest').value;
-            const vehicleEfficiency = parseFloat(document.getElementById('routeVehicle').value);
-            const hardcodedFuelPrice = 78.00; // Fixed price as requested
+            const selectedPlate = document.getElementById('routeVehicle').value;
 
-            if (isNaN(vehicleEfficiency)) return alert("Please select a Vehicle.");
+            if (!selectedPlate) return alert("Please select a Vehicle.");
             if (!origin || !destination) return alert("Please enter Origin and Destination.");
+            
+            // Look up vehicle dynamically
+            const vehicle = fleetData.find(v => v.plateNumber === selectedPlate);
+            const vehicleEfficiency = vehicle && vehicle.efficiency ? parseFloat(vehicle.efficiency) : 14;
+            const fuelType = vehicle && vehicle.fuelType ? vehicle.fuelType : 'Gasoline';
+            const dynamicFuelPrice = estimatedPrices[fuelType] || 75.00;
             
             const btn = document.getElementById('planRouteBtn');
             const originalText = btn.innerHTML;
@@ -391,7 +405,7 @@
                     
                     const distanceKm = parseFloat(route.distance.value) / 1000;
                     const litersNeeded = (distanceKm / vehicleEfficiency);
-                    const fuelCost = (litersNeeded * hardcodedFuelPrice);
+                    const fuelCost = (litersNeeded * dynamicFuelPrice);
 
                     // Update Summary Text
                     document.getElementById('summaryOriginText').innerText = origin;
@@ -399,6 +413,9 @@
                     document.getElementById('summaryDistance').innerText = route.distance.text;
                     document.getElementById('summaryDuration').innerText = route.duration.text;
                     document.getElementById('summaryLiters').innerText = `${litersNeeded.toFixed(2)}L`;
+                    
+                    document.getElementById('summaryFuelType').innerText = fuelType;
+                    document.getElementById('summaryPriceLabel').innerText = `₱${dynamicFuelPrice.toFixed(2)}/L`;
                     document.getElementById('summaryFuelCost').innerText = `₱${fuelCost.toFixed(2)}`;
 
                     buildSummary(parseFloat(fuelCost));
