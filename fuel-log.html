@@ -16,7 +16,6 @@
                 }
             }
         }
-        // Security Check - Allow both admins and drivers to view their logs
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
             if (!token) window.location.href = 'login.html';
@@ -86,14 +85,14 @@
             </div>
 
             <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar p-2">
-                <table class="w-full text-left border-collapse min-w-[800px]">
+                <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead class="sticky top-0 bg-white z-10 shadow-sm">
                         <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
-                            <th class="p-4 font-bold">Date & Time</th>
-                            <th class="p-4 font-bold">Vehicle</th>
+                            <th class="p-4 font-bold">Date</th>
+                            <th class="p-4 font-bold">Vehicle & ODO</th>
                             <th class="p-4 font-bold">Driver / Dept</th>
-                            <th class="p-4 font-bold">Gas Station</th>
-                            <th class="p-4 font-bold text-right">Volume</th>
+                            <th class="p-4 font-bold">Station & Notes</th>
+                            <th class="p-4 font-bold text-right">Fuel Details</th>
                             <th class="p-4 font-bold text-right">Total Cost</th>
                         </tr>
                     </thead>
@@ -123,13 +122,9 @@
             const userRole = localStorage.getItem('userRole');
 
             try {
-                // Fetch logs from your existing data.js function
                 const allLogs = await getLogs();
-                
-                // If it's a driver, only show THEIR logs. If Admin, show ALL logs.
                 const logsToDisplay = userRole === 'admin' ? allLogs : allLogs.filter(log => log.driver === currentUser);
 
-                // Update Summary Stats
                 document.getElementById('statTotalLogs').innerText = logsToDisplay.length;
                 
                 let totalLiters = 0;
@@ -143,11 +138,14 @@
                 }
 
                 tableBody.innerHTML = logsToDisplay.map(log => {
-                    // Accumulate totals safely
                     const liters = parseFloat(log.liters) || 0;
                     const cost = parseFloat(log.total) || 0;
                     totalLiters += liters;
                     totalCost += cost;
+
+                    const odoText = log.odo ? `ODO: ${log.odo.toLocaleString()} km` : 'ODO: N/A';
+                    const fuelTypeText = log.fuelType || 'Unknown';
+                    const notesText = log.notes ? `<div class="text-[10px] text-gray-400 mt-1 italic w-full max-w-[200px] truncate" title="${log.notes}">"${log.notes}"</div>` : '';
 
                     return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
@@ -155,18 +153,23 @@
                             <span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-md border border-gray-200 tracking-widest text-[10px] uppercase">${log.date}</span>
                         </td>
                         <td class="p-4">
-                            <span class="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-md border border-blue-100 tracking-wider inline-block">${log.vehicle}</span>
+                            <div class="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-md border border-blue-100 tracking-wider inline-block mb-1.5">${log.vehicle}</div>
+                            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1"><i class="fa-solid fa-gauge-high mr-1"></i> ${odoText}</div>
                         </td>
                         <td class="p-4">
                             <div class="font-bold text-gray-800">${log.driver}</div>
                             <div class="text-xs text-gray-500 mt-1">${log.department}</div>
                         </td>
                         <td class="p-4 font-medium text-gray-600">
-                            <i class="fa-solid fa-location-dot text-blue-300 mr-1.5"></i> ${log.station || 'N/A'}
+                            <div class="flex items-center"><i class="fa-solid fa-location-dot text-blue-300 mr-1.5"></i> ${log.station || 'N/A'}</div>
+                            ${notesText}
                         </td>
                         <td class="p-4 text-right">
-                            <div class="font-bold text-gray-800">${liters.toFixed(2)} L</div>
-                            <div class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">@ ₱${(parseFloat(log.price) || 0).toFixed(2)}/L</div>
+                            <div class="font-bold text-gray-800 flex justify-end items-center gap-2">
+                                ${liters.toFixed(2)} L 
+                                <span class="text-[10px] text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded uppercase tracking-wider border border-blue-200">${fuelTypeText}</span>
+                            </div>
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wider mt-1.5">@ ₱${(parseFloat(log.price) || 0).toFixed(2)}/L</div>
                         </td>
                         <td class="p-4 text-right font-black text-blue-900 text-base">
                             ₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
@@ -174,12 +177,10 @@
                     </tr>`;
                 }).join('');
 
-                // Apply accumulated totals to DOM
                 document.getElementById('statTotalLiters').innerText = `${totalLiters.toFixed(2)} L`;
                 document.getElementById('statTotalCost').innerText = `₱${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             } catch (error) {
-                console.error("Error loading logs:", error);
                 tableBody.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-500 font-bold">Failed to load records. Ensure backend is running.</td></tr>`;
             }
         }

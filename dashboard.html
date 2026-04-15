@@ -237,7 +237,7 @@
                                 <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                                     <th class="p-4 font-bold">Date</th>
                                     <th class="p-4 font-bold">Dept / Driver</th>
-                                    <th class="p-4 font-bold">Vehicle</th>
+                                    <th class="p-4 font-bold">Vehicle Details</th>
                                     <th class="p-4 font-bold text-right">Total Cost</th>
                                 </tr>
                             </thead>
@@ -367,14 +367,28 @@
                     </tr>`).join('');
 
             const lList = document.getElementById('logsList');
-            if (logs.length === 0) lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
-            else lList.innerHTML = logs.map(l => `
+            if (logs.length === 0) {
+                lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
+            } else {
+                lList.innerHTML = logs.map(l => {
+                    const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
+                    const fuelText = l.fuelType || 'Unknown';
+                    const notesBadge = l.notes ? `<i class="fa-solid fa-message text-blue-300 ml-2" title="${l.notes}"></i>` : '';
+                    
+                    return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="p-4 text-gray-500">${l.date}</td>
+                        <td class="p-4 text-gray-500 text-xs font-medium">${l.date}</td>
                         <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500 mt-1">${l.driver}</span></td>
-                        <td class="p-4 text-gray-600 font-medium">${l.vehicle}</td>
-                        <td class="p-4 text-right font-bold text-blue-900">₱${l.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    </tr>`).join('');
+                        <td class="p-4">
+                            <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${notesBadge}</div>
+                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                                <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700">${l.liters}L ${fuelText}</span>
+                            </div>
+                        </td>
+                        <td class="p-4 text-right font-bold text-blue-900">₱${(l.total || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    </tr>`
+                }).join('');
+            }
 
             const dList = document.getElementById('adminDriverList');
             const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
