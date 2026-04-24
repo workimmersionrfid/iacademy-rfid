@@ -32,12 +32,8 @@
                     renderNavigation('dashboard');
                 }
 
-                loadMyTasks(); loadFleetForForms();
-
-                const dateInput = document.getElementById('fDate');
-                if(dateInput) dateInput.valueAsDate = new Date();
-                const tollDateInput = document.getElementById('tollDate');
-                if(tollDateInput) tollDateInput.valueAsDate = new Date();
+                // UPDATED: Use initData to ensure tasks load before vehicles
+                initDriverData();
             }
         });
     </script>
@@ -240,14 +236,14 @@
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
                     <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Select vehicle</option>
+                        <option value="" disabled selected>Loading vehicles...</option>
                     </select>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Date</label>
-                        <input type="date" id="fDate" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
+                        <input type="date" id="fDate" onchange="updateModalVehicleDropdown('fuel')" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Fuel Type</label>
@@ -313,14 +309,14 @@
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
                     <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Select vehicle</option>
+                        <option value="" disabled selected>Loading vehicles...</option>
                     </select>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Date</label>
-                        <input type="date" id="tollDate" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
+                        <input type="date" id="tollDate" onchange="updateModalVehicleDropdown('toll')" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Expressway</label>
@@ -370,13 +366,18 @@
         let currentActiveTaskDest = "N/A";
         const statusText = document.getElementById('status-text');
 
+        // NEW GLOBALS FOR SMART FILTERING
+        let allVehicles = [];
+        let allTasks = [];
+
         window.globalLogout = function() { localStorage.clear(); window.location.href = 'login.html'; };
 
-        // --- NEW: Center Modal Fixes ---
+        // Center Modal Fixes
         window.openFuelModal = function() {
             const m = document.getElementById('fuelModal');
             m.classList.remove('hidden');
             m.classList.add('flex');
+            updateModalVehicleDropdown('fuel'); // Trigger filter when opened
         };
         window.closeFuelModal = function() {
             const m = document.getElementById('fuelModal');
@@ -388,6 +389,7 @@
             const m = document.getElementById('tollModal');
             m.classList.remove('hidden');
             m.classList.add('flex');
+            updateModalVehicleDropdown('toll'); // Trigger filter when opened
         };
         window.closeTollModal = function() {
             const m = document.getElementById('tollModal');
@@ -395,73 +397,117 @@
             m.classList.add('hidden');
         };
 
-        // --- LOAD TASKS & VEHICLES ---
-        async function loadMyTasks() {
-            const myName = localStorage.getItem('username');
+        // --- NEW: INITIALIZE DATA ---
+        async function initDriverData() {
             try {
-                const res = await fetch(`${API_BASE}/tasks`);
-                const allTasks = await res.json();
+                // Fetch tasks and vehicles concurrently
+                const [tasksRes, vehiclesRes] = await Promise.all([
+                    fetch(`${API_BASE}/tasks`),
+                    fetch(`${API_BASE}/vehicles`)
+                ]);
                 
-                const myTasks = allTasks.filter(t => t.driver === myName);
-                const list = document.getElementById('taskList');
-                
-                if(myTasks.length === 0) {
-                    list.innerHTML = `<div class="text-center p-8 bg-white rounded-2xl shadow-sm border border-blue-50 text-gray-400 text-sm font-medium">No tasks assigned to you yet.</div>`;
-                    return;
-                }
+                allTasks = await tasksRes.json();
+                allVehicles = await vehiclesRes.json();
 
-                list.innerHTML = myTasks.map(t => {
-                    const isDone = t.status === 'Completed';
-                    const isRebook = t.status === 'Rebook';
-                    
-                    const bgClass = isDone ? 'bg-gray-50 opacity-75' : 'bg-white';
-                    const statusBadge = isDone ? '<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-md tracking-widest border border-blue-200">DONE</span>' : 
-                                       (isRebook ? '<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-3 py-1 rounded-md tracking-widest border border-gray-300">REBOOK</span>' : '');
-                    
-                    return `
-                    <div class="${bgClass} p-6 rounded-2xl shadow-sm border border-blue-50 transition-all relative overflow-hidden">
-                        ${!isDone && !isRebook ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>' : ''}
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex gap-2 flex-wrap">
-                                <span class="text-[10px] font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-md border border-gray-200 tracking-widest">${t.date}</span>
-                                <span class="text-[10px] font-bold bg-blue-50 text-blue-800 px-3 py-1 rounded-md border border-blue-100 tracking-widest">${t.vehicle}</span>
-                                <span class="text-[10px] font-bold bg-purple-50 text-purple-800 px-3 py-1 rounded-md border border-purple-100 tracking-widest">${t.department || 'GENERAL'}</span>
-                            </div>
-                            ${statusBadge}
-                        </div>
-                        <h3 class="font-bold text-blue-900 text-xl leading-tight mb-1">${t.description}</h3>
-                        <p class="text-sm text-gray-500 font-medium">${t.destination}</p>
-                        
-                        ${(!isDone && !isRebook) ? `
-                        <div class="mt-6 pt-5 border-t border-gray-100">
-                            <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
-                                Start Execution
-                            </button>
-                        </div>
-                        ` : ''}
-                    </div>
-                    `;
-                }).join('');
-            } catch (err) { console.error(err); }
+                // Set default dates to today
+                document.getElementById('fDate').valueAsDate = new Date();
+                document.getElementById('tollDate').valueAsDate = new Date();
+                
+                // Load UI Elements
+                renderMyTasks();
+                updateModalVehicleDropdown('fuel');
+                updateModalVehicleDropdown('toll');
+
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
         }
 
-        async function loadFleetForForms() {
-            try {
-                const res = await fetch(`${API_BASE}/vehicles`);
-                const vehicles = await res.json();
+        // --- NEW: SMART MODAL DROPDOWN FILTER ---
+        window.updateModalVehicleDropdown = function(type) {
+            const dateInputId = type === 'fuel' ? 'fDate' : 'tollDate';
+            const selectId = type === 'fuel' ? 'fVehicle' : 'tollVehicle';
+            
+            const dateInput = document.getElementById(dateInputId).value;
+            const selectEl = document.getElementById(selectId);
+            const myName = localStorage.getItem('username');
+
+            if (!dateInput || allVehicles.length === 0) return;
+
+            // Find which vehicle is assigned to which driver on the selected date
+            const dailyTasks = allTasks.filter(t => t.date === dateInput);
+            const vehicleAssignments = {};
+            dailyTasks.forEach(t => {
+                if (t.vehicle && t.driver) vehicleAssignments[t.vehicle] = t.driver;
+            });
+
+            selectEl.innerHTML = '<option value="" disabled selected>Select vehicle...</option>';
+            let autoSelectPlate = null;
+
+            allVehicles.forEach(v => {
+                const plate = v.plateNumber.trim();
+                const assignedTo = vehicleAssignments[plate];
+
+                if (assignedTo && assignedTo !== myName) {
+                    // Locked: Assigned to someone else
+                    selectEl.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50 font-medium">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
+                } else if (assignedTo === myName) {
+                    // Auto-Select: Assigned to THIS driver
+                    selectEl.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-700 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to you)</option>`;
+                    autoSelectPlate = v.plateNumber;
+                } else {
+                    // Free to use
+                    selectEl.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
+                }
+            });
+
+            if (autoSelectPlate) {
+                selectEl.value = autoSelectPlate;
+            }
+        };
+
+        function renderMyTasks() {
+            const myName = localStorage.getItem('username');
+            const myTasks = allTasks.filter(t => t.driver === myName);
+            const list = document.getElementById('taskList');
+            
+            if(myTasks.length === 0) {
+                list.innerHTML = `<div class="text-center p-8 bg-white rounded-2xl shadow-sm border border-blue-50 text-gray-400 text-sm font-medium">No tasks assigned to you yet.</div>`;
+                return;
+            }
+
+            list.innerHTML = myTasks.map(t => {
+                const isDone = t.status === 'Completed';
+                const isRebook = t.status === 'Rebook';
                 
-                const selectFuel = document.getElementById('fVehicle');
-                const selectToll = document.getElementById('tollVehicle');
+                const bgClass = isDone ? 'bg-gray-50 opacity-75' : 'bg-white';
+                const statusBadge = isDone ? '<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-md tracking-widest border border-blue-200">DONE</span>' : 
+                                    (isRebook ? '<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-3 py-1 rounded-md tracking-widest border border-gray-300">REBOOK</span>' : '');
                 
-                selectFuel.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
-                selectToll.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
-                
-                vehicles.forEach(v => {
-                    const opt = `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`;
-                    selectFuel.innerHTML += opt;
-                    selectToll.innerHTML += opt;
-                });
-            } catch (err) { console.error(err); }
+                return `
+                <div class="${bgClass} p-6 rounded-2xl shadow-sm border border-blue-50 transition-all relative overflow-hidden">
+                    ${!isDone && !isRebook ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>' : ''}
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex gap-2 flex-wrap">
+                            <span class="text-[10px] font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-md border border-gray-200 tracking-widest">${t.date}</span>
+                            <span class="text-[10px] font-bold bg-blue-50 text-blue-800 px-3 py-1 rounded-md border border-blue-100 tracking-widest">${t.vehicle}</span>
+                            <span class="text-[10px] font-bold bg-purple-50 text-purple-800 px-3 py-1 rounded-md border border-purple-100 tracking-widest">${t.department || 'GENERAL'}</span>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <h3 class="font-bold text-blue-900 text-xl leading-tight mb-1">${t.description}</h3>
+                    <p class="text-sm text-gray-500 font-medium">${t.destination}</p>
+                    
+                    ${(!isDone && !isRebook) ? `
+                    <div class="mt-6 pt-5 border-t border-gray-100">
+                        <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                            Start Execution
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
         }
 
         // --- FUEL CALCULATION & SUBMISSION ---
@@ -507,6 +553,7 @@
                     e.target.reset();
                     document.getElementById('fTotalCostDisplay').innerText = '₱0.00';
                     document.getElementById('fDate').valueAsDate = new Date();
+                    updateModalVehicleDropdown('fuel'); // reset dropdown styling
                 }
             } catch (err) { alert('Server error saving fuel log.'); } 
             finally { btn.innerHTML = originalText; btn.disabled = false; }
@@ -542,6 +589,7 @@
                     closeTollModal();
                     e.target.reset();
                     document.getElementById('tollDate').valueAsDate = new Date();
+                    updateModalVehicleDropdown('toll'); // reset dropdown styling
                 } else {
                     alert('Failed to save toll log.');
                 }
@@ -795,7 +843,8 @@
                 document.getElementById('display-task-type').innerText = "N/A";
                 document.getElementById('display-task-vehicle').innerText = "VEHICLE";
                 
-                loadMyTasks();
+                // Re-fetch tasks globally after a handover!
+                initDriverData();
             }
         });
     </script>
