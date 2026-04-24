@@ -23,12 +23,6 @@
         });
     </script>
     <style>
-        select.preset-dropdown {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231e3a8a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.75rem center;
-            background-repeat: no-repeat;
-            background-size: 1em 1em;
-        }
         .dpd-card-accent { border-bottom-left-radius: 100%; }
         
         .pac-container { z-index: 99999 !important; border-radius: 0.75rem; font-family: 'Inter', sans-serif; margin-top: 4px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
@@ -136,47 +130,50 @@
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
-                <h3 class="font-bold text-xl mb-6 text-blue-900">Register Vehicle</h3>
+                <h3 class="font-bold text-xl mb-6 text-blue-900">Register New Vehicle</h3>
                 
-                <div class="mb-6 pb-6 border-b border-gray-100">
-                    <label class="block text-xs font-bold text-blue-600 uppercase mb-2">Quick Fill Preset</label>
-                    <select id="vPreset" onchange="applyPreset()" class="preset-dropdown appearance-none w-full border border-blue-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-blue-50/50 text-blue-800 font-medium transition-colors cursor-pointer">
-                        <option value="" class="text-gray-800">-- Select preset or type manually --</option>
-                        <option value="Toyota Vios" class="text-gray-800">Toyota Vios (14 km/L - Ron95)</option>
-                        <option value="Toyota Fortuner" class="text-gray-800">Toyota Fortuner (10 km/L - Diesel)</option>
-                        <option value="Toyota Hi-Ace" class="text-gray-800">Toyota Hi-Ace (10 km/L - Diesel)</option>
-                        <option value="Mitsubishi Xpander" class="text-gray-800">Mitsubishi Xpander (13 km/L - Ron95)</option>
-                        <option value="Mitsubishi Montero" class="text-gray-800">Mitsubishi Montero (11 km/L - Diesel)</option>
-                        <option value="Honda Beat" class="text-gray-800">Honda Beat (50 km/L - Ron95)</option>
-                        <option value="Honda City" class="text-gray-800">Honda City (15 km/L - Ron95)</option>
-                        <option value="Suzuki Carry" class="text-gray-800">Suzuki Carry (12 km/L - Diesel)</option>
-                        <option value="Ford Ranger" class="text-gray-800">Ford Ranger (11 km/L - Diesel)</option>
-                        <option value="Hyundai Tucson" class="text-gray-800">Hyundai Tucson (12 km/L - Ron95)</option>
-                        <option value="Kia Picanto" class="text-gray-800">Kia Picanto (18 km/L - Ron95)</option>
-                        <option value="Geely Coolray" class="text-gray-800">Geely Coolray (14 km/L - Ron95)</option>
-                        <option value="Suzuki Ertiga" class="text-gray-800">Suzuki Ertiga (14 km/L - Ron95)</option>
-                        <option value="Yamaha Mio" class="text-gray-800">Yamaha Mio (55 km/L - Ron95)</option>
-                        <option value="Isuzu D-Max" class="text-gray-800">Isuzu D-Max (12 km/L - Diesel)</option>
-                    </select>
-                </div>
-
                 <form id="vehicleForm" class="space-y-5">
+                    
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Make & Model</label>
-                        <input type="text" id="vModel" placeholder="e.g. Toyota Vios" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Master Catalog: Make & Model</label>
+                        <select id="vModel" onchange="autoFillSpecs()" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all font-bold text-blue-900">
+                            <option value="" disabled selected>Select vehicle model...</option>
+                            <option value="Toyota Vios">Toyota Vios</option>
+                            <option value="Toyota Fortuner">Toyota Fortuner</option>
+                            <option value="Toyota Hi-Ace">Toyota Hi-Ace</option>
+                            <option value="Mitsubishi Xpander">Mitsubishi Xpander</option>
+                            <option value="Mitsubishi Montero">Mitsubishi Montero</option>
+                            <option value="Honda Beat">Honda Beat</option>
+                            <option value="Honda City">Honda City</option>
+                            <option value="Suzuki Carry">Suzuki Carry</option>
+                            <option value="Ford Ranger">Ford Ranger</option>
+                            <option value="Hyundai Tucson">Hyundai Tucson</option>
+                            <option value="Kia Picanto">Kia Picanto</option>
+                            <option value="Geely Coolray">Geely Coolray</option>
+                            <option value="Suzuki Ertiga">Suzuki Ertiga</option>
+                            <option value="Yamaha Mio">Yamaha Mio</option>
+                            <option value="Isuzu D-Max">Isuzu D-Max</option>
+                            <option value="Other">Other (Custom Entry)</option>
+                        </select>
+                        <div id="customModelGroup" class="hidden mt-3">
+                            <input type="text" id="vModelCustom" placeholder="Type custom make & model..." class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition-all">
+                        </div>
                     </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Plate Number</label>
-                        <input type="text" id="vPlate" placeholder="e.g. ABC 1234" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 uppercase transition-all">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assigned Plate Number</label>
+                        <input type="text" id="vPlate" placeholder="e.g. NCD 5673" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 uppercase transition-all">
                     </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Year</label>
-                            <input type="number" id="vYear" placeholder="2022" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                            <input type="number" id="vYear" placeholder="2026" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fuel Type</label>
-                            <select id="vFuel" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <select id="vFuel" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50 transition-all disabled:opacity-75" disabled>
+                                <option value="">Auto-filled</option>
                                 <option value="Diesel">Diesel</option>
                                 <option value="Gasoline">Gasoline</option>
                                 <option value="Ron91">Ron91</option>
@@ -185,12 +182,14 @@
                             </select>
                         </div>
                     </div>
+                    
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fuel Efficiency (km/L)</label>
-                        <input type="number" id="vEfficiency" step="0.1" placeholder="e.g. 12.5" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                        <input type="number" id="vEfficiency" step="0.1" placeholder="Auto-filled" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-gray-50 disabled:opacity-75" disabled>
                     </div>
+
                     <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
-                        Add to Fleet
+                        Register Fleet Vehicle
                     </button>
                 </form>
             </div>
@@ -566,14 +565,12 @@
             
             const todayStr = new Date().toISOString().split('T')[0];
             
-            // Reset form and UI
             document.getElementById('advancedTaskForm').reset();
             document.getElementById('dDate').value = todayStr;
             document.getElementById('dOrigin').value = "iACADEMY Nexus (Yakal St.)";
             document.getElementById('dTollSegments').innerHTML = '';
             document.getElementById('tDestinationCustom').classList.add('hidden');
             
-            // Hide summary
             const summary = document.getElementById('dispatchSummary');
             summary.classList.add('hidden');
             summary.classList.remove('translate-y-0', 'opacity-100');
@@ -583,7 +580,6 @@
 
             updateModalDropdowns();
 
-            // Open Modal
             const modal = document.getElementById('dispatchPlannerModal');
             const box = document.getElementById('dispatchPlannerBox');
             modal.classList.remove('hidden');
@@ -618,7 +614,6 @@
             const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const dayName = daysOfWeek[dayIndex];
 
-            // 1. FILTER DRIVERS
             const dDriverSelect = document.getElementById('dDriver');
             dDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
             
@@ -639,11 +634,9 @@
                 });
             }
 
-            // Sync Vehicles
             updateVehicleDropdown();
         }
 
-        // SMART VEHICLE LOCKING LOGIC
         window.updateVehicleDropdown = function() {
             const dateInput = document.getElementById('dDate').value;
             const selectedDriver = document.getElementById('dDriver').value;
@@ -652,7 +645,6 @@
             if (!dateInput) return;
             const dayIndex = new Date(dateInput).getDay();
 
-            // Map which vehicle is used by which driver TODAY
             const dailyTasks = allTasks.filter(t => t.date === dateInput);
             const vehicleAssignments = {};
             dailyTasks.forEach(t => {
@@ -677,10 +669,8 @@
                 const assignedTo = vehicleAssignments[plate];
 
                 if (assignedTo && assignedTo !== selectedDriver) {
-                    // Booked by someone else! Strict Lock.
                     dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
                 } else if (assignedTo === selectedDriver) {
-                    // Already assigned to THIS driver today. Auto-select it!
                     dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-600 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to ${selectedDriver})</option>`;
                     autoSelectPlate = v.plateNumber;
                     availableCount++;
@@ -870,16 +860,13 @@
                     alert('Task dispatched successfully!');
                     
                     if (isContinuing) {
-                        // Set the new Origin to be the old Destination!
                         document.getElementById('dOrigin').value = dest;
                         
-                        // Clear out the old destination and notes
                         document.getElementById('tDestinationSelect').value = "";
                         document.getElementById('tDestinationCustom').value = "";
                         document.getElementById('tDestinationCustom').classList.add('hidden');
                         document.getElementById('dDescription').value = "";
                         
-                        // Clear Map and Summary
                         document.getElementById('dTollSegments').innerHTML = '';
                         tollCounter = 0;
                         if (dirRenderer) dirRenderer.setDirections({routes: []});
@@ -889,14 +876,12 @@
                         summary.classList.remove('translate-y-0', 'opacity-100');
                         summary.classList.add('translate-y-4', 'opacity-0');
                         
-                        // Refresh the global tasks immediately so the vehicle locks in for this driver
                         const taskRes = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
                         allTasks = await taskRes.json();
                         updateVehicleDropdown();
                         renderLiveBoard();
 
                     } else {
-                        // All done, close it up.
                         closeDispatchModal();
                         loadDashboardData();
                     }
@@ -904,7 +889,6 @@
             } catch (err) { alert('Failed to dispatch task.'); }
             finally { btnConfirm.innerHTML = `Confirm & Close`; btnConfirm.disabled = false; }
         }
-
 
         // --- UI RENDER HELPERS ---
         function renderLiveBoard() {
@@ -1007,14 +991,52 @@
             }
         }
 
+        // --- CATALOG REGISTRATION LOGIC ---
+        const masterVehicleDatabase = {
+            "Toyota Vios": { eff: 14, fuel: "Ron95" }, "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
+            "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" }, "Mitsubishi Xpander": { eff: 13, fuel: "Ron95" },
+            "Mitsubishi Montero": { eff: 11, fuel: "Diesel" }, "Honda Beat": { eff: 50, fuel: "Ron95" },
+            "Honda City": { eff: 15, fuel: "Ron95" }, "Suzuki Carry": { eff: 12, fuel: "Diesel" },
+            "Ford Ranger": { eff: 11, fuel: "Diesel" }, "Hyundai Tucson": { eff: 12, fuel: "Ron95" },
+            "Kia Picanto": { eff: 18, fuel: "Ron95" }, "Geely Coolray": { eff: 14, fuel: "Ron95" },
+            "Suzuki Ertiga": { eff: 14, fuel: "Ron95" }, "Yamaha Mio": { eff: 55, fuel: "Ron95" },
+            "Isuzu D-Max": { eff: 12, fuel: "Diesel" }
+        };
+
+        window.autoFillSpecs = function() {
+            const modelSelect = document.getElementById('vModel').value;
+            const fuelSelect = document.getElementById('vFuel');
+            const effInput = document.getElementById('vEfficiency');
+            const customModelGroup = document.getElementById('customModelGroup');
+            const customModelInput = document.getElementById('vModelCustom');
+
+            if (modelSelect === 'Other') {
+                customModelGroup.classList.remove('hidden');
+                customModelInput.required = true;
+                fuelSelect.disabled = false;
+                effInput.disabled = false;
+                fuelSelect.value = "";
+                effInput.value = "";
+            } else if (masterVehicleDatabase[modelSelect]) {
+                customModelGroup.classList.add('hidden');
+                customModelInput.required = false;
+                fuelSelect.value = masterVehicleDatabase[modelSelect].fuel;
+                effInput.value = masterVehicleDatabase[modelSelect].eff;
+                fuelSelect.disabled = true;
+                effInput.disabled = true;
+            }
+        };
+
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
             btn.disabled = true;
 
+            const finalModel = document.getElementById('vModel').value === 'Other' ? document.getElementById('vModelCustom').value : document.getElementById('vModel').value;
+
             const vehicleData = {
-                model: document.getElementById('vModel').value,
+                model: finalModel,
                 plateNumber: document.getElementById('vPlate').value.toUpperCase(),
                 year: document.getElementById('vYear').value,
                 fuelType: document.getElementById('vFuel').value,
@@ -1023,9 +1045,9 @@
 
             try {
                 const res = await fetch('https://iacademy-rfid.onrender.com/api/vehicles', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(vehicleData) });
-                if (res.ok) { document.getElementById('vehicleForm').reset(); document.getElementById('vPreset').value = ''; loadDashboardData(); }
+                if (res.ok) { document.getElementById('vehicleForm').reset(); autoFillSpecs(); loadDashboardData(); }
             } catch (err) { console.error('Error saving vehicle:', err); } 
-            finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
+            finally { btn.innerHTML = `Register Fleet Vehicle`; btn.disabled = false; }
         });
 
         window.openProfileModal = function(driverId) {
