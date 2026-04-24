@@ -102,15 +102,19 @@
                 <h3 class="font-bold text-xl mb-6 text-blue-900">Dispatch a Task</h3>
                 <form id="taskForm" onsubmit="submitTask(event)" class="space-y-5">
                     <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
+                        <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
                         <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Loading drivers...</option>
+                            <option value="" disabled selected>Select date first...</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
                         <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Loading fleet...</option>
+                            <option value="" disabled selected>Select date first...</option>
                         </select>
                     </div>
                     <div>
@@ -170,10 +174,7 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Description</label>
                         <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
-                        <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                    </div>
+                    
                     <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
                         Send to Driver
                     </button>
@@ -327,6 +328,10 @@
     <script src="js/app.js"></script>
     
     <script>
+        // --- NEW GLOBALS FOR SMART DISPATCH ---
+        let allVehicles = [];
+        let allDrivers = [];
+
         const vehiclePresets = {
             "Toyota Vios": { eff: 14, fuel: "Gasoline" }, "Toyota Wigo": { eff: 16, fuel: "Gasoline" },
             "Toyota Innova": { eff: 11, fuel: "Diesel" }, "Mitsubishi Mirage": { eff: 16, fuel: "Gasoline" },
@@ -343,7 +348,6 @@
             }
         }
 
-        // --- NEW: Toggle Custom Destination Input ---
         function toggleCustomDestination() {
             const select = document.getElementById('tDestinationSelect');
             const customInput = document.getElementById('tDestinationCustom');
@@ -359,14 +363,19 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             renderNavigation('dashboard');
-            document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
+            
+            // Set date to today and attach listener for Smart Dispatch
+            const dateInput = document.getElementById('tDate');
+            dateInput.value = new Date().toISOString().split('T')[0];
+            dateInput.addEventListener('change', updateDispatchDropdowns);
+
             loadDashboardData();
         });
 
         async function loadDashboardData() {
-            const vehicles = await getVehicles();
+            allVehicles = await getVehicles(); // Store globally
+            allDrivers = await getDrivers();   // Store globally
             const logs = await getLogs();
-            const drivers = await getDrivers(); 
             
             let tasks = [];
             try {
@@ -374,24 +383,10 @@
                 tasks = await res.json();
             } catch(e) { console.error("Could not load tasks"); }
 
-            const tDriverSelect = document.getElementById('tDriver');
-            if (drivers.length === 0) {
-                tDriverSelect.innerHTML = '<option value="" disabled selected>No drivers registered</option>';
-            } else {
-                tDriverSelect.innerHTML = '<option value="" disabled selected>Select a driver</option>';
-                drivers.forEach(d => {
-                    const deptText = Array.isArray(d.department) ? d.department.join(', ') : (d.department || 'Pending');
-                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${deptText})</option>`;
-                });
-            }
+            // --- TRIGGER SMART SPREADSHEET FILTER ---
+            updateDispatchDropdowns();
 
-            const tVehicleSelect = document.getElementById('tVehicle');
-            tVehicleSelect.innerHTML = '<option value="" disabled selected>Select from fleet</option>';
-            vehicles.forEach(v => {
-                tVehicleSelect.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`;
-            });
-
-            document.getElementById('statVehicles').innerText = vehicles.length;
+            document.getElementById('statVehicles').innerText = allVehicles.length;
             document.getElementById('statTasks').innerText = tasks.length;
             document.getElementById('statLogs').innerText = logs.length;
             
@@ -430,8 +425,8 @@
             }
 
             const vList = document.getElementById('vehicleList');
-            if (vehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
-            else vList.innerHTML = vehicles.map(v => `
+            if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
+            else vList.innerHTML = allVehicles.map(v => `
                     <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4"><span class="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-md border border-blue-100 tracking-wider">${v.plateNumber}</span></td>
                         <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
@@ -465,10 +460,10 @@
             const dList = document.getElementById('adminDriverList');
             const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
 
-            if (drivers.length === 0) {
+            if (allDrivers.length === 0) {
                 dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
             } else {
-                dList.innerHTML = drivers.map(d => {
+                dList.innerHTML = allDrivers.map(d => {
                     const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
                     const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
                     
@@ -497,6 +492,62 @@
                         </td>
                     </tr>`;
                 }).join('');
+            }
+        }
+
+        // --- NEW: SMART DISPATCH LOGIC (UVVRP Coding & Driver Schedule) ---
+        function updateDispatchDropdowns() {
+            const dateInput = document.getElementById('tDate').value;
+            if (!dateInput) return;
+
+            const selectedDate = new Date(dateInput);
+            const dayIndex = selectedDate.getDay(); // 0 = Sun, 1 = Mon, etc.
+            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = daysOfWeek[dayIndex];
+
+            // 1. FILTER DRIVERS BY SCHEDULE
+            const tDriverSelect = document.getElementById('tDriver');
+            tDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
+            
+            const availableDrivers = allDrivers.filter(d => !d.workDays || d.workDays.includes(dayName));
+            
+            if (availableDrivers.length === 0) {
+                tDriverSelect.innerHTML = `<option value="" disabled selected>No drivers scheduled for ${dayName}</option>`;
+            } else {
+                availableDrivers.forEach(d => {
+                    const deptText = Array.isArray(d.department) ? d.department.join(', ') : (d.department || 'Pending');
+                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${deptText})</option>`;
+                });
+            }
+
+            // 2. FILTER VEHICLES BY PH NUMBER CODING (MMDA UVVRP)
+            const tVehicleSelect = document.getElementById('tVehicle');
+            tVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
+            
+            let codingDigits = [];
+            if (dayIndex === 1) codingDigits = ['1', '2']; // Monday
+            else if (dayIndex === 2) codingDigits = ['3', '4']; // Tuesday
+            else if (dayIndex === 3) codingDigits = ['5', '6']; // Wednesday
+            else if (dayIndex === 4) codingDigits = ['7', '8']; // Thursday
+            else if (dayIndex === 5) codingDigits = ['9', '0']; // Friday
+
+            let availableCount = 0;
+            allVehicles.forEach(v => {
+                const plate = v.plateNumber.trim();
+                const lastDigit = plate.charAt(plate.length - 1);
+                const isCoded = codingDigits.includes(lastDigit);
+                
+                if (isCoded) {
+                    // Lock out the vehicle and show it is on coding
+                    tVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-red-500 bg-red-50">❌ ${v.plateNumber} (${v.model}) - CODING</option>`;
+                } else {
+                    tVehicleSelect.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
+                    availableCount++;
+                }
+            });
+
+            if (availableCount === 0) {
+                tVehicleSelect.innerHTML = `<option value="" disabled selected>All vehicles on coding for ${dayName}</option>`;
             }
         }
 
@@ -532,7 +583,9 @@
                     alert('Task dispatched successfully!');
                     e.target.reset();
                     toggleCustomDestination(); // Hide custom input again
-                    document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    document.getElementById('tDate').value = todayStr;
+                    updateDispatchDropdowns(); // Re-trigger filter for reset date
                     loadDashboardData();
                 }
             } catch (err) { alert('Failed to dispatch task.'); }
