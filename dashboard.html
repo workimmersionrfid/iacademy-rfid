@@ -29,9 +29,16 @@
             background-repeat: no-repeat;
             background-size: 1em 1em;
         }
-        .dpd-card-accent {
-            border-bottom-left-radius: 100%;
-        }
+        .dpd-card-accent { border-bottom-left-radius: 100%; }
+        
+        /* Map Autocomplete Styles */
+        .pac-container { z-index: 99999 !important; border-radius: 0.75rem; font-family: 'Inter', sans-serif; margin-top: 4px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .pac-item { padding: 12px; cursor: pointer; font-size: 13px; }
+        .pac-item:hover { background-color: #eff6ff; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
@@ -63,7 +70,6 @@
                     <h3 id="statVehicles" class="text-3xl font-black text-blue-900">0</h3>
                 </div>
             </div>
-            
             <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
                     <i class="fa-solid fa-clipboard-list text-blue-500 text-xl"></i>
@@ -73,7 +79,6 @@
                     <h3 id="statTasks" class="text-3xl font-black text-blue-900">0</h3>
                 </div>
             </div>
-
             <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
                     <i class="fa-solid fa-file-invoice text-blue-500 text-xl"></i>
@@ -83,7 +88,6 @@
                     <h3 id="statLogs" class="text-3xl font-black text-blue-900">0</h3>
                 </div>
             </div>
-
             <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
                     <i class="fa-solid fa-peso-sign text-blue-500 text-xl"></i>
@@ -95,140 +99,42 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            
-            <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit xl:col-span-1 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
-                <h3 class="font-bold text-xl mb-6 text-blue-900">Dispatch a Task</h3>
-                <form id="taskForm" onsubmit="submitTask(event)" class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
-                        <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Charge to Department</label>
-                        <select id="tDepartment" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select department first...</option>
-                            <option value="ELPD">ELPD</option>
-                            <option value="OSAS">OSAS</option>
-                            <option value="IT">IT</option>
-                            <option value="REGISTRAR">REGISTRAR</option>
-                            <option value="FINANCE">FINANCE</option>
-                            <option value="ADMISSIONS">ADMISSIONS</option>
-                            <option value="ADCOM">ADCOM</option>
-                            <option value="CLINIC">CLINIC</option>
-                            <option value="PURCHASING">PURCHASING</option>
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="SHS">SHS</option>
-                            <option value="COLLEGE">COLLEGE</option>
-                            <option value="LIBRARY">LIBRARY</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
-                        <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select department & date first...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
-                        <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select date first...</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Category</label>
-                        <select id="tType" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select category...</option>
-                            <option value="Asset Collection">Asset Collection</option>
-                            <option value="Document Routing">Document Routing</option>
-                            <option value="Hardware Transport">Hardware Transport</option>
-                            <option value="Bank Transaction">Bank Transaction</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Destination</label>
-                        <select id="tDestinationSelect" required onchange="toggleCustomDestination()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select destination...</option>
-                            <optgroup label="iACADEMY Campuses">
-                                <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus (Yakal St.)</option>
-                                <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza (Buendia)</option>
-                            </optgroup>
-                            <optgroup label="Tech & Computing Partners">
-                                <option value="Amazon Web Services">Amazon Web Services</option>
-                                <option value="ASUS">ASUS</option>
-                                <option value="Huawei">Huawei</option>
-                                <option value="Ubisoft">Ubisoft</option>
-                                <option value="Alibaba Cloud Academy">Alibaba Cloud Academy</option>
-                            </optgroup>
-                            <optgroup label="Animation & Creative">
-                                <option value="Toon City">Toon City</option>
-                                <option value="Netflix Philippines">Netflix Philippines</option>
-                                <option value="Toon Boom Animation">Toon Boom Animation</option>
-                            </optgroup>
-                            <optgroup label="Business, Finance & Marketing">
-                                <option value="Metrobank">Metrobank</option>
-                                <option value="Macquarie">Macquarie</option>
-                                <option value="Sunlife">Sunlife</option>
-                                <option value="McCann">McCann</option>
-                                <option value="Mullenlowe Treyna">Mullenlowe Treyna</option>
-                            </optgroup>
-                            <optgroup label="Other Partners & Agencies">
-                                <option value="Unilab">Unilab</option>
-                                <option value="Knowledge Channel">Knowledge Channel</option>
-                                <option value="Adarna House">Adarna House</option>
-                                <option value="Gov: CHED / DepEd">Gov: CHED / DepEd</option>
-                                <option value="Gov: Climate Change Commission">Gov: Climate Change Commission</option>
-                            </optgroup>
-                            <optgroup label="Custom Destination">
-                                <option value="Other">Other (Specify Destination)</option>
-                            </optgroup>
-                        </select>
-                        <input type="text" id="tDestinationCustom" placeholder="Type exact destination..." class="hidden mt-3 w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Description</label>
-                        <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                    </div>
-                    
-                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
-                        Send to Driver
-                    </button>
-                </form>
+        <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-xl text-blue-900">Department Dispatch Hub</h3>
+                    <p class="text-xs text-gray-500 mt-1">Select a department to plan an optimized route and assign a driver.</p>
+                </div>
             </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="deptCardsContainer">
+                </div>
+        </div>
 
-            <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col xl:col-span-2 relative">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
-                <div class="p-6 border-b border-gray-100">
-                    <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
-                </div>
-                <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                            <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
-                                <th class="p-4 font-bold">Status</th>
-                                <th class="p-4 font-bold">Date & Driver</th>
-                                <th class="p-4 font-bold">Vehicle</th>
-                                <th class="p-4 font-bold">Itinerary</th>
-                            </tr>
-                        </thead>
-                        <tbody id="taskBoard" class="text-sm divide-y divide-gray-50">
-                            <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading tasks...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
+                <button onclick="loadDashboardData()" class="text-sm font-bold text-blue-600 hover:text-blue-800"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh</button>
+            </div>
+            <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
+                <table class="w-full text-left border-collapse min-w-[800px]">
+                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                        <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                            <th class="p-4 font-bold">Status</th>
+                            <th class="p-4 font-bold">Date & Driver</th>
+                            <th class="p-4 font-bold">Vehicle</th>
+                            <th class="p-4 font-bold w-1/2">Itinerary Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskBoard" class="text-sm divide-y divide-gray-50">
+                        <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading tasks...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
                 <h3 class="font-bold text-xl mb-6 text-blue-900">Register Vehicle</h3>
@@ -379,20 +285,129 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Departments</label>
-                    <div class="border border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto custom-scrollbar bg-gray-50 space-y-2" id="modalDeptList">
-                        </div>
+                    <div class="border border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto custom-scrollbar bg-gray-50 space-y-2" id="modalDeptList"></div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Work Schedule</label>
-                    <div class="grid grid-cols-2 gap-2 border border-gray-200 rounded-xl p-3 bg-gray-50" id="modalScheduleList">
-                        </div>
+                    <div class="grid grid-cols-2 gap-2 border border-gray-200 rounded-xl p-3 bg-gray-50" id="modalScheduleList"></div>
                 </div>
 
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeProfileModal()" class="w-1/3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold py-3.5 rounded-xl transition-colors text-sm">Cancel</button>
                     <button type="button" id="btnSaveModal" onclick="saveProfileFromModal()" class="w-2/3 bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm">Save Profile</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dispatchPlannerModal" class="fixed inset-0 bg-gray-900/80 hidden items-center justify-center z-50 p-4 lg:p-8 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white w-full max-w-[1200px] rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col max-h-full transform scale-95 opacity-0 transition-all duration-200" id="dispatchPlannerBox">
+            
+            <div class="p-5 bg-blue-900 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="font-bold text-white text-lg flex items-center gap-2"><i class="fa-solid fa-route"></i> Advanced Dispatch Planner</h3>
+                    <p class="text-blue-200 text-xs font-medium uppercase tracking-widest mt-0.5" id="modalDispatchDeptLabel">DEPARTMENT</p>
+                </div>
+                <button onclick="closeDispatchModal()" class="text-blue-200 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden bg-gray-50">
+                
+                <div class="w-full lg:w-[400px] p-6 bg-white border-r border-gray-200 overflow-y-auto custom-scrollbar shrink-0">
+                    <form id="advancedTaskForm" class="space-y-5">
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Date</label>
+                                <input type="date" id="dDate" required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Task Type</label>
+                                <select id="dType" required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50">
+                                    <option value="Asset Collection">Collection</option>
+                                    <option value="Document Routing">Routing</option>
+                                    <option value="Hardware Transport">Transport</option>
+                                    <option value="Bank Transaction">Bank</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Assign Driver</label>
+                            <select id="dDriver" required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-medium text-blue-900">
+                                <option value="" disabled selected>Loading drivers...</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Assign Vehicle</label>
+                            <select id="dVehicle" required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-medium text-blue-900">
+                                <option value="" disabled selected>Loading fleet...</option>
+                            </select>
+                        </div>
+
+                        <hr class="border-gray-100">
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Origin</label>
+                            <input type="text" id="dOrigin" autocomplete="off" value="iACADEMY Nexus (Yakal St.)" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Destination</label>
+                            <input type="text" id="dDestination" autocomplete="off" placeholder="Search Google Maps..." required class="w-full border border-blue-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 font-bold text-blue-900 shadow-sm">
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-xs font-bold text-blue-900 uppercase tracking-widest">Toll Estimation</h3>
+                            </div>
+                            <div id="dTollSegments" class="space-y-3"></div>
+                            <button type="button" onclick="addDispatchTollSegment()" class="w-full text-[10px] text-blue-700 font-bold py-2 mt-3 bg-blue-100/50 hover:bg-blue-100 rounded border border-blue-200 transition-colors uppercase tracking-widest">
+                                + Add Toll Road
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Instructions</label>
+                            <textarea id="dDescription" rows="2" placeholder="Specific task instructions..." required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50 custom-scrollbar"></textarea>
+                        </div>
+                        
+                        <button type="button" id="btnCalculateRoute" onclick="calculateDispatchRoute()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> Calculate Route & Budget
+                        </button>
+                    </form>
+                </div>
+
+                <div class="flex-1 flex flex-col relative min-h-[400px]">
+                    <div id="dispatchMap" class="flex-1 w-full bg-gray-200"></div>
+                    
+                    <div id="dispatchSummary" class="absolute bottom-4 left-4 right-4 lg:left-auto lg:right-4 lg:w-80 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 p-5 hidden transform translate-y-4 opacity-0 transition-all duration-300">
+                        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">Trip Logistics</h4>
+                        
+                        <div class="space-y-2 mb-4 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-600 font-medium">Distance / Time</span><span id="dSumDistTime" class="font-bold text-gray-900">--</span></div>
+                            <div class="flex justify-between"><span class="text-gray-600 font-medium">Fuel Req.</span><span id="dSumFuelVol" class="font-bold text-gray-900">--</span></div>
+                            <div class="flex justify-between"><span class="text-gray-600 font-medium">Fuel Cost</span><span id="dSumFuelCost" class="font-bold text-emerald-600">--</span></div>
+                            <div class="flex justify-between"><span class="text-gray-600 font-medium">Toll Cost</span><span id="dSumTollCost" class="font-bold text-emerald-600">--</span></div>
+                        </div>
+                        
+                        <div class="pt-3 border-t border-gray-200">
+                            <div class="flex justify-between items-end mb-4">
+                                <span class="text-sm font-bold text-blue-900 uppercase tracking-widest">Total Budget</span>
+                                <span id="dSumTotal" class="text-2xl font-black text-blue-800">₱0.00</span>
+                            </div>
+                            
+                            <button type="button" id="btnConfirmDispatch" onclick="finalizeDispatchTask()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors text-sm uppercase tracking-wider">
+                                Confirm & Dispatch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -404,144 +419,84 @@
         // --- GLOBALS ---
         let allVehicles = [];
         let allDrivers = [];
-        let allTasks = []; // NEW: Keep track of all tasks globally for double-booking check
+        let allTasks = []; 
+        let currentDispatchDept = ""; // Tracks which dept card was clicked
+        
+        // Map Globals
+        let dispatchMap, dirService, dirRenderer;
+        let calculatedDistance = "0 km";
+        let calculatedBudget = 0;
 
-        const vehiclePresets = {
-            "Toyota Vios": { eff: 14, fuel: "Ron95" },
-            "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
-            "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" },
-            "Mitsubishi Xpander": { eff: 13, fuel: "Ron95" },
-            "Mitsubishi Montero": { eff: 11, fuel: "Diesel" },
-            "Honda Beat": { eff: 50, fuel: "Ron95" },
-            "Honda City": { eff: 15, fuel: "Ron95" },
-            "Suzuki Carry": { eff: 12, fuel: "Diesel" },
-            "Ford Ranger": { eff: 11, fuel: "Diesel" },
-            "Hyundai Tucson": { eff: 12, fuel: "Ron95" },
-            "Kia Picanto": { eff: 18, fuel: "Ron95" },
-            "Geely Coolray": { eff: 14, fuel: "Ron95" },
-            "Suzuki Ertiga": { eff: 14, fuel: "Ron95" },
-            "Yamaha Mio": { eff: 55, fuel: "Ron95" },
-            "Isuzu D-Max": { eff: 12, fuel: "Diesel" }
+        const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
+
+        const estimatedPrices = {
+            "Diesel": 65.00, "Gasoline": 75.00, "Ron91": 72.00, "Ron95": 78.00, "Ron97": 82.00
         };
 
-        function applyPreset() {
-            const presetName = document.getElementById('vPreset').value;
-            if (presetName && vehiclePresets[presetName]) {
-                const data = vehiclePresets[presetName];
-                document.getElementById('vModel').value = presetName;
-                document.getElementById('vEfficiency').value = data.eff;
-                document.getElementById('vFuel').value = data.fuel;
-            }
+        const expressways = {
+            "NLEX": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
+            "SCTEX": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
+            "SLEX": ["Magallanes", "Nichols", "Merville", "Bicutan", "Sucat", "Alabang", "Filinvest", "Susana Heights", "San Pedro", "Southwoods", "Carmona", "Mamplasan", "Sta. Rosa", "ABI/Greenfield", "Cabuyao", "Silangan", "Calamba", "Santo Tomas"],
+            "Skyway": ["Quezon Ave", "Plaza Dilao", "Nagtahan", "Buendia", "Amorsolo", "Magallanes", "NAIAx", "Bicutan", "Sucat", "Alabang", "South Station", "Filinvest", "Susana Heights"],
+            "MCX": ["Daang Hari", "SLEX"],
+            "STAR Tollway": ["Santo Tomas", "Tanauan", "Malvar", "Balete", "Lipa", "San Jose", "Ibaan", "Batangas City"],
+            "CALAX": ["Mamplasan", "Laguna Boulevard", "Laguna Technopark", "Santa Rosa-Tagaytay", "Silang East", "Silang (Aguinaldo)"],
+            "CAVITEX": ["Roxas Blvd", "MIA Road", "Zapote", "Bacoor", "Kawit"],
+            "NAIAx": ["Skyway", "Sales", "Andrews Ave", "NAIA T3", "NAIA T1/T2", "Macapagal Blvd", "CAVITEX"],
+            "TPLEX": ["Tarlac", "Victoria", "Pura", "Ramos", "Anao", "Carmen", "Urdaneta", "Binalonan", "Pozorrubio", "Sison", "Rosario"],
+            "CCLEX": ["Cebu City", "Cordova"]
+        };
+
+        let tollCounter = 0;
+
+        // --- MAP INITIALIZATION ---
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initGooglePlaces`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
         }
 
-        function toggleCustomDestination() {
-            const select = document.getElementById('tDestinationSelect');
-            const customInput = document.getElementById('tDestinationCustom');
-            if (select.value === 'Other') {
-                customInput.classList.remove('hidden');
-                customInput.required = true;
-            } else {
-                customInput.classList.add('hidden');
-                customInput.required = false;
-                customInput.value = '';
-            }
-        }
-
-        // --- MODAL UI HELPERS ---
-        window.openProfileModal = function(driverId) {
-            const driver = allDrivers.find(d => d._id === driverId);
-            if (!driver) return;
-
-            document.getElementById('modalDriverName').innerText = driver.username;
-            document.getElementById('modalDriverId').value = driver._id;
-
-            const deptArray = Array.isArray(driver.department) ? driver.department : (driver.department ? [driver.department] : []);
-            const driverWorkDays = driver.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-
-            const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
-            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-            document.getElementById('modalDeptList').innerHTML = departmentsList.map(dept => `
-                <label class="flex items-center text-xs text-gray-700 font-medium cursor-pointer p-1.5 hover:bg-gray-100 rounded transition-colors">
-                    <input type="checkbox" value="${dept}" class="modal-dept-cb mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${deptArray.includes(dept) ? 'checked' : ''}>
-                    ${dept}
-                </label>
-            `).join('');
-
-            document.getElementById('modalScheduleList').innerHTML = daysOfWeek.map(day => `
-                <label class="flex items-center text-xs text-gray-700 font-bold tracking-wide uppercase cursor-pointer p-1.5 hover:bg-gray-100 rounded transition-colors">
-                    <input type="checkbox" value="${day}" class="modal-sched-cb mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${driverWorkDays.includes(day) ? 'checked' : ''}>
-                    ${day.substring(0,3)}
-                </label>
-            `).join('');
-
-            const modal = document.getElementById('driverProfileModal');
-            const box = document.getElementById('driverProfileBox');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => {
-                box.classList.remove('scale-95', 'opacity-0');
-                box.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        };
-
-        window.closeProfileModal = function() {
-            const modal = document.getElementById('driverProfileModal');
-            const box = document.getElementById('driverProfileBox');
-            box.classList.remove('scale-100', 'opacity-100');
-            box.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.remove('flex');
-                modal.classList.add('hidden');
-            }, 200);
-        };
-
-        window.saveProfileFromModal = async function() {
-            const driverId = document.getElementById('modalDriverId').value;
-            const deptElements = document.querySelectorAll('.modal-dept-cb:checked');
-            const schedElements = document.querySelectorAll('.modal-sched-cb:checked');
+        window.initGooglePlaces = function() {
+            dispatchMap = new google.maps.Map(document.getElementById('dispatchMap'), {
+                center: { lat: 14.5632, lng: 121.0142 }, 
+                zoom: 13, 
+                disableDefaultUI: true, 
+                zoomControl: true
+            });
             
-            const selectedDepartments = Array.from(deptElements).map(cb => cb.value);
-            const selectedWorkDays = Array.from(schedElements).map(cb => cb.value);
+            dirService = new google.maps.DirectionsService();
+            dirRenderer = new google.maps.DirectionsRenderer({
+                map: dispatchMap,
+                polylineOptions: { strokeColor: '#1d4ed8', strokeWeight: 6 }
+            });
 
-            if (selectedDepartments.length === 0) return alert("Please select at least one department.");
-            if (selectedWorkDays.length === 0) return alert("Please assign at least one work day.");
+            const autocompleteOptions = { componentRestrictions: { country: "ph" }, fields: ["formatted_address", "geometry", "name"] };
+            new google.maps.places.Autocomplete(document.getElementById('dOrigin'), autocompleteOptions);
+            new google.maps.places.Autocomplete(document.getElementById('dDestination'), autocompleteOptions);
+        }
 
-            const btn = document.getElementById('btnSaveModal');
-            const origText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(`https://iacademy-rfid.onrender.com/api/drivers/${driverId}/profile`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ department: selectedDepartments, workDays: selectedWorkDays }) 
-                });
-
-                if (res.ok) {
-                    closeProfileModal();
-                    loadDashboardData(); 
-                } else alert("Failed to update driver profile.");
-            } catch (err) { 
-                alert("Network error."); 
-            } finally {
-                btn.innerHTML = origText;
-                btn.disabled = false;
-            }
-        };
-
+        // --- CORE LOAD LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
             renderNavigation('dashboard');
-            
-            const dateInput = document.getElementById('tDate');
-            dateInput.value = new Date().toISOString().split('T')[0];
-            
-            dateInput.addEventListener('change', updateDispatchDropdowns);
-            document.getElementById('tDepartment').addEventListener('change', updateDispatchDropdowns);
-
+            renderDeptCards();
+            loadGoogleMaps();
             loadDashboardData();
+            document.getElementById('dDate').addEventListener('change', updateModalDropdowns);
         });
+
+        function renderDeptCards() {
+            const container = document.getElementById('deptCardsContainer');
+            container.innerHTML = departmentsList.map(dept => `
+                <div onclick="openDispatchModal('${dept}')" class="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer hover:border-blue-400 hover:shadow-md hover:-translate-y-1 transition-all group flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-briefcase text-lg"></i>
+                    </div>
+                    <span class="font-bold text-blue-900 text-sm tracking-wide">${dept}</span>
+                </div>
+            `).join('');
+        }
 
         async function loadDashboardData() {
             allVehicles = await getVehicles();
@@ -550,18 +505,298 @@
             
             try {
                 const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
-                allTasks = await res.json(); // Assigned to Global Variable
+                allTasks = await res.json(); 
             } catch(e) { console.error("Could not load tasks"); }
 
-            updateDispatchDropdowns();
-
             document.getElementById('statVehicles').innerText = allVehicles.length;
-            document.getElementById('statTasks').innerText = allTasks.length; // Use global variable
+            document.getElementById('statTasks').innerText = allTasks.length; 
             document.getElementById('statLogs').innerText = logs.length;
             
             const totalSpent = logs.reduce((sum, log) => sum + (log.total || 0), 0);
             document.getElementById('statSpent').innerText = `₱${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
+            renderLiveBoard();
+            renderVehicleList();
+            renderLogsList(logs);
+            renderAdminDriverList();
+        }
+
+        // --- DISPATCH MODAL LOGIC ---
+        window.openDispatchModal = function(dept) {
+            currentDispatchDept = dept;
+            document.getElementById('modalDispatchDeptLabel').innerText = `Charging to: ${dept}`;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('dDate').value = todayStr;
+            
+            // Reset form and UI
+            document.getElementById('advancedTaskForm').reset();
+            document.getElementById('dDate').value = todayStr;
+            document.getElementById('dOrigin').value = "iACADEMY Nexus (Yakal St.)";
+            document.getElementById('dTollSegments').innerHTML = '';
+            
+            // Hide summary
+            const summary = document.getElementById('dispatchSummary');
+            summary.classList.add('hidden');
+            summary.classList.remove('translate-y-0', 'opacity-100');
+            summary.classList.add('translate-y-4', 'opacity-0');
+            
+            if (dirRenderer) dirRenderer.setDirections({routes: []});
+
+            updateModalDropdowns();
+
+            // Open Modal
+            const modal = document.getElementById('dispatchPlannerModal');
+            const box = document.getElementById('dispatchPlannerBox');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+                // Vital: Resize map after modal is visible to prevent grey box
+                if (dispatchMap) {
+                    google.maps.event.trigger(dispatchMap, 'resize');
+                    dispatchMap.setCenter({ lat: 14.5632, lng: 121.0142 });
+                }
+            }, 10);
+        }
+
+        window.closeDispatchModal = function() {
+            const modal = document.getElementById('dispatchPlannerModal');
+            const box = document.getElementById('dispatchPlannerBox');
+            box.classList.remove('scale-100', 'opacity-100');
+            box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function updateModalDropdowns() {
+            const dateInput = document.getElementById('dDate').value;
+            if (!dateInput) return;
+
+            const selectedDate = new Date(dateInput);
+            const dayIndex = selectedDate.getDay(); 
+            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = daysOfWeek[dayIndex];
+
+            // 1. FILTER DRIVERS
+            const dDriverSelect = document.getElementById('dDriver');
+            dDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
+            
+            let availableDrivers = allDrivers.filter(d => !d.workDays || d.workDays.includes(dayName));
+
+            if (currentDispatchDept) {
+                availableDrivers = availableDrivers.filter(d => {
+                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
+                    return deptArray.includes(currentDispatchDept);
+                });
+            }
+            
+            if (availableDrivers.length === 0) {
+                dDriverSelect.innerHTML = `<option value="" disabled selected>No drivers in ${currentDispatchDept} scheduled for ${dayName}</option>`;
+            } else {
+                availableDrivers.forEach(d => {
+                    dDriverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
+                });
+            }
+
+            // 2. FILTER VEHICLES
+            const dVehicleSelect = document.getElementById('dVehicle');
+            dVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
+            
+            let codingDigits = [];
+            if (dayIndex === 1) codingDigits = ['1', '2']; 
+            else if (dayIndex === 2) codingDigits = ['3', '4']; 
+            else if (dayIndex === 3) codingDigits = ['5', '6']; 
+            else if (dayIndex === 4) codingDigits = ['7', '8']; 
+            else if (dayIndex === 5) codingDigits = ['9', '0']; 
+
+            const bookedVehicles = allTasks.filter(t => t.date === dateInput).map(t => t.vehicle);
+
+            let availableCount = 0;
+            allVehicles.forEach(v => {
+                const plate = v.plateNumber.trim();
+                const lastDigit = plate.charAt(plate.length - 1);
+                
+                const isCoded = codingDigits.includes(lastDigit);
+                const isBooked = bookedVehicles.includes(plate);
+                
+                if (isBooked) {
+                    dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - BOOKED</option>`;
+                } else if (isCoded) {
+                    dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-red-500 bg-red-50">❌ ${v.plateNumber} - CODING</option>`;
+                } else {
+                    dVehicleSelect.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
+                    availableCount++;
+                }
+            });
+
+            if (availableCount === 0) dVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles</option>`;
+        }
+
+        // --- TOLL LOGIC INSIDE MODAL ---
+        window.addDispatchTollSegment = function() {
+            tollCounter++;
+            const id = tollCounter;
+            const container = document.getElementById('dTollSegments');
+            
+            let expOptions = `<option value="" disabled selected>Select expressway</option>`;
+            for (const exp in expressways) { expOptions += `<option value="${exp}">${exp}</option>`; }
+
+            container.insertAdjacentHTML('beforeend', `
+                <div id="dseg-${id}" class="bg-white border border-slate-200 p-3 rounded-lg relative">
+                    <button type="button" onclick="document.getElementById('dseg-${id}').remove(); updateDispatchToll();" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+                    <select id="dexp-${id}" onchange="updateDispatchExits(${id})" class="w-full text-xs bg-slate-50 border border-transparent rounded p-2 mb-2 outline-none focus:border-blue-400">
+                        ${expOptions}
+                    </select>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <select id="dentry-${id}" onchange="calculateDispatchSegment(${id})" class="w-full text-[10px] bg-slate-50 border border-transparent rounded p-2 outline-none focus:border-blue-400" disabled><option>Entry</option></select>
+                        <select id="dexit-${id}" onchange="calculateDispatchSegment(${id})" class="w-full text-[10px] bg-slate-50 border border-transparent rounded p-2 outline-none focus:border-blue-400" disabled><option>Exit</option></select>
+                    </div>
+                    <div class="text-right text-xs font-bold text-blue-800 hidden" id="dprice-${id}" data-cost="0">₱0.00</div>
+                </div>
+            `);
+        }
+
+        window.updateDispatchExits = function(id) {
+            const expSelect = document.getElementById(`dexp-${id}`);
+            const exits = expressways[expSelect.value] || [];
+            let options = `<option value="" disabled selected>Point...</option>`;
+            exits.forEach((exit, index) => { options += `<option value="${exit}" data-index="${index}">${exit}</option>`; });
+            
+            document.getElementById(`dentry-${id}`).innerHTML = options;
+            document.getElementById(`dexit-${id}`).innerHTML = options;
+            document.getElementById(`dentry-${id}`).disabled = false;
+            document.getElementById(`dexit-${id}`).disabled = false;
+        }
+
+        window.calculateDispatchSegment = function(id) {
+            const entrySelect = document.getElementById(`dentry-${id}`);
+            const exitSelect = document.getElementById(`dexit-${id}`);
+            const priceText = document.getElementById(`dprice-${id}`);
+
+            if (entrySelect.value && exitSelect.value && entrySelect.value !== "Entry" && exitSelect.value !== "Exit") {
+                const eIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
+                const xIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
+                let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 39 + 46 : 0; 
+                
+                priceText.innerText = `₱${cost.toFixed(2)}`;
+                priceText.setAttribute('data-cost', cost);
+                priceText.classList.remove('hidden');
+            }
+        }
+
+        function updateDispatchToll() {
+            let total = 0;
+            document.querySelectorAll('[id^="dprice-"]').forEach(span => total += parseFloat(span.getAttribute('data-cost') || 0));
+            return total;
+        }
+
+        // --- MAP ROUTING & BUDGETING ---
+        window.calculateDispatchRoute = function() {
+            if (!dirService) return alert("Maps loading, please wait.");
+            
+            const origin = document.getElementById('dOrigin').value;
+            const destination = document.getElementById('dDestination').value;
+            const plate = document.getElementById('dVehicle').value;
+
+            if (!plate) return alert("Please select a Vehicle.");
+            if (!origin || !destination) return alert("Please enter Origin and Destination.");
+            
+            const vehicle = allVehicles.find(v => v.plateNumber === plate);
+            const efficiency = vehicle && vehicle.efficiency ? parseFloat(vehicle.efficiency) : 14;
+            const fuelType = vehicle && vehicle.fuelType ? vehicle.fuelType : 'Gasoline';
+            const pricePerLiter = estimatedPrices[fuelType] || 75.00;
+            
+            const btn = document.getElementById('btnCalculateRoute');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Thinking...`;
+            btn.disabled = true;
+
+            dirService.route({
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (response, status) => {
+                btn.innerHTML = `<i class="fa-solid fa-calculator"></i> Calculate Route & Budget`;
+                btn.disabled = false;
+
+                if (status === "OK") {
+                    dirRenderer.setDirections(response);
+                    const route = response.routes[0].legs[0];
+                    
+                    calculatedDistance = route.distance.text;
+                    const distanceKm = parseFloat(route.distance.value) / 1000;
+                    const liters = (distanceKm / efficiency);
+                    const fuelCost = (liters * pricePerLiter);
+                    const tollCost = updateDispatchToll();
+                    
+                    calculatedBudget = fuelCost + tollCost;
+
+                    // Update UI
+                    document.getElementById('dSumDistTime').innerText = `${route.distance.text} / ${route.duration.text}`;
+                    document.getElementById('dSumFuelVol').innerText = `${liters.toFixed(1)}L (${fuelType})`;
+                    document.getElementById('dSumFuelCost').innerText = `₱${fuelCost.toFixed(2)}`;
+                    document.getElementById('dSumTollCost').innerText = `₱${tollCost.toFixed(2)}`;
+                    document.getElementById('dSumTotal').innerText = `₱${calculatedBudget.toFixed(2)}`;
+
+                    // Show Summary
+                    const summary = document.getElementById('dispatchSummary');
+                    summary.classList.remove('hidden');
+                    setTimeout(() => {
+                        summary.classList.remove('translate-y-4', 'opacity-0');
+                        summary.classList.add('translate-y-0', 'opacity-100');
+                    }, 10);
+
+                } else {
+                    alert("Google Maps cannot find a driving route between these points.");
+                }
+            });
+        }
+
+        // --- SUBMIT DISPATCH TO DB ---
+        window.finalizeDispatchTask = async function() {
+            const btn = document.getElementById('btnConfirmDispatch');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Dispatching...`;
+            btn.disabled = true;
+
+            const baseDesc = document.getElementById('dDescription').value;
+            const origin = document.getElementById('dOrigin').value;
+            const dest = document.getElementById('dDestination').value;
+            
+            // Enrich description with our smart data
+            const enrichedDesc = `[Est. Budget: ₱${calculatedBudget.toFixed(2)} | Dist: ${calculatedDistance}] From ${origin}. Instructions: ${baseDesc}`;
+
+            const taskData = {
+                driver: document.getElementById('dDriver').value,
+                vehicle: document.getElementById('dVehicle').value,
+                department: currentDispatchDept,
+                taskType: document.getElementById('dType').value,
+                destination: dest,
+                description: enrichedDesc,
+                date: document.getElementById('dDate').value,
+                status: 'Pending'
+            };
+
+            try {
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData)
+                });
+                if (res.ok) {
+                    alert('Task dispatched to driver successfully!');
+                    closeDispatchModal();
+                    loadDashboardData();
+                }
+            } catch (err) { alert('Failed to dispatch task.'); }
+            finally { btn.innerHTML = `Confirm & Dispatch`; btn.disabled = false; }
+        }
+
+
+        // --- UI RENDER HELPERS ---
+        function renderLiveBoard() {
             const tBoard = document.getElementById('taskBoard');
             if (allTasks.length === 0) {
                 tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks dispatched yet.</td></tr>`;
@@ -569,9 +804,9 @@
                 tBoard.innerHTML = allTasks.map(t => {
                     const isDone = t.status === 'Completed';
                     const isRebook = t.status === 'Rebook';
-                    let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-xs border border-blue-100">Completed</span>`
-                                   : (isRebook ? `<span class="bg-red-50 text-red-700 font-bold px-3 py-1.5 rounded-md text-xs border border-red-200">Rebook</span>`
-                                   : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-xs border border-gray-200">Pending</span>`);
+                    let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-blue-100 uppercase tracking-widest">Completed</span>`
+                                   : (isRebook ? `<span class="bg-red-50 text-red-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-red-200 uppercase tracking-widest">Rebook</span>`
+                                   : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-gray-200 uppercase tracking-widest">Pending</span>`);
 
                     return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
@@ -584,12 +819,14 @@
                         <td class="p-4">
                             <div class="font-bold text-blue-900">${t.destination}</div>
                             <div class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1">${t.taskType || 'Standard Task'}</div>
-                            <div class="text-xs text-gray-500 truncate max-w-[200px] mt-0.5">${t.description}</div>
+                            <div class="text-xs text-gray-500 line-clamp-2 max-w-[300px] mt-0.5" title="${t.description}">${t.description}</div>
                         </td>
                     </tr>
                 `}).join('');
             }
+        }
 
+        function renderVehicleList() {
             const vList = document.getElementById('vehicleList');
             if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
             else vList.innerHTML = allVehicles.map(v => `
@@ -598,7 +835,9 @@
                         <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
                         <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-lg"></i></button></td>
                     </tr>`).join('');
+        }
 
+        function renderLogsList(logs) {
             const lList = document.getElementById('logsList');
             if (logs.length === 0) {
                 lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
@@ -607,7 +846,6 @@
                     const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
                     const fuelText = l.fuelType || 'Unknown';
                     const notesBadge = l.notes ? `<i class="fa-solid fa-message text-blue-300 ml-2" title="${l.notes}"></i>` : '';
-                    
                     return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4 text-gray-500 text-xs font-medium">${l.date}</td>
@@ -622,7 +860,9 @@
                     </tr>`
                 }).join('');
             }
+        }
 
+        function renderAdminDriverList() {
             const dList = document.getElementById('adminDriverList');
             if (allDrivers.length === 0) {
                 dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
@@ -652,120 +892,6 @@
             }
         }
 
-        // --- UPDATED: Checks for booked vehicles ---
-        function updateDispatchDropdowns() {
-            const dateInput = document.getElementById('tDate').value;
-            const deptInput = document.getElementById('tDepartment').value;
-            if (!dateInput) return;
-
-            const selectedDate = new Date(dateInput);
-            const dayIndex = selectedDate.getDay(); 
-            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayName = daysOfWeek[dayIndex];
-
-            // 1. FILTER DRIVERS
-            const tDriverSelect = document.getElementById('tDriver');
-            tDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
-            
-            let availableDrivers = allDrivers.filter(d => !d.workDays || d.workDays.includes(dayName));
-
-            if (deptInput) {
-                availableDrivers = availableDrivers.filter(d => {
-                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
-                    return deptArray.includes(deptInput);
-                });
-            }
-            
-            if (availableDrivers.length === 0) {
-                if (deptInput) {
-                    tDriverSelect.innerHTML = `<option value="" disabled selected>No drivers in ${deptInput} scheduled for ${dayName}</option>`;
-                } else {
-                    tDriverSelect.innerHTML = `<option value="" disabled selected>No drivers scheduled for ${dayName}</option>`;
-                }
-            } else {
-                availableDrivers.forEach(d => {
-                    const deptText = Array.isArray(d.department) ? d.department.join(', ') : (d.department || 'Pending');
-                    tDriverSelect.innerHTML += `<option value="${d.username}">${d.username} (${deptText})</option>`;
-                });
-            }
-
-            // 2. FILTER VEHICLES (CODING & DOUBLE-BOOKING)
-            const tVehicleSelect = document.getElementById('tVehicle');
-            tVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
-            
-            let codingDigits = [];
-            if (dayIndex === 1) codingDigits = ['1', '2']; 
-            else if (dayIndex === 2) codingDigits = ['3', '4']; 
-            else if (dayIndex === 3) codingDigits = ['5', '6']; 
-            else if (dayIndex === 4) codingDigits = ['7', '8']; 
-            else if (dayIndex === 5) codingDigits = ['9', '0']; 
-
-            // Check which vehicles are already assigned to a task on this exact date
-            const bookedVehicles = allTasks.filter(t => t.date === dateInput).map(t => t.vehicle);
-
-            let availableCount = 0;
-            allVehicles.forEach(v => {
-                const plate = v.plateNumber.trim();
-                const lastDigit = plate.charAt(plate.length - 1);
-                
-                const isCoded = codingDigits.includes(lastDigit);
-                const isBooked = bookedVehicles.includes(plate);
-                
-                if (isBooked) {
-                    tVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} (${v.model}) - BOOKED</option>`;
-                } else if (isCoded) {
-                    tVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-red-500 bg-red-50">❌ ${v.plateNumber} (${v.model}) - CODING</option>`;
-                } else {
-                    tVehicleSelect.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
-                    availableCount++;
-                }
-            });
-
-            if (availableCount === 0) {
-                tVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles for ${dayName}</option>`;
-            }
-        }
-
-        async function submitTask(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
-            btn.disabled = true;
-
-            let finalDestination = document.getElementById('tDestinationSelect').value;
-            if (finalDestination === 'Other') {
-                finalDestination = document.getElementById('tDestinationCustom').value;
-            }
-
-            const taskData = {
-                driver: document.getElementById('tDriver').value,
-                vehicle: document.getElementById('tVehicle').value,
-                department: document.getElementById('tDepartment').value,
-                taskType: document.getElementById('tType').value,
-                destination: finalDestination,
-                description: document.getElementById('tDescription').value,
-                date: document.getElementById('tDate').value,
-                status: 'Pending'
-            };
-
-            try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(taskData)
-                });
-                if (res.ok) {
-                    alert('Task dispatched successfully!');
-                    e.target.reset();
-                    toggleCustomDestination(); 
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    document.getElementById('tDate').value = todayStr;
-                    loadDashboardData(); // This will fetch the new task and trigger the dropdown update automatically
-                }
-            } catch (err) { alert('Failed to dispatch task.'); }
-            finally { btn.innerHTML = `Send to Driver`; btn.disabled = false; }
-        }
-
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -781,19 +907,76 @@
             };
 
             try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/vehicles', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(vehicleData)
-                });
-                if (res.ok) {
-                    document.getElementById('vehicleForm').reset();
-                    document.getElementById('vPreset').value = ''; 
-                    loadDashboardData();
-                }
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/vehicles', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(vehicleData) });
+                if (res.ok) { document.getElementById('vehicleForm').reset(); document.getElementById('vPreset').value = ''; loadDashboardData(); }
             } catch (err) { console.error('Error saving vehicle:', err); } 
             finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
+
+        window.openProfileModal = function(driverId) {
+            const driver = allDrivers.find(d => d._id === driverId);
+            if (!driver) return;
+
+            document.getElementById('modalDriverName').innerText = driver.username;
+            document.getElementById('modalDriverId').value = driver._id;
+
+            const deptArray = Array.isArray(driver.department) ? driver.department : (driver.department ? [driver.department] : []);
+            const driverWorkDays = driver.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            document.getElementById('modalDeptList').innerHTML = departmentsList.map(dept => `
+                <label class="flex items-center text-xs text-gray-700 font-medium cursor-pointer p-1.5 hover:bg-gray-100 rounded transition-colors">
+                    <input type="checkbox" value="${dept}" class="modal-dept-cb mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${deptArray.includes(dept) ? 'checked' : ''}>
+                    ${dept}
+                </label>
+            `).join('');
+
+            document.getElementById('modalScheduleList').innerHTML = daysOfWeek.map(day => `
+                <label class="flex items-center text-xs text-gray-700 font-bold tracking-wide uppercase cursor-pointer p-1.5 hover:bg-gray-100 rounded transition-colors">
+                    <input type="checkbox" value="${day}" class="modal-sched-cb mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${driverWorkDays.includes(day) ? 'checked' : ''}>
+                    ${day.substring(0,3)}
+                </label>
+            `).join('');
+
+            const modal = document.getElementById('driverProfileModal');
+            const box = document.getElementById('driverProfileBox');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 10);
+        };
+
+        window.closeProfileModal = function() {
+            const modal = document.getElementById('driverProfileModal');
+            const box = document.getElementById('driverProfileBox');
+            box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 200);
+        };
+
+        window.saveProfileFromModal = async function() {
+            const driverId = document.getElementById('modalDriverId').value;
+            const deptElements = document.querySelectorAll('.modal-dept-cb:checked');
+            const schedElements = document.querySelectorAll('.modal-sched-cb:checked');
+            
+            const selectedDepartments = Array.from(deptElements).map(cb => cb.value);
+            const selectedWorkDays = Array.from(schedElements).map(cb => cb.value);
+
+            if (selectedDepartments.length === 0) return alert("Please select at least one department.");
+            if (selectedWorkDays.length === 0) return alert("Please assign at least one work day.");
+
+            const btn = document.getElementById('btnSaveModal');
+            const origText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`https://iacademy-rfid.onrender.com/api/drivers/${driverId}/profile`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ department: selectedDepartments, workDays: selectedWorkDays }) 
+                });
+
+                if (res.ok) { closeProfileModal(); loadDashboardData(); } 
+                else alert("Failed to update driver profile.");
+            } catch (err) { alert("Network error."); } finally { btn.innerHTML = origText; btn.disabled = false; }
+        };
 
         async function deleteVehicle(id) {
             if (confirm("Are you sure you want to permanently delete this vehicle?")) {
