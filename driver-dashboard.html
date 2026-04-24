@@ -32,7 +32,6 @@
                     renderNavigation('dashboard');
                 }
 
-                // UPDATED: Use initData to ensure tasks load before vehicles
                 initDriverData();
             }
         });
@@ -233,12 +232,6 @@
             </div>
             
             <form id="fuelForm" onsubmit="submitFuel(event)" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
-                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Loading vehicles...</option>
-                    </select>
-                </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -255,6 +248,13 @@
                             <option value="Diesel">Diesel</option>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
+                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Loading vehicles...</option>
+                    </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -306,12 +306,6 @@
             </div>
             
             <form id="tollForm" onsubmit="submitToll(event)" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
-                    <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Loading vehicles...</option>
-                    </select>
-                </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -336,6 +330,13 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
+                    <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Loading vehicles...</option>
+                    </select>
                 </div>
 
                 <div>
@@ -366,18 +367,16 @@
         let currentActiveTaskDest = "N/A";
         const statusText = document.getElementById('status-text');
 
-        // NEW GLOBALS FOR SMART FILTERING
         let allVehicles = [];
         let allTasks = [];
 
         window.globalLogout = function() { localStorage.clear(); window.location.href = 'login.html'; };
 
-        // Center Modal Fixes
         window.openFuelModal = function() {
             const m = document.getElementById('fuelModal');
             m.classList.remove('hidden');
             m.classList.add('flex');
-            updateModalVehicleDropdown('fuel'); // Trigger filter when opened
+            updateModalVehicleDropdown('fuel'); 
         };
         window.closeFuelModal = function() {
             const m = document.getElementById('fuelModal');
@@ -389,7 +388,7 @@
             const m = document.getElementById('tollModal');
             m.classList.remove('hidden');
             m.classList.add('flex');
-            updateModalVehicleDropdown('toll'); // Trigger filter when opened
+            updateModalVehicleDropdown('toll'); 
         };
         window.closeTollModal = function() {
             const m = document.getElementById('tollModal');
@@ -397,10 +396,8 @@
             m.classList.add('hidden');
         };
 
-        // --- NEW: INITIALIZE DATA ---
         async function initDriverData() {
             try {
-                // Fetch tasks and vehicles concurrently
                 const [tasksRes, vehiclesRes] = await Promise.all([
                     fetch(`${API_BASE}/tasks`),
                     fetch(`${API_BASE}/vehicles`)
@@ -409,11 +406,9 @@
                 allTasks = await tasksRes.json();
                 allVehicles = await vehiclesRes.json();
 
-                // Set default dates to today
                 document.getElementById('fDate').valueAsDate = new Date();
                 document.getElementById('tollDate').valueAsDate = new Date();
                 
-                // Load UI Elements
                 renderMyTasks();
                 updateModalVehicleDropdown('fuel');
                 updateModalVehicleDropdown('toll');
@@ -423,7 +418,6 @@
             }
         }
 
-        // --- NEW: SMART MODAL DROPDOWN FILTER ---
         window.updateModalVehicleDropdown = function(type) {
             const dateInputId = type === 'fuel' ? 'fDate' : 'tollDate';
             const selectId = type === 'fuel' ? 'fVehicle' : 'tollVehicle';
@@ -434,7 +428,6 @@
 
             if (!dateInput || allVehicles.length === 0) return;
 
-            // Find which vehicle is assigned to which driver on the selected date
             const dailyTasks = allTasks.filter(t => t.date === dateInput);
             const vehicleAssignments = {};
             dailyTasks.forEach(t => {
@@ -449,14 +442,11 @@
                 const assignedTo = vehicleAssignments[plate];
 
                 if (assignedTo && assignedTo !== myName) {
-                    // Locked: Assigned to someone else
                     selectEl.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50 font-medium">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
                 } else if (assignedTo === myName) {
-                    // Auto-Select: Assigned to THIS driver
                     selectEl.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-700 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to you)</option>`;
                     autoSelectPlate = v.plateNumber;
                 } else {
-                    // Free to use
                     selectEl.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
                 }
             });
@@ -553,7 +543,7 @@
                     e.target.reset();
                     document.getElementById('fTotalCostDisplay').innerText = '₱0.00';
                     document.getElementById('fDate').valueAsDate = new Date();
-                    updateModalVehicleDropdown('fuel'); // reset dropdown styling
+                    updateModalVehicleDropdown('fuel'); 
                 }
             } catch (err) { alert('Server error saving fuel log.'); } 
             finally { btn.innerHTML = originalText; btn.disabled = false; }
@@ -589,7 +579,7 @@
                     closeTollModal();
                     e.target.reset();
                     document.getElementById('tollDate').valueAsDate = new Date();
-                    updateModalVehicleDropdown('toll'); // reset dropdown styling
+                    updateModalVehicleDropdown('toll'); 
                 } else {
                     alert('Failed to save toll log.');
                 }
@@ -843,7 +833,6 @@
                 document.getElementById('display-task-type').innerText = "N/A";
                 document.getElementById('display-task-vehicle').innerText = "VEHICLE";
                 
-                // Re-fetch tasks globally after a handover!
                 initDriverData();
             }
         });
