@@ -63,7 +63,6 @@
                     <h3 id="statVehicles" class="text-3xl font-black text-blue-900">0</h3>
                 </div>
             </div>
-            
             <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
                     <i class="fa-solid fa-clipboard-list text-blue-500 text-xl"></i>
@@ -73,7 +72,6 @@
                     <h3 id="statTasks" class="text-3xl font-black text-blue-900">0</h3>
                 </div>
             </div>
-
             <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
                     <i class="fa-solid fa-file-invoice text-blue-500 text-xl"></i>
@@ -83,7 +81,6 @@
                     <h3 id="statLogs" class="text-3xl font-black text-blue-900">0</h3>
                 </div>
             </div>
-
             <div class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4">
                     <i class="fa-solid fa-peso-sign text-blue-500 text-xl"></i>
@@ -105,22 +102,11 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
                         <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
-                        <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select date first...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
-                        <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select date first...</option>
-                        </select>
-                    </div>
+                    
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Charge to Department</label>
                         <select id="tDepartment" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                            <option value="" disabled selected>Select department...</option>
+                            <option value="" disabled selected>Select department first...</option>
                             <option value="ELPD">ELPD</option>
                             <option value="OSAS">OSAS</option>
                             <option value="IT">IT</option>
@@ -136,6 +122,21 @@
                             <option value="LIBRARY">LIBRARY</option>
                         </select>
                     </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
+                        <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Select department & date first...</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
+                        <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Select date first...</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Category</label>
                         <select id="tType" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
@@ -363,7 +364,6 @@
         let allVehicles = [];
         let allDrivers = [];
 
-        // --- UPDATED PRESET DATA ---
         const vehiclePresets = {
             "Toyota Vios": { eff: 14, fuel: "Ron95" },
             "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
@@ -410,7 +410,10 @@
             
             const dateInput = document.getElementById('tDate');
             dateInput.value = new Date().toISOString().split('T')[0];
+            
+            // Listen to BOTH date and department changes to filter drivers
             dateInput.addEventListener('change', updateDispatchDropdowns);
+            document.getElementById('tDepartment').addEventListener('change', updateDispatchDropdowns);
 
             loadDashboardData();
         });
@@ -450,9 +453,9 @@
                     <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4">${statusHtml}</td>
                         <td class="p-4">
-    <div class="font-medium text-gray-800">${t.date}</div>
-    <div class="text-xs text-gray-500 mt-1">${t.driver} &bull; <span class="font-bold text-blue-600">${t.department || 'N/A'}</span></div>
-</td>
+                            <div class="font-medium text-gray-800">${t.date}</div>
+                            <div class="text-xs text-gray-500 mt-1">${t.driver} &bull; <span class="font-bold text-blue-600">${t.department || 'N/A'}</span></div>
+                        </td>
                         <td class="p-4 text-gray-600 font-medium">${t.vehicle}</td>
                         <td class="p-4">
                             <div class="font-bold text-blue-900">${t.destination}</div>
@@ -504,7 +507,6 @@
                 dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
             } else {
                 dList.innerHTML = allDrivers.map(d => {
-                    // 1. Departments Logic
                     const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
                     const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
                     
@@ -517,7 +519,6 @@
                         return `<option value="${dept}" ${isSelected}>${dept}</option>`;
                     }).join('');
                     
-                    // 2. Work Schedule Logic
                     const driverWorkDays = d.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']; 
                     const scheduleCheckboxes = daysOfWeek.map(day => {
                         const isChecked = driverWorkDays.includes(day) ? 'checked' : '';
@@ -553,8 +554,10 @@
             }
         }
 
+        // --- ENHANCED: Filters drivers by Schedule AND Department ---
         function updateDispatchDropdowns() {
             const dateInput = document.getElementById('tDate').value;
+            const deptInput = document.getElementById('tDepartment').value;
             if (!dateInput) return;
 
             const selectedDate = new Date(dateInput);
@@ -562,14 +565,26 @@
             const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const dayName = daysOfWeek[dayIndex];
 
-            // 1. FILTER DRIVERS BY SCHEDULE
+            // 1. FILTER DRIVERS BY SCHEDULE AND DEPARTMENT
             const tDriverSelect = document.getElementById('tDriver');
             tDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
             
-            const availableDrivers = allDrivers.filter(d => !d.workDays || d.workDays.includes(dayName));
+            let availableDrivers = allDrivers.filter(d => !d.workDays || d.workDays.includes(dayName));
+
+            // If a department is selected, filter drivers to only those in that department
+            if (deptInput) {
+                availableDrivers = availableDrivers.filter(d => {
+                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
+                    return deptArray.includes(deptInput);
+                });
+            }
             
             if (availableDrivers.length === 0) {
-                tDriverSelect.innerHTML = `<option value="" disabled selected>No drivers scheduled for ${dayName}</option>`;
+                if (deptInput) {
+                    tDriverSelect.innerHTML = `<option value="" disabled selected>No drivers in ${deptInput} scheduled for ${dayName}</option>`;
+                } else {
+                    tDriverSelect.innerHTML = `<option value="" disabled selected>No drivers scheduled for ${dayName}</option>`;
+                }
             } else {
                 availableDrivers.forEach(d => {
                     const deptText = Array.isArray(d.department) ? d.department.join(', ') : (d.department || 'Pending');
@@ -618,10 +633,10 @@
                 finalDestination = document.getElementById('tDestinationCustom').value;
             }
 
-          const taskData = {
+            const taskData = {
                 driver: document.getElementById('tDriver').value,
                 vehicle: document.getElementById('tVehicle').value,
-                department: document.getElementById('tDepartment').value, 
+                department: document.getElementById('tDepartment').value,
                 taskType: document.getElementById('tType').value,
                 destination: finalDestination,
                 description: document.getElementById('tDescription').value,
