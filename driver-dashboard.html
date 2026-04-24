@@ -450,6 +450,11 @@
                     selectEl.value = autoSelectPlate;
                 }
             }
+
+            // NEW: Auto-fill fuel type instantly if we are in the fuel modal
+            if (type === 'fuel' && typeof updateFuelTypeDisplay === 'function') {
+                updateFuelTypeDisplay();
+            }
         };
 
         function renderMyTasks() {
@@ -495,6 +500,16 @@
                 `;
             }).join('');
         }
+window.updateFuelTypeDisplay = function() {
+            const plate = document.getElementById('fVehicle').value;
+            const fuelInput = document.getElementById('fFuelType');
+            if (!plate) {
+                fuelInput.value = "";
+                return;
+            }
+            const vObj = allVehicles.find(v => v.plateNumber === plate);
+            fuelInput.value = vObj && vObj.fuelType ? vObj.fuelType : "Unknown";
+        };
 
         // --- FUEL CALCULATION & SUBMISSION ---
         function calculateTotalFuelCost() {
@@ -507,19 +522,24 @@
         document.getElementById('fPrice').addEventListener('input', calculateTotalFuelCost);
         document.getElementById('fLiters').addEventListener('input', calculateTotalFuelCost);
 
-        async function submitFuel(e) {
+       async function submitFuel(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...'; 
             btn.disabled = true;
 
+            // Securely grab the exact fuel type from the database array
+            const vehiclePlate = document.getElementById('fVehicle').value;
+            const vObj = allVehicles.find(v => v.plateNumber === vehiclePlate);
+            const actualFuelType = vObj ? vObj.fuelType : "Unknown";
+
             const logData = {
-                vehicle: document.getElementById('fVehicle').value,
+                vehicle: vehiclePlate,
                 driver: localStorage.getItem('username'),
                 department: localStorage.getItem('userDept') || 'Unknown',
                 date: document.getElementById('fDate').value,
-                fuelType: document.getElementById('fFuelType').value,
+                fuelType: actualFuelType, // <--- Uses the secure variable
                 liters: parseFloat(document.getElementById('fLiters').value),
                 price: parseFloat(document.getElementById('fPrice').value),
                 total: parseFloat(document.getElementById('fLiters').value) * parseFloat(document.getElementById('fPrice').value),
