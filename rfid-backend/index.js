@@ -65,6 +65,7 @@ const taskSchema = new mongoose.Schema({
 const actionLogSchema = new mongoose.Schema({
     driver_name: String,
     plate_number: String,
+    department: String,
     action: String, // e.g., "Travel Update", "Final Task Handover"
     task: String,
     location: String,

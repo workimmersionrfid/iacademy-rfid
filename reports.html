@@ -14,7 +14,7 @@
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
+                    colors: { brand: { blue: '#1e3a8a', bg: '#f8fafc' } }
                 }
             }
         }
@@ -49,18 +49,30 @@
                 <i class="fa-solid fa-filter text-blue-400"></i> Database Filters
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
-                    <input type="date" id="filterStart" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
+                    <input type="date" id="filterStart" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
-                    <input type="date" id="filterEnd" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
+                    <input type="date" id="filterEnd" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">All Tasks</label>
-                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Department</label>
+                    <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                        <option value="">All Departments</option>
+                        <option value="ELPD">ELPD</option>
+                        <option value="OSAS">OSAS</option>
+                        <option value="IT">IT</option>
+                        <option value="REGISTRAR">REGISTRAR</option>
+                        <option value="FINANCE">FINANCE</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Task Category</label>
+                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
                         <option value="">All Tasks</option>
                         <option value="Asset Collection">Asset Collection</option>
                         <option value="Document Routing">Document Routing</option>
@@ -70,43 +82,12 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">All Destinations</label>
-                    <select id="filterDest" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
-                        <option value="">All Destinations</option>
-                        <option value="iACADEMY Nexus">iACADEMY Nexus</option>
-                        <option value="iACADEMY Plaza">iACADEMY Plaza</option>
-                        <option value="Metrobank">Metrobank</option>
-                        <option value="Macquarie">Macquarie</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">All Travel Updates</label>
-                    <select id="filterTravel" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
-                        <option value="">All Travel Updates</option>
-                        <option value="En Route">En Route</option>
-                        <option value="Delayed">Delayed</option>
-                        <option value="Nearby">Nearby</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">All Handover Results</label>
-                    <select id="filterHandover" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
-                        <option value="">All Handover Results</option>
-                        <option value="Completed">Successful</option>
-                        <option value="Completed_Remarks">Successful (With Remarks)</option>
-                        <option value="Failed">Failed</option>
-                    </select>
-                </div>
-            </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 pb-8">
                 <button onclick="applyFilters()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass"></i> Search Database
                 </button>
-                <button onclick="clearFilters()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-eraser"></i> Clear
+                <button onclick="clearFilters()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3.5 rounded-xl transition-colors flex justify-center items-center gap-2 border border-gray-200">
+                    <i class="fa-solid fa-eraser"></i> Clear Filters
                 </button>
             </div>
 
@@ -122,7 +103,7 @@
             
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h2 class="font-bold text-xl text-blue-900 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-blue-400"></i> Filtered Results
+                    <i class="fa-solid fa-list-check text-blue-400"></i> Action Logs
                 </h2>
                 <span id="resultCount" class="bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-md text-xs border border-blue-100">0 logs found</span>
             </div>
@@ -132,7 +113,7 @@
                     <thead class="sticky top-0 bg-white z-10 shadow-sm">
                         <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                             <th class="p-4 font-bold">Timestamp</th>
-                            <th class="p-4 font-bold">Driver & Vehicle</th>
+                            <th class="p-4 font-bold">Driver / Dept</th>
                             <th class="p-4 font-bold">Action & Task</th>
                             <th class="p-4 font-bold">Destination</th>
                             <th class="p-4 font-bold">Status & Remarks</th>
@@ -167,7 +148,6 @@
                 filteredLogs = [...allLogs];
                 renderTable(filteredLogs);
             } catch (error) {
-                console.error("Failed to fetch logs", error);
                 document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 font-bold">Failed to load database.</td></tr>`;
             }
         }
@@ -176,32 +156,19 @@
             const fStart = document.getElementById('filterStart').value;
             const fEnd = document.getElementById('filterEnd').value;
             const fTask = document.getElementById('filterTask').value.toLowerCase();
-            const fDest = document.getElementById('filterDest').value.toLowerCase();
-            const fTravel = document.getElementById('filterTravel').value.toLowerCase();
-            const fHandover = document.getElementById('filterHandover').value; // Keep original casing for exact match
+            const fDept = document.getElementById('filterDept').value; 
 
             filteredLogs = allLogs.filter(log => {
                 let match = true;
-                
-                // Date logic
                 if (fStart || fEnd) {
                     const logDate = new Date(log.timestamp).toISOString().split('T')[0];
                     if (fStart && logDate < fStart) match = false;
                     if (fEnd && logDate > fEnd) match = false;
                 }
-
                 if (fTask && !log.task.toLowerCase().includes(fTask)) match = false;
-                if (fDest && !log.location.toLowerCase().includes(fDest)) match = false;
-                
-                // For "Travel Update" filter, look at delivery_status (which contains En Route, Delayed, etc.)
-                if (fTravel && (!log.delivery_status || !log.delivery_status.toLowerCase().includes(fTravel))) match = false;
-                
-                // For "Handover", look at completion_type
-                if (fHandover && log.completion_type !== fHandover) match = false;
-
+                if (fDept && log.department !== fDept) match = false;
                 return match;
             });
-
             renderTable(filteredLogs);
         }
 
@@ -209,10 +176,7 @@
             document.getElementById('filterStart').value = '';
             document.getElementById('filterEnd').value = '';
             document.getElementById('filterTask').value = '';
-            document.getElementById('filterDest').value = '';
-            document.getElementById('filterTravel').value = '';
-            document.getElementById('filterHandover').value = '';
-            
+            document.getElementById('filterDept').value = '';
             filteredLogs = [...allLogs];
             renderTable(filteredLogs);
         }
@@ -239,6 +203,8 @@
                         statusBadge = `<span class="text-red-700 bg-red-50 px-2 py-1 rounded border border-red-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
                 } else if(log.action === "Travel Update") {
                     statusBadge = `<span class="text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
+                } else if(log.action === "Started Navigation") {
+                    statusBadge = `<span class="text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
                 }
 
                 let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
@@ -252,11 +218,11 @@
                     </td>
                     <td class="p-4">
                         <div class="font-bold text-gray-800"><i class="fa-regular fa-user text-blue-400 mr-1"></i> ${log.driver_name}</div>
-                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Plate: ${log.plate_number}</div>
+                        <div class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">${log.department || 'GENERAL'}</div>
                     </td>
                     <td class="p-4">
                         <div class="font-bold text-blue-900">${log.action}</div>
-                        <div class="text-xs text-gray-500 mt-1">${log.task}</div>
+                        <div class="text-[10px] text-gray-500 mt-1 font-bold uppercase tracking-wider">${log.task}</div>
                     </td>
                     <td class="p-4 font-medium text-gray-600 text-sm">
                         ${log.location}
@@ -271,15 +237,11 @@
         }
 
         function exportToExcel() {
-            if (filteredLogs.length === 0) {
-                alert("No data to export!");
-                return;
-            }
-
-            // Map internal JSON keys to nice Excel headers
+            if (filteredLogs.length === 0) return alert("No data to export!");
             const exportData = filteredLogs.map(log => ({
                 "Date": new Date(log.timestamp).toLocaleDateString(),
                 "Time": new Date(log.timestamp).toLocaleTimeString(),
+                "Department": log.department || "General",
                 "Driver Name": log.driver_name,
                 "Plate Number": log.plate_number,
                 "Action Type": log.action,
@@ -289,18 +251,11 @@
                 "Result Type": log.completion_type || "N/A",
                 "Remarks/Reasons": log.incomplete_reasons !== "None" ? log.incomplete_reasons : "",
                 "Comments": log.comments !== "None" ? log.comments : "",
-                "GPS Latitude": log.latitude,
-                "GPS Longitude": log.longitude
             }));
-
-            // Generate Worksheet
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Logs");
-
-            // Save File
-            const fileName = `Logistics_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
+            XLSX.writeFile(workbook, `Logistics_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
     </script>
 </body>
