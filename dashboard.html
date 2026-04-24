@@ -245,7 +245,6 @@
             <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h2 class="font-bold text-xl text-blue-900">Driver Profiles & Scheduling</h2>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Click a driver to edit</p>
             </div>
             <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                 <table class="w-full text-left border-collapse">
@@ -990,39 +989,21 @@
                     const scheduleBadges = driverWorkDays.map(day => `<span class="text-[10px] font-bold text-gray-600 border border-gray-200 bg-white px-2 py-0.5 rounded m-0.5 inline-block uppercase">${day.substring(0,3)}</span>`).join('');
 
                     return `
-                    <tr class="hover:bg-blue-50/30 transition-colors cursor-pointer group" onclick="openProfileModal('${d._id}')">
-                        <td class="p-4 font-bold text-blue-800 align-middle underline decoration-blue-200 underline-offset-4 group-hover:text-blue-900">${d.username}</td>
+                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                        <td class="p-4 align-middle">
+                            <button onclick="openProfileModal('${d._id}')" class="font-bold text-blue-800 underline decoration-blue-200 underline-offset-4 hover:text-blue-900 text-left transition-colors cursor-pointer">
+                                ${d.username}
+                            </button>
+                        </td>
                         <td class="p-4 align-middle max-w-[200px]">${deptBadge}</td>
                         <td class="p-4 align-middle max-w-[200px]">${scheduleBadges}</td>
                         <td class="p-4 text-right align-middle">
-                            <button class="bg-white border border-gray-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 text-gray-500 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm">
+                            <button onclick="openProfileModal('${d._id}')" class="bg-white border border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 text-gray-500 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm">
                                 <i class="fa-solid fa-pen text-[10px] mr-1"></i> Edit
                             </button>
                         </td>
                     </tr>`;
                 }).join('');
-            }
-        }
-
-        // --- PRESET VEHICLES ---
-        const vehiclePresets = {
-            "Toyota Vios": { eff: 14, fuel: "Ron95" }, "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
-            "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" }, "Mitsubishi Xpander": { eff: 13, fuel: "Ron95" },
-            "Mitsubishi Montero": { eff: 11, fuel: "Diesel" }, "Honda Beat": { eff: 50, fuel: "Ron95" },
-            "Honda City": { eff: 15, fuel: "Ron95" }, "Suzuki Carry": { eff: 12, fuel: "Diesel" },
-            "Ford Ranger": { eff: 11, fuel: "Diesel" }, "Hyundai Tucson": { eff: 12, fuel: "Ron95" },
-            "Kia Picanto": { eff: 18, fuel: "Ron95" }, "Geely Coolray": { eff: 14, fuel: "Ron95" },
-            "Suzuki Ertiga": { eff: 14, fuel: "Ron95" }, "Yamaha Mio": { eff: 55, fuel: "Ron95" },
-            "Isuzu D-Max": { eff: 12, fuel: "Diesel" }
-        };
-
-        function applyPreset() {
-            const presetName = document.getElementById('vPreset').value;
-            if (presetName && vehiclePresets[presetName]) {
-                const data = vehiclePresets[presetName];
-                document.getElementById('vModel').value = presetName;
-                document.getElementById('vEfficiency').value = data.eff;
-                document.getElementById('vFuel').value = data.fuel;
             }
         }
 
@@ -1047,7 +1028,6 @@
             finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
 
-        // --- DRIVER PROFILE MODAL LOGIC ---
         window.openProfileModal = function(driverId) {
             const driver = allDrivers.find(d => d._id === driverId);
             if (!driver) return;
