@@ -31,7 +31,6 @@
         }
         .dpd-card-accent { border-bottom-left-radius: 100%; }
         
-        /* Map Autocomplete Styles */
         .pac-container { z-index: 99999 !important; border-radius: 0.75rem; font-family: 'Inter', sans-serif; margin-top: 4px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .pac-item { padding: 12px; cursor: pointer; font-size: 13px; }
         .pac-item:hover { background-color: #eff6ff; }
@@ -104,10 +103,10 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="font-bold text-xl text-blue-900">Department Dispatch Hub</h3>
-                    <p class="text-xs text-gray-500 mt-1">Select a department to plan an optimized route and assign a driver.</p>
+                    <p class="text-xs text-gray-500 mt-1">Select a department to plan an optimized multi-stop route and assign a driver.</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="deptCardsContainer">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4" id="deptCardsContainer">
                 </div>
         </div>
 
@@ -338,7 +337,7 @@
 
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Assign Driver</label>
-                            <select id="dDriver" required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-medium text-blue-900">
+                            <select id="dDriver" onchange="updateVehicleDropdown()" required class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-medium text-blue-900">
                                 <option value="" disabled selected>Loading drivers...</option>
                             </select>
                         </div>
@@ -358,7 +357,43 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1.5 tracking-widest">Destination</label>
-                            <input type="text" id="dDestination" autocomplete="off" placeholder="Search Google Maps..." required class="w-full border border-blue-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 font-bold text-blue-900 shadow-sm">
+                            <select id="tDestinationSelect" required onchange="toggleCustomDestination()" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-bold text-blue-900">
+                                <option value="" disabled selected>Select destination...</option>
+                                <optgroup label="iACADEMY Campuses">
+                                    <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus (Yakal St.)</option>
+                                    <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza (Buendia)</option>
+                                </optgroup>
+                                <optgroup label="Tech & Computing Partners">
+                                    <option value="Amazon Web Services">Amazon Web Services</option>
+                                    <option value="ASUS">ASUS</option>
+                                    <option value="Huawei">Huawei</option>
+                                    <option value="Ubisoft">Ubisoft</option>
+                                    <option value="Alibaba Cloud Academy">Alibaba Cloud Academy</option>
+                                </optgroup>
+                                <optgroup label="Animation & Creative">
+                                    <option value="Toon City">Toon City</option>
+                                    <option value="Netflix Philippines">Netflix Philippines</option>
+                                    <option value="Toon Boom Animation">Toon Boom Animation</option>
+                                </optgroup>
+                                <optgroup label="Business, Finance & Marketing">
+                                    <option value="Metrobank">Metrobank</option>
+                                    <option value="Macquarie">Macquarie</option>
+                                    <option value="Sunlife">Sunlife</option>
+                                    <option value="McCann">McCann</option>
+                                    <option value="Mullenlowe Treyna">Mullenlowe Treyna</option>
+                                </optgroup>
+                                <optgroup label="Other Partners & Agencies">
+                                    <option value="Unilab">Unilab</option>
+                                    <option value="Knowledge Channel">Knowledge Channel</option>
+                                    <option value="Adarna House">Adarna House</option>
+                                    <option value="Gov: CHED / DepEd">Gov: CHED / DepEd</option>
+                                    <option value="Gov: Climate Change Commission">Gov: Climate Change Commission</option>
+                                </optgroup>
+                                <optgroup label="Custom Destination">
+                                    <option value="Other">Other (Specify Destination)</option>
+                                </optgroup>
+                            </select>
+                            <input type="text" id="tDestinationCustom" placeholder="Search Google Maps..." class="hidden mt-3 w-full border border-blue-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 font-bold text-blue-900 shadow-sm">
                         </div>
 
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
@@ -401,9 +436,14 @@
                                 <span id="dSumTotal" class="text-2xl font-black text-blue-800">₱0.00</span>
                             </div>
                             
-                            <button type="button" id="btnConfirmDispatch" onclick="finalizeDispatchTask()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors text-sm uppercase tracking-wider">
-                                Confirm & Dispatch
-                            </button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="finalizeDispatchTask(true)" class="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-3 rounded-lg transition-colors text-[10px] uppercase tracking-widest text-center shadow-sm">
+                                    + Add Next Stop
+                                </button>
+                                <button type="button" id="btnConfirmDispatch" onclick="finalizeDispatchTask(false)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors text-[10px] uppercase tracking-widest text-center">
+                                    Confirm & Close
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -420,9 +460,8 @@
         let allVehicles = [];
         let allDrivers = [];
         let allTasks = []; 
-        let currentDispatchDept = ""; // Tracks which dept card was clicked
+        let currentDispatchDept = ""; 
         
-        // Map Globals
         let dispatchMap, dirService, dirRenderer;
         let calculatedDistance = "0 km";
         let calculatedBudget = 0;
@@ -474,7 +513,7 @@
 
             const autocompleteOptions = { componentRestrictions: { country: "ph" }, fields: ["formatted_address", "geometry", "name"] };
             new google.maps.places.Autocomplete(document.getElementById('dOrigin'), autocompleteOptions);
-            new google.maps.places.Autocomplete(document.getElementById('dDestination'), autocompleteOptions);
+            new google.maps.places.Autocomplete(document.getElementById('tDestinationCustom'), autocompleteOptions);
         }
 
         // --- CORE LOAD LOGIC ---
@@ -493,7 +532,7 @@
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                         <i class="fa-solid fa-briefcase text-lg"></i>
                     </div>
-                    <span class="font-bold text-blue-900 text-sm tracking-wide">${dept}</span>
+                    <span class="font-bold text-blue-900 text-xs md:text-sm tracking-wide">${dept}</span>
                 </div>
             `).join('');
         }
@@ -521,19 +560,19 @@
             renderAdminDriverList();
         }
 
-        // --- DISPATCH MODAL LOGIC ---
+        // --- DISPATCH MODAL LOGIC & VEHICLE LOCKING ---
         window.openDispatchModal = function(dept) {
             currentDispatchDept = dept;
             document.getElementById('modalDispatchDeptLabel').innerText = `Charging to: ${dept}`;
             
             const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('dDate').value = todayStr;
             
             // Reset form and UI
             document.getElementById('advancedTaskForm').reset();
             document.getElementById('dDate').value = todayStr;
             document.getElementById('dOrigin').value = "iACADEMY Nexus (Yakal St.)";
             document.getElementById('dTollSegments').innerHTML = '';
+            document.getElementById('tDestinationCustom').classList.add('hidden');
             
             // Hide summary
             const summary = document.getElementById('dispatchSummary');
@@ -553,7 +592,6 @@
             setTimeout(() => {
                 box.classList.remove('scale-95', 'opacity-0');
                 box.classList.add('scale-100', 'opacity-100');
-                // Vital: Resize map after modal is visible to prevent grey box
                 if (dispatchMap) {
                     google.maps.event.trigger(dispatchMap, 'resize');
                     dispatchMap.setCenter({ lat: 14.5632, lng: 121.0142 });
@@ -602,10 +640,26 @@
                 });
             }
 
-            // 2. FILTER VEHICLES
+            // Sync Vehicles
+            updateVehicleDropdown();
+        }
+
+        // SMART VEHICLE LOCKING LOGIC
+        window.updateVehicleDropdown = function() {
+            const dateInput = document.getElementById('dDate').value;
+            const selectedDriver = document.getElementById('dDriver').value;
             const dVehicleSelect = document.getElementById('dVehicle');
-            dVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
-            
+
+            if (!dateInput) return;
+            const dayIndex = new Date(dateInput).getDay();
+
+            // Map which vehicle is used by which driver TODAY
+            const dailyTasks = allTasks.filter(t => t.date === dateInput);
+            const vehicleAssignments = {};
+            dailyTasks.forEach(t => {
+                if (t.vehicle && t.driver) vehicleAssignments[t.vehicle] = t.driver;
+            });
+
             let codingDigits = [];
             if (dayIndex === 1) codingDigits = ['1', '2']; 
             else if (dayIndex === 2) codingDigits = ['3', '4']; 
@@ -613,18 +667,24 @@
             else if (dayIndex === 4) codingDigits = ['7', '8']; 
             else if (dayIndex === 5) codingDigits = ['9', '0']; 
 
-            const bookedVehicles = allTasks.filter(t => t.date === dateInput).map(t => t.vehicle);
-
+            dVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
             let availableCount = 0;
+            let autoSelectPlate = null;
+
             allVehicles.forEach(v => {
                 const plate = v.plateNumber.trim();
                 const lastDigit = plate.charAt(plate.length - 1);
-                
                 const isCoded = codingDigits.includes(lastDigit);
-                const isBooked = bookedVehicles.includes(plate);
-                
-                if (isBooked) {
-                    dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - BOOKED</option>`;
+                const assignedTo = vehicleAssignments[plate];
+
+                if (assignedTo && assignedTo !== selectedDriver) {
+                    // Booked by someone else! Strict Lock.
+                    dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
+                } else if (assignedTo === selectedDriver) {
+                    // Already assigned to THIS driver today. Auto-select it!
+                    dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-600 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to ${selectedDriver})</option>`;
+                    autoSelectPlate = v.plateNumber;
+                    availableCount++;
                 } else if (isCoded) {
                     dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-red-500 bg-red-50">❌ ${v.plateNumber} - CODING</option>`;
                 } else {
@@ -633,7 +693,26 @@
                 }
             });
 
-            if (availableCount === 0) dVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles</option>`;
+            if (availableCount === 0) {
+                dVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles</option>`;
+            } else if (autoSelectPlate) {
+                dVehicleSelect.value = autoSelectPlate;
+            }
+        }
+
+
+        // --- CUSTOM DESTINATION LOGIC ---
+        window.toggleCustomDestination = function() {
+            const select = document.getElementById('tDestinationSelect');
+            const customInput = document.getElementById('tDestinationCustom');
+            if (select.value === 'Other') {
+                customInput.classList.remove('hidden');
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                customInput.required = false;
+                customInput.value = '';
+            }
         }
 
         // --- TOLL LOGIC INSIDE MODAL ---
@@ -686,6 +765,7 @@
                 priceText.setAttribute('data-cost', cost);
                 priceText.classList.remove('hidden');
             }
+            updateDispatchToll();
         }
 
         function updateDispatchToll() {
@@ -699,11 +779,13 @@
             if (!dirService) return alert("Maps loading, please wait.");
             
             const origin = document.getElementById('dOrigin').value;
-            const destination = document.getElementById('dDestination').value;
+            let dest = document.getElementById('tDestinationSelect').value;
+            if (dest === 'Other') dest = document.getElementById('tDestinationCustom').value;
+            
             const plate = document.getElementById('dVehicle').value;
 
             if (!plate) return alert("Please select a Vehicle.");
-            if (!origin || !destination) return alert("Please enter Origin and Destination.");
+            if (!origin || !dest) return alert("Please enter Origin and Destination.");
             
             const vehicle = allVehicles.find(v => v.plateNumber === plate);
             const efficiency = vehicle && vehicle.efficiency ? parseFloat(vehicle.efficiency) : 14;
@@ -716,7 +798,7 @@
 
             dirService.route({
                 origin: origin,
-                destination: destination,
+                destination: dest,
                 travelMode: google.maps.TravelMode.DRIVING
             }, (response, status) => {
                 btn.innerHTML = `<i class="fa-solid fa-calculator"></i> Calculate Route & Budget`;
@@ -734,14 +816,12 @@
                     
                     calculatedBudget = fuelCost + tollCost;
 
-                    // Update UI
                     document.getElementById('dSumDistTime').innerText = `${route.distance.text} / ${route.duration.text}`;
                     document.getElementById('dSumFuelVol').innerText = `${liters.toFixed(1)}L (${fuelType})`;
                     document.getElementById('dSumFuelCost').innerText = `₱${fuelCost.toFixed(2)}`;
                     document.getElementById('dSumTollCost').innerText = `₱${tollCost.toFixed(2)}`;
                     document.getElementById('dSumTotal').innerText = `₱${calculatedBudget.toFixed(2)}`;
 
-                    // Show Summary
                     const summary = document.getElementById('dispatchSummary');
                     summary.classList.remove('hidden');
                     setTimeout(() => {
@@ -755,17 +835,18 @@
             });
         }
 
-        // --- SUBMIT DISPATCH TO DB ---
-        window.finalizeDispatchTask = async function() {
-            const btn = document.getElementById('btnConfirmDispatch');
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Dispatching...`;
-            btn.disabled = true;
+        // --- SUBMIT DISPATCH TO DB (WITH CHAINING) ---
+        window.finalizeDispatchTask = async function(isContinuing = false) {
+            const btnConfirm = document.getElementById('btnConfirmDispatch');
+            btnConfirm.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+            btnConfirm.disabled = true;
 
             const baseDesc = document.getElementById('dDescription').value;
             const origin = document.getElementById('dOrigin').value;
-            const dest = document.getElementById('dDestination').value;
             
-            // Enrich description with our smart data
+            let dest = document.getElementById('tDestinationSelect').value;
+            if (dest === 'Other') dest = document.getElementById('tDestinationCustom').value;
+            
             const enrichedDesc = `[Est. Budget: ₱${calculatedBudget.toFixed(2)} | Dist: ${calculatedDistance}] From ${origin}. Instructions: ${baseDesc}`;
 
             const taskData = {
@@ -785,13 +866,44 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(taskData)
                 });
+                
                 if (res.ok) {
-                    alert('Task dispatched to driver successfully!');
-                    closeDispatchModal();
-                    loadDashboardData();
+                    alert('Task dispatched successfully!');
+                    
+                    if (isContinuing) {
+                        // Set the new Origin to be the old Destination!
+                        document.getElementById('dOrigin').value = dest;
+                        
+                        // Clear out the old destination and notes
+                        document.getElementById('tDestinationSelect').value = "";
+                        document.getElementById('tDestinationCustom').value = "";
+                        document.getElementById('tDestinationCustom').classList.add('hidden');
+                        document.getElementById('dDescription').value = "";
+                        
+                        // Clear Map and Summary
+                        document.getElementById('dTollSegments').innerHTML = '';
+                        tollCounter = 0;
+                        if (dirRenderer) dirRenderer.setDirections({routes: []});
+                        
+                        const summary = document.getElementById('dispatchSummary');
+                        summary.classList.add('hidden');
+                        summary.classList.remove('translate-y-0', 'opacity-100');
+                        summary.classList.add('translate-y-4', 'opacity-0');
+                        
+                        // Refresh the global tasks immediately so the vehicle locks in for this driver
+                        const taskRes = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
+                        allTasks = await taskRes.json();
+                        updateVehicleDropdown();
+                        renderLiveBoard();
+
+                    } else {
+                        // All done, close it up.
+                        closeDispatchModal();
+                        loadDashboardData();
+                    }
                 }
             } catch (err) { alert('Failed to dispatch task.'); }
-            finally { btn.innerHTML = `Confirm & Dispatch`; btn.disabled = false; }
+            finally { btnConfirm.innerHTML = `Confirm & Close`; btnConfirm.disabled = false; }
         }
 
 
@@ -892,6 +1004,28 @@
             }
         }
 
+        // --- PRESET VEHICLES ---
+        const vehiclePresets = {
+            "Toyota Vios": { eff: 14, fuel: "Ron95" }, "Toyota Fortuner": { eff: 10, fuel: "Diesel" },
+            "Toyota Hi-Ace": { eff: 10, fuel: "Diesel" }, "Mitsubishi Xpander": { eff: 13, fuel: "Ron95" },
+            "Mitsubishi Montero": { eff: 11, fuel: "Diesel" }, "Honda Beat": { eff: 50, fuel: "Ron95" },
+            "Honda City": { eff: 15, fuel: "Ron95" }, "Suzuki Carry": { eff: 12, fuel: "Diesel" },
+            "Ford Ranger": { eff: 11, fuel: "Diesel" }, "Hyundai Tucson": { eff: 12, fuel: "Ron95" },
+            "Kia Picanto": { eff: 18, fuel: "Ron95" }, "Geely Coolray": { eff: 14, fuel: "Ron95" },
+            "Suzuki Ertiga": { eff: 14, fuel: "Ron95" }, "Yamaha Mio": { eff: 55, fuel: "Ron95" },
+            "Isuzu D-Max": { eff: 12, fuel: "Diesel" }
+        };
+
+        function applyPreset() {
+            const presetName = document.getElementById('vPreset').value;
+            if (presetName && vehiclePresets[presetName]) {
+                const data = vehiclePresets[presetName];
+                document.getElementById('vModel').value = presetName;
+                document.getElementById('vEfficiency').value = data.eff;
+                document.getElementById('vFuel').value = data.fuel;
+            }
+        }
+
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -913,6 +1047,7 @@
             finally { btn.innerHTML = `Add to Fleet`; btn.disabled = false; }
         });
 
+        // --- DRIVER PROFILE MODAL LOGIC ---
         window.openProfileModal = function(driverId) {
             const driver = allDrivers.find(d => d._id === driverId);
             if (!driver) return;
