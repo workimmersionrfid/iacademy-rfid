@@ -401,8 +401,10 @@
     <script src="js/app.js"></script>
     
     <script>
+        // --- GLOBALS ---
         let allVehicles = [];
         let allDrivers = [];
+        let allTasks = []; // NEW: Keep track of all tasks globally for double-booking check
 
         const vehiclePresets = {
             "Toyota Vios": { eff: 14, fuel: "Ron95" },
@@ -445,132 +447,7 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderNavigation('dashboard');
-            
-            const dateInput = document.getElementById('tDate');
-            dateInput.value = new Date().toISOString().split('T')[0];
-            
-            dateInput.addEventListener('change', updateDispatchDropdowns);
-            document.getElementById('tDepartment').addEventListener('change', updateDispatchDropdowns);
-
-            loadDashboardData();
-        });
-
-        async function loadDashboardData() {
-            allVehicles = await getVehicles();
-            allDrivers = await getDrivers();   
-            const logs = await getLogs();
-            
-            let tasks = [];
-            try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
-                tasks = await res.json();
-            } catch(e) { console.error("Could not load tasks"); }
-
-            updateDispatchDropdowns();
-
-            document.getElementById('statVehicles').innerText = allVehicles.length;
-            document.getElementById('statTasks').innerText = tasks.length;
-            document.getElementById('statLogs').innerText = logs.length;
-            
-            const totalSpent = logs.reduce((sum, log) => sum + (log.total || 0), 0);
-            document.getElementById('statSpent').innerText = `₱${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-
-            const tBoard = document.getElementById('taskBoard');
-            if (tasks.length === 0) {
-                tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks dispatched yet.</td></tr>`;
-            } else {
-                tBoard.innerHTML = tasks.map(t => {
-                    const isDone = t.status === 'Completed';
-                    const isRebook = t.status === 'Rebook';
-                    let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-xs border border-blue-100">Completed</span>`
-                                   : (isRebook ? `<span class="bg-red-50 text-red-700 font-bold px-3 py-1.5 rounded-md text-xs border border-red-200">Rebook</span>`
-                                   : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-xs border border-gray-200">Pending</span>`);
-
-                    return `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="p-4">${statusHtml}</td>
-                        <td class="p-4">
-                            <div class="font-medium text-gray-800">${t.date}</div>
-                            <div class="text-xs text-gray-500 mt-1">${t.driver} &bull; <span class="font-bold text-blue-600">${t.department || 'N/A'}</span></div>
-                        </td>
-                        <td class="p-4 text-gray-600 font-medium">${t.vehicle}</td>
-                        <td class="p-4">
-                            <div class="font-bold text-blue-900">${t.destination}</div>
-                            <div class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1">${t.taskType || 'Standard Task'}</div>
-                            <div class="text-xs text-gray-500 truncate max-w-[200px] mt-0.5">${t.description}</div>
-                        </td>
-                    </tr>
-                `}).join('');
-            }
-
-            const vList = document.getElementById('vehicleList');
-            if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
-            else vList.innerHTML = allVehicles.map(v => `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="p-4"><span class="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-md border border-blue-100 tracking-wider">${v.plateNumber}</span></td>
-                        <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
-                        <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-lg"></i></button></td>
-                    </tr>`).join('');
-
-            const lList = document.getElementById('logsList');
-            if (logs.length === 0) {
-                lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
-            } else {
-                lList.innerHTML = logs.map(l => {
-                    const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
-                    const fuelText = l.fuelType || 'Unknown';
-                    const notesBadge = l.notes ? `<i class="fa-solid fa-message text-blue-300 ml-2" title="${l.notes}"></i>` : '';
-                    
-                    return `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="p-4 text-gray-500 text-xs font-medium">${l.date}</td>
-                        <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500 mt-1">${l.driver}</span></td>
-                        <td class="p-4">
-                            <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${notesBadge}</div>
-                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
-                                <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700">${l.liters}L ${fuelText}</span>
-                            </div>
-                        </td>
-                        <td class="p-4 text-right font-bold text-blue-900">₱${(l.total || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    </tr>`
-                }).join('');
-            }
-
-            // --- NEW: CLEANER DRIVER TABLE ---
-            const dList = document.getElementById('adminDriverList');
-            if (allDrivers.length === 0) {
-                dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
-            } else {
-                dList.innerHTML = allDrivers.map(d => {
-                    // Departments Badges
-                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
-                    const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
-                    const deptBadge = isPending 
-                        ? `<span class="bg-gray-100 text-gray-600 font-bold px-2 py-1 rounded-md text-[10px] inline-block m-0.5 border border-gray-200 uppercase tracking-widest">Pending</span>`
-                        : deptArray.map(dept => `<span class="bg-blue-50 text-blue-700 font-bold px-2 py-1 rounded-md text-[10px] inline-block m-0.5 border border-blue-100 uppercase tracking-widest">${dept}</span>`).join('');
-                    
-                    // Schedule Badges
-                    const driverWorkDays = d.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']; 
-                    const scheduleBadges = driverWorkDays.map(day => `<span class="text-[10px] font-bold text-gray-600 border border-gray-200 bg-white px-2 py-0.5 rounded m-0.5 inline-block uppercase">${day.substring(0,3)}</span>`).join('');
-
-                    return `
-                    <tr class="hover:bg-blue-50/30 transition-colors cursor-pointer group" onclick="openProfileModal('${d._id}')">
-                        <td class="p-4 font-bold text-blue-800 align-middle underline decoration-blue-200 underline-offset-4 group-hover:text-blue-900">${d.username}</td>
-                        <td class="p-4 align-middle max-w-[200px]">${deptBadge}</td>
-                        <td class="p-4 align-middle max-w-[200px]">${scheduleBadges}</td>
-                        <td class="p-4 text-right align-middle">
-                            <button class="bg-white border border-gray-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 text-gray-500 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm">
-                                <i class="fa-solid fa-pen text-[10px] mr-1"></i> Edit
-                            </button>
-                        </td>
-                    </tr>`;
-                }).join('');
-            }
-        }
-
-        // --- NEW: MODAL LOGIC FOR DRIVER PROFILES ---
+        // --- MODAL UI HELPERS ---
         window.openProfileModal = function(driverId) {
             const driver = allDrivers.find(d => d._id === driverId);
             if (!driver) return;
@@ -584,7 +461,6 @@
             const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
             const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-            // Generate Dept Checkboxes
             document.getElementById('modalDeptList').innerHTML = departmentsList.map(dept => `
                 <label class="flex items-center text-xs text-gray-700 font-medium cursor-pointer p-1.5 hover:bg-gray-100 rounded transition-colors">
                     <input type="checkbox" value="${dept}" class="modal-dept-cb mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${deptArray.includes(dept) ? 'checked' : ''}>
@@ -592,7 +468,6 @@
                 </label>
             `).join('');
 
-            // Generate Schedule Checkboxes
             document.getElementById('modalScheduleList').innerHTML = daysOfWeek.map(day => `
                 <label class="flex items-center text-xs text-gray-700 font-bold tracking-wide uppercase cursor-pointer p-1.5 hover:bg-gray-100 rounded transition-colors">
                     <input type="checkbox" value="${day}" class="modal-sched-cb mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${driverWorkDays.includes(day) ? 'checked' : ''}>
@@ -600,7 +475,6 @@
                 </label>
             `).join('');
 
-            // Open modal with animation
             const modal = document.getElementById('driverProfileModal');
             const box = document.getElementById('driverProfileBox');
             modal.classList.remove('hidden');
@@ -657,6 +531,128 @@
             }
         };
 
+        document.addEventListener("DOMContentLoaded", () => {
+            renderNavigation('dashboard');
+            
+            const dateInput = document.getElementById('tDate');
+            dateInput.value = new Date().toISOString().split('T')[0];
+            
+            dateInput.addEventListener('change', updateDispatchDropdowns);
+            document.getElementById('tDepartment').addEventListener('change', updateDispatchDropdowns);
+
+            loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            allVehicles = await getVehicles();
+            allDrivers = await getDrivers();   
+            const logs = await getLogs();
+            
+            try {
+                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
+                allTasks = await res.json(); // Assigned to Global Variable
+            } catch(e) { console.error("Could not load tasks"); }
+
+            updateDispatchDropdowns();
+
+            document.getElementById('statVehicles').innerText = allVehicles.length;
+            document.getElementById('statTasks').innerText = allTasks.length; // Use global variable
+            document.getElementById('statLogs').innerText = logs.length;
+            
+            const totalSpent = logs.reduce((sum, log) => sum + (log.total || 0), 0);
+            document.getElementById('statSpent').innerText = `₱${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            const tBoard = document.getElementById('taskBoard');
+            if (allTasks.length === 0) {
+                tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks dispatched yet.</td></tr>`;
+            } else {
+                tBoard.innerHTML = allTasks.map(t => {
+                    const isDone = t.status === 'Completed';
+                    const isRebook = t.status === 'Rebook';
+                    let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-xs border border-blue-100">Completed</span>`
+                                   : (isRebook ? `<span class="bg-red-50 text-red-700 font-bold px-3 py-1.5 rounded-md text-xs border border-red-200">Rebook</span>`
+                                   : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-xs border border-gray-200">Pending</span>`);
+
+                    return `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4">${statusHtml}</td>
+                        <td class="p-4">
+                            <div class="font-medium text-gray-800">${t.date}</div>
+                            <div class="text-xs text-gray-500 mt-1">${t.driver} &bull; <span class="font-bold text-blue-600">${t.department || 'N/A'}</span></div>
+                        </td>
+                        <td class="p-4 text-gray-600 font-medium">${t.vehicle}</td>
+                        <td class="p-4">
+                            <div class="font-bold text-blue-900">${t.destination}</div>
+                            <div class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1">${t.taskType || 'Standard Task'}</div>
+                            <div class="text-xs text-gray-500 truncate max-w-[200px] mt-0.5">${t.description}</div>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+
+            const vList = document.getElementById('vehicleList');
+            if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
+            else vList.innerHTML = allVehicles.map(v => `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4"><span class="bg-blue-50 text-blue-800 font-bold px-3 py-1.5 rounded-md border border-blue-100 tracking-wider">${v.plateNumber}</span></td>
+                        <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
+                        <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-lg"></i></button></td>
+                    </tr>`).join('');
+
+            const lList = document.getElementById('logsList');
+            if (logs.length === 0) {
+                lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
+            } else {
+                lList.innerHTML = logs.map(l => {
+                    const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
+                    const fuelText = l.fuelType || 'Unknown';
+                    const notesBadge = l.notes ? `<i class="fa-solid fa-message text-blue-300 ml-2" title="${l.notes}"></i>` : '';
+                    
+                    return `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4 text-gray-500 text-xs font-medium">${l.date}</td>
+                        <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500 mt-1">${l.driver}</span></td>
+                        <td class="p-4">
+                            <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${notesBadge}</div>
+                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                                <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700">${l.liters}L ${fuelText}</span>
+                            </div>
+                        </td>
+                        <td class="p-4 text-right font-bold text-blue-900">₱${(l.total || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    </tr>`
+                }).join('');
+            }
+
+            const dList = document.getElementById('adminDriverList');
+            if (allDrivers.length === 0) {
+                dList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No drivers registered yet.</td></tr>`;
+            } else {
+                dList.innerHTML = allDrivers.map(d => {
+                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
+                    const isPending = deptArray.length === 0 || deptArray.includes('Pending Assignment');
+                    const deptBadge = isPending 
+                        ? `<span class="bg-gray-100 text-gray-600 font-bold px-2 py-1 rounded-md text-[10px] inline-block m-0.5 border border-gray-200 uppercase tracking-widest">Pending</span>`
+                        : deptArray.map(dept => `<span class="bg-blue-50 text-blue-700 font-bold px-2 py-1 rounded-md text-[10px] inline-block m-0.5 border border-blue-100 uppercase tracking-widest">${dept}</span>`).join('');
+                    
+                    const driverWorkDays = d.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']; 
+                    const scheduleBadges = driverWorkDays.map(day => `<span class="text-[10px] font-bold text-gray-600 border border-gray-200 bg-white px-2 py-0.5 rounded m-0.5 inline-block uppercase">${day.substring(0,3)}</span>`).join('');
+
+                    return `
+                    <tr class="hover:bg-blue-50/30 transition-colors cursor-pointer group" onclick="openProfileModal('${d._id}')">
+                        <td class="p-4 font-bold text-blue-800 align-middle underline decoration-blue-200 underline-offset-4 group-hover:text-blue-900">${d.username}</td>
+                        <td class="p-4 align-middle max-w-[200px]">${deptBadge}</td>
+                        <td class="p-4 align-middle max-w-[200px]">${scheduleBadges}</td>
+                        <td class="p-4 text-right align-middle">
+                            <button class="bg-white border border-gray-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 text-gray-500 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm">
+                                <i class="fa-solid fa-pen text-[10px] mr-1"></i> Edit
+                            </button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        // --- UPDATED: Checks for booked vehicles ---
         function updateDispatchDropdowns() {
             const dateInput = document.getElementById('tDate').value;
             const deptInput = document.getElementById('tDepartment').value;
@@ -667,7 +663,7 @@
             const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const dayName = daysOfWeek[dayIndex];
 
-            // 1. FILTER DRIVERS BY SCHEDULE AND DEPARTMENT
+            // 1. FILTER DRIVERS
             const tDriverSelect = document.getElementById('tDriver');
             tDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
             
@@ -693,7 +689,7 @@
                 });
             }
 
-            // 2. FILTER VEHICLES BY PH NUMBER CODING (MMDA UVVRP)
+            // 2. FILTER VEHICLES (CODING & DOUBLE-BOOKING)
             const tVehicleSelect = document.getElementById('tVehicle');
             tVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
             
@@ -704,13 +700,20 @@
             else if (dayIndex === 4) codingDigits = ['7', '8']; 
             else if (dayIndex === 5) codingDigits = ['9', '0']; 
 
+            // Check which vehicles are already assigned to a task on this exact date
+            const bookedVehicles = allTasks.filter(t => t.date === dateInput).map(t => t.vehicle);
+
             let availableCount = 0;
             allVehicles.forEach(v => {
                 const plate = v.plateNumber.trim();
                 const lastDigit = plate.charAt(plate.length - 1);
-                const isCoded = codingDigits.includes(lastDigit);
                 
-                if (isCoded) {
+                const isCoded = codingDigits.includes(lastDigit);
+                const isBooked = bookedVehicles.includes(plate);
+                
+                if (isBooked) {
+                    tVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} (${v.model}) - BOOKED</option>`;
+                } else if (isCoded) {
                     tVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-red-500 bg-red-50">❌ ${v.plateNumber} (${v.model}) - CODING</option>`;
                 } else {
                     tVehicleSelect.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
@@ -719,7 +722,7 @@
             });
 
             if (availableCount === 0) {
-                tVehicleSelect.innerHTML = `<option value="" disabled selected>All vehicles on coding for ${dayName}</option>`;
+                tVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles for ${dayName}</option>`;
             }
         }
 
@@ -757,8 +760,7 @@
                     toggleCustomDestination(); 
                     const todayStr = new Date().toISOString().split('T')[0];
                     document.getElementById('tDate').value = todayStr;
-                    updateDispatchDropdowns(); 
-                    loadDashboardData();
+                    loadDashboardData(); // This will fetch the new task and trigger the dropdown update automatically
                 }
             } catch (err) { alert('Failed to dispatch task.'); }
             finally { btn.innerHTML = `Send to Driver`; btn.disabled = false; }
