@@ -101,45 +101,45 @@
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
                 <h3 class="font-bold text-xl mb-6 text-blue-900">Dispatch a Task</h3>
                 <form id="taskForm" onsubmit="submitTask(event)" class="space-y-5">
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
-        <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-            <option value="" disabled selected>Loading drivers...</option>
-        </select>
-    </div>
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
-        <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-            <option value="" disabled selected>Loading fleet...</option>
-        </select>
-    </div>
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Category</label>
-        <select id="tType" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-            <option value="" disabled selected>Select category...</option>
-            <option value="Asset Collection">Asset Collection</option>
-            <option value="Document Routing">Document Routing</option>
-            <option value="Hardware Transport">Hardware Transport</option>
-            <option value="Bank Transaction">Bank Transaction</option>
-            <option value="Other">Other</option>
-        </select>
-    </div>
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Destination</label>
-        <input type="text" id="tDestination" placeholder="e.g. Makati Campus" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-    </div>
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Description / Instructions</label>
-        <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-    </div>
-    <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
-        <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-    </div>
-    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
-        Dispatch to Driver
-    </button>
-</form>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Driver Username</label>
+                        <select id="tDriver" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Loading drivers...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Vehicle</label>
+                        <select id="tVehicle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Loading fleet...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Category</label>
+                        <select id="tType" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Select category...</option>
+                            <option value="Asset Collection">Asset Collection</option>
+                            <option value="Document Routing">Document Routing</option>
+                            <option value="Hardware Transport">Hardware Transport</option>
+                            <option value="Bank Transaction">Bank Transaction</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Destination</label>
+                        <input type="text" id="tDestination" placeholder="e.g. Makati Campus" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Description</label>
+                        <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
+                        <input type="date" id="tDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-4">
+                        Send to Driver
+                    </button>
+                </form>
             </div>
 
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col xl:col-span-2 relative">
@@ -352,9 +352,17 @@
             } else {
                 tBoard.innerHTML = tasks.map(t => {
                     const isDone = t.status === 'Completed';
-                    const statusHtml = isDone 
-                        ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-xs border border-blue-100">Completed</span>`
-                        : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-xs border border-gray-200">Pending</span>`;
+                    const isRebook = t.status === 'Rebook';
+                    let statusHtml = '';
+                    
+                    if (isDone) {
+                        statusHtml = `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-xs border border-blue-100">Completed</span>`;
+                    } else if (isRebook) {
+                        statusHtml = `<span class="bg-red-50 text-red-700 font-bold px-3 py-1.5 rounded-md text-xs border border-red-200">Rebook</span>`;
+                    } else {
+                        statusHtml = `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-xs border border-gray-200">Pending</span>`;
+                    }
+
                     return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4">${statusHtml}</td>
@@ -362,7 +370,8 @@
                         <td class="p-4 text-gray-600 font-medium">${t.vehicle}</td>
                         <td class="p-4">
                             <div class="font-bold text-blue-900">${t.destination}</div>
-                            <div class="text-xs text-gray-500 truncate max-w-[200px] mt-1">${t.description}</div>
+                            <div class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-1">${t.taskType || 'Standard Task'}</div>
+                            <div class="text-xs text-gray-500 truncate max-w-[200px] mt-0.5">${t.description}</div>
                         </td>
                     </tr>
                 `}).join('');
@@ -446,14 +455,14 @@
             btn.disabled = true;
 
             const taskData = {
-    driver: document.getElementById('tDriver').value,
-    vehicle: document.getElementById('tVehicle').value,
-    taskType: document.getElementById('tType').value, 
-    destination: document.getElementById('tDestination').value,
-    description: document.getElementById('tDescription').value,
-    date: document.getElementById('tDate').value,
-    status: 'Pending'
-};
+                driver: document.getElementById('tDriver').value,
+                vehicle: document.getElementById('tVehicle').value,
+                taskType: document.getElementById('tType').value,
+                destination: document.getElementById('tDestination').value,
+                description: document.getElementById('tDescription').value,
+                date: document.getElementById('tDate').value,
+                status: 'Pending'
+            };
 
             try {
                 const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks', {
