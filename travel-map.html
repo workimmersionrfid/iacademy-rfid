@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Journey Planner - iACADEMY</title>
+    <title>Fleet Map - iACADEMY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,179 +23,80 @@
         });
     </script>
     <style>
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.75rem center;
-            background-repeat: no-repeat;
-            background-size: 1em 1em;
-        }
-        .toggle-checkbox:checked { right: 0; border-color: #1d4ed8; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #1d4ed8; }
-        
-        /* Custom Google Maps Autocomplete Styling */
-        .pac-container {
-            z-index: 99999 !important;
-            border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            font-family: 'Inter', sans-serif;
-            margin-top: 4px;
-        }
-        .pac-item { padding: 12px; cursor: pointer; border-radius: 0.5rem; border-top: 1px solid #f8fafc; font-size: 14px; }
-        .pac-item:hover { background-color: #eff6ff; color: #1e3a8a; }
-        .pac-item-query { font-weight: 600; color: #1e293b; }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .pac-container { z-index: 99999 !important; border-radius: 0.75rem; font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body class="bg-brand-bg text-slate-800 font-sans antialiased min-h-screen flex flex-col">
     
     <div id="shared-nav"></div>
     
-    <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8">
+    <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
         
-        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-6 md:p-12 relative overflow-hidden flex items-center justify-between">
+        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-6 md:p-10 relative overflow-hidden flex items-center justify-between">
             <div class="relative z-10">
-                <p class="text-blue-100 text-xs md:text-sm font-medium mb-1 tracking-wide uppercase">Route Optimization</p>
-                <h1 class="text-2xl md:text-4xl font-bold text-white tracking-tight">Journey Planner</h1>
-                <p class="text-blue-50 mt-2 max-w-lg text-xs md:text-sm">Simulate routes, calculate exact toll fees, and estimate dynamic fuel consumption.</p>
+                <p id="role-subtitle" class="text-blue-100 text-xs font-bold mb-1 tracking-widest uppercase">System Loading...</p>
+                <h1 id="role-title" class="text-2xl md:text-4xl font-bold text-white tracking-tight">Fleet Intelligence</h1>
             </div>
             <div class="hidden md:block relative z-10 text-white/20">
-                <i class="fa-solid fa-map-location-dot text-7xl md:text-9xl"></i>
+                <i id="header-icon" class="fa-solid fa-satellite text-7xl md:text-9xl"></i>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 h-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
             
-            <div class="lg:col-span-4 flex flex-col h-full order-2 lg:order-1">
+            <div class="lg:col-span-4 flex flex-col h-full order-2 lg:order-1 space-y-6">
                 
-                <div id="plannerForm" class="bg-white rounded-2xl shadow-md border border-blue-50 p-6 md:p-8 relative overflow-hidden flex flex-col h-full transition-opacity duration-300">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-                    <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-6">Journey Planner</h2>
-                    
-                    <div class="space-y-5 mb-6">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Select Vehicle</label>
-                            <select id="routeVehicle" class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl p-3.5 outline-none focus:border-blue-500 transition-all appearance-none">
-                                <option value="" disabled selected>Loading fleet...</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Origin</label>
-                            <input type="text" id="routeOrigin" autocomplete="off" placeholder="Search origin..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl p-3.5 outline-none focus:border-blue-500 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Destination</label>
-                            <input type="text" id="routeDest" autocomplete="off" placeholder="Search destination..." class="w-full bg-white border border-gray-200 text-slate-700 font-medium text-sm rounded-xl p-3.5 outline-none focus:border-blue-500 transition-all">
-                        </div>
+                <div id="admin-fleet-panel" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 flex flex-col h-[600px]">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                        <h2 class="font-bold text-blue-900">Live Driver Status</h2>
+                        <span id="active-count" class="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-1 rounded">0 ACTIVE</span>
                     </div>
-
-                    <div class="flex items-center mb-6">
-                        <div class="relative inline-block w-10 mr-3 align-middle select-none">
-                            <input type="checkbox" name="toggle" id="toggleToll" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0"/>
-                            <label for="toggleToll" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-all duration-300"></label>
-                        </div>
-                        <label for="toggleToll" class="text-sm font-bold text-slate-700 cursor-pointer">Avoid toll roads</label>
+                    <div id="fleet-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                        <p class="text-center text-gray-400 text-sm py-10">Loading fleet coordinates...</p>
                     </div>
-
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-sm font-bold text-blue-900">Toll Calculator</h3>
-                            <span class="text-[10px] text-gray-500">From toll.ph</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-5 font-medium">Select your expressway; then entry and exit points. Add a row for each expressway you'll use.</p>
-                        
-                        <div id="tollSegments" class="space-y-4"></div>
-
-                        <button onclick="addTollSegment()" class="w-full text-xs text-blue-700 font-bold py-3 mt-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                            + Add another toll road
-                        </button>
-                    </div>
-
-                    <button id="planRouteBtn" onclick="simulateRouting()" disabled class="w-full bg-slate-200 text-slate-400 py-4 rounded-xl font-bold transition-colors shadow-md mt-auto uppercase tracking-widest text-xs cursor-not-allowed">
-                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Initializing Map...
-                    </button>
                 </div>
 
-                <div id="plannerSummary" class="bg-white rounded-2xl shadow-md border border-blue-50 p-6 md:p-8 hidden relative flex-col h-full animate-[fadeIn_0.3s_ease-in-out]">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-                    
-                    <div class="mb-5">
-                        <h3 class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-2">Route</h3>
-                        <div id="summaryOriginText" class="font-bold text-blue-900 text-sm">Origin</div>
-                        <div class="text-xs text-gray-400 my-1 font-medium">to</div>
-                        <div id="summaryDestText" class="font-bold text-blue-900 text-sm">Destination</div>
+                <div id="driver-itinerary-panel" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 flex flex-col h-[600px]">
+                    <div class="p-6 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                        <h2 class="font-bold text-blue-900">My Assigned Itinerary</h2>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mt-1">Select a task to generate route</p>
                     </div>
-
-                    <button onclick="resetPlanner()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mb-8">
-                        Plan New Route
-                    </button>
-
-                    <h3 class="text-lg font-bold text-blue-900 mb-4">Trip Cost Summary</h3>
-                    
-                    <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden text-sm">
-                            
-                            <div class="flex justify-between p-3.5 border-b border-gray-100">
-                                <span class="text-gray-600">Distance</span>
-                                <span id="summaryDistance" class="font-bold text-gray-900">0 km</span>
-                            </div>
-                            <div class="flex justify-between p-3.5 border-b border-gray-100">
-                                <span class="text-gray-600">Travel time</span>
-                                <span id="summaryDuration" class="font-bold text-gray-900">0 mins</span>
-                            </div>
-                            <div class="flex justify-between p-3.5 border-b border-gray-200 items-center">
-                                <span class="text-gray-600">Traffic</span>
-                                <span class="font-bold text-green-700 bg-green-100 px-2 py-1 rounded text-xs">Light traffic</span>
-                            </div>
-                            
-                            <div class="flex justify-between p-3.5 border-b border-gray-100 bg-gray-50">
-                                <span class="text-gray-600">Liters needed</span>
-                                <span id="summaryLiters" class="font-bold text-gray-900">0L</span>
-                            </div>
-                            <div class="flex justify-between p-3.5 border-b border-gray-100 bg-gray-50">
-                                <span class="text-gray-600 flex items-center gap-2">Fuel price <span id="summaryFuelType" class="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded tracking-widest uppercase"></span></span>
-                                <span id="summaryPriceLabel" class="font-bold text-gray-900">₱0.00/L</span>
-                            </div>
-                            <div class="flex justify-between p-3.5 border-b border-gray-200 bg-gray-50">
-                                <span class="text-gray-600">Fuel cost</span>
-                                <span id="summaryFuelCost" class="font-bold text-gray-900">₱0.00</span>
-                            </div>
-
-                            <div id="summaryTollBreakdown"></div>
-                            
-                            <div class="flex justify-between p-3.5 bg-blue-50 border-b border-gray-200">
-                                <span class="text-blue-800 font-bold">Total exact</span> 
-                                <span id="summaryTotalToll" class="font-bold text-blue-900">₱0.00</span>
-                            </div>
-                        </div>
-                        <div class="text-[10px] text-blue-500 mt-2 mb-6 text-right">Prices sourced from toll.ph</div>
+                    <div id="itinerary-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                        <p class="text-center text-gray-400 text-sm py-10">Fetching your tasks...</p>
                     </div>
+                </div>
 
-                    <div class="mt-4 pt-4">
-                        <div class="flex justify-between items-end mb-1">
-                            <span class="text-lg font-bold text-blue-900">Total Cost</span>
-                            <span id="grandTotalCost" class="text-3xl font-black text-blue-800 tracking-tight">₱0.00</span>
+                <div id="route-summary-panel" class="hidden bg-blue-900 rounded-2xl shadow-lg p-6 text-white animate-[fadeIn_0.3s]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-blue-200">Trip Estimate</h3>
+                        <button onclick="closeSummary()" class="text-blue-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b border-blue-800 pb-2">
+                            <span class="text-xs text-blue-300">Distance / Time</span>
+                            <span id="res-dist-time" class="font-bold text-sm">--</span>
                         </div>
-                        <p class="text-xs text-gray-500">Fuel + exact toll</p>
+                        <div class="flex justify-between border-b border-blue-800 pb-2">
+                            <span class="text-xs text-blue-300">Est. Fuel Consumption</span>
+                            <span id="res-fuel" class="font-bold text-sm text-emerald-400">--</span>
+                        </div>
+                        <div class="pt-2 text-center">
+                            <p class="text-[10px] text-blue-400 uppercase font-bold mb-1">Total Trip Budget</p>
+                            <h3 id="res-total-cost" class="text-3xl font-black">₱0.00</h3>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative min-h-[400px] lg:min-h-[600px] h-full order-1 lg:order-2">
-                <div class="absolute inset-0 bg-[#f1f5f9] flex flex-col items-center justify-center text-center p-6">
-                    <i class="fa-solid fa-map-location-dot text-blue-200 text-6xl mb-4"></i>
-                    <p class="text-slate-500 font-medium text-sm">Waiting for map connection...</p>
-                </div>
+            <div class="lg:col-span-8 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative min-h-[500px] lg:h-[600px] order-1 lg:order-2">
                 <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
                 
-                <div class="absolute bottom-6 left-6 bg-white p-3 rounded-lg shadow-md z-20 text-xs font-medium space-y-2 border border-gray-100 hidden" id="mapLegend">
-                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-green-500"></div> Light traffic</div>
-                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-yellow-500"></div> Moderate traffic</div>
-                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-500"></div> Heavy traffic</div>
+                <div id="gps-status" class="hidden absolute top-4 left-4 z-20 bg-white/90 backdrop-blur px-3 py-2 rounded-full shadow-md border border-gray-100 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">GPS Active</span>
                 </div>
             </div>
             
@@ -205,277 +106,204 @@
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script>
-        let map;
-        let directionsService;
-        let directionsRenderer;
-        let trafficLayer;
-        let fleetData = [];
+        let map, directionsService, directionsRenderer, trafficLayer;
+        let markers = [];
+        const role = localStorage.getItem('userRole');
+        const username = localStorage.getItem('username');
+        const API_BASE = 'https://iacademy-rfid.onrender.com/api';
 
-        // Simple lookup for estimated default prices per fuel type in the PH
-        const estimatedPrices = {
-            "Diesel": 65.00,
-            "Gasoline": 75.00,
-            "Ron91": 72.00,
-            "Ron95": 78.00,
-            "Ron97": 82.00
-        };
+        document.addEventListener("DOMContentLoaded", () => {
+            renderNavigation('travel-map');
+            setupRoleUI();
+            loadGoogleMaps();
+        });
 
-        // 1. Instant Load Map Using Your Direct API Key
+        function setupRoleUI() {
+            const sub = document.getElementById('role-subtitle');
+            const title = document.getElementById('role-title');
+            const icon = document.getElementById('header-icon');
+
+            if (role === 'admin') {
+                sub.innerText = "Command Center";
+                title.innerText = "Live Fleet Tracker";
+                icon.className = "fa-solid fa-tower-broadcast text-9xl";
+                document.getElementById('admin-fleet-panel').classList.remove('hidden');
+                startAdminPolling();
+            } else {
+                sub.innerText = "Navigation Hub";
+                title.innerText = "My Route Navigator";
+                icon.className = "fa-solid fa-location-arrow text-9xl";
+                document.getElementById('driver-itinerary-panel').classList.remove('hidden');
+                document.getElementById('gps-status').classList.remove('hidden');
+                loadDriverItinerary();
+            }
+        }
+
+        // --- MAP INITIALIZATION ---
         function loadGoogleMaps() {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=IzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initGooglePlaces`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initMapLogic`;
             script.async = true;
-            script.defer = true;
             document.head.appendChild(script);
         }
 
-        // Callback when map is ready
-        window.initGooglePlaces = function() {
+        window.initMapLogic = function() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 14.5632, lng: 121.0142 }, 
-                zoom: 13, 
-                disableDefaultUI: false, 
-                zoomControl: true,
-                mapTypeControl: true
+                zoom: 13,
+                styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
             });
             
-            // Initialize Traffic Layer
             trafficLayer = new google.maps.TrafficLayer();
             trafficLayer.setMap(map);
-            document.getElementById('mapLegend').classList.remove('hidden');
 
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 map: map,
-                polylineOptions: { strokeColor: '#1d4ed8', strokeWeight: 6, strokeOpacity: 0.8 }
+                polylineOptions: { strokeColor: '#3674FF', strokeWeight: 6 }
             });
-
-            // Autocomplete Features
-            const autocompleteOptions = { componentRestrictions: { country: "ph" }, fields: ["formatted_address", "geometry", "name"] };
-            new google.maps.places.Autocomplete(document.getElementById('routeOrigin'), autocompleteOptions);
-            new google.maps.places.Autocomplete(document.getElementById('routeDest'), autocompleteOptions);
-
-            // Enable the Plan Route Button
-            const btn = document.getElementById('planRouteBtn');
-            btn.disabled = false;
-            btn.innerHTML = `Plan Route`;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-200', 'text-slate-400');
-            btn.classList.add('bg-blue-700', 'text-white', 'hover:bg-blue-800');
         }
 
-        // Fetch DB Vehicles to populate dropdown
-        async function loadFleetOptions() {
-            const select = document.getElementById('routeVehicle');
+        // --- DRIVER LOGIC: Itinerary & Routing ---
+        async function loadDriverItinerary() {
+            const list = document.getElementById('itinerary-list');
             try {
-                fleetData = await getVehicles();
-                select.innerHTML = '<option value="" disabled selected>-- Select a Vehicle --</option>';
-                fleetData.forEach(v => {
-                    const fuelText = v.fuelType ? ` - ${v.fuelType}` : '';
-                    select.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} - ${v.model} (${v.efficiency} km/L${fuelText})</option>`;
-                });
-            } catch (err) {
-                select.innerHTML = '<option value="">Standard Car (14km/L)</option>';
-            }
+                const res = await fetch(`${API_BASE}/tasks`);
+                const allTasks = await res.json();
+                const myTasks = allTasks.filter(t => t.driver === username && t.status === 'Pending');
+
+                if (myTasks.length === 0) {
+                    list.innerHTML = `<div class="text-center py-10 text-gray-400 text-sm">No pending tasks for today.</div>`;
+                    return;
+                }
+
+                list.innerHTML = myTasks.map(t => `
+                    <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-xl hover:border-blue-300 transition-all cursor-pointer group" onclick="autoRouteTo('${t.destination}', '${t.vehicle}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[9px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded tracking-widest uppercase">${t.vehicle}</span>
+                            <i class="fa-solid fa-chevron-right text-blue-200 group-hover:text-blue-500 transition-colors"></i>
+                        </div>
+                        <h3 class="font-bold text-blue-900 text-sm">${t.destination}</h3>
+                        <p class="text-[11px] text-gray-500 mt-1 line-clamp-1">${t.description}</p>
+                        <button class="mt-4 w-full bg-blue-600 text-white text-[10px] font-bold py-2 rounded-lg shadow-sm uppercase tracking-widest">Start Navigation</button>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
         }
 
-        const expressways = {
-            "North Luzon Expressway": ["Balintawak", "Mindanao Ave", "Karuhatan", "Valenzuela", "Meycauayan", "Marilao", "Bocaue", "Tambobong", "Philippine Arena", "Tabang", "Balagtas", "Guiguinto", "Plaridel", "Pulilan", "San Simon", "San Fernando", "Mexico", "Angeles", "Dau", "Sta. Ines"],
-            "Subic-Clark-Tarlac Expressway": ["Mabalacat", "Clark South", "Clark North", "Porac", "Floridablanca", "Dinalupihan", "Tipo", "Concepcion", "San Miguel", "Tarlac"],
-            "South Luzon Expressway": ["Magallanes", "Nichols", "Merville", "Bicutan", "Sucat", "Alabang", "Filinvest", "Susana Heights", "San Pedro", "Southwoods", "Carmona", "Mamplasan", "Sta. Rosa", "ABI/Greenfield", "Cabuyao", "Silangan", "Calamba", "Santo Tomas"],
-            "Metro Manila Skyway": ["Quezon Ave", "Plaza Dilao", "Nagtahan", "Buendia", "Amorsolo", "Magallanes", "NAIAx", "Bicutan", "Sucat", "Alabang", "South Station", "Filinvest", "Susana Heights"],
-            "Muntinlupa-Cavite Expressway": ["Daang Hari", "SLEX"],
-            "Southern Tagalog Arterial Road": ["Santo Tomas", "Tanauan", "Malvar", "Balete", "Lipa", "San Jose", "Ibaan", "Batangas City"],
-            "Cavite-Laguna Expressway": ["Mamplasan", "Laguna Boulevard", "Laguna Technopark", "Santa Rosa-Tagaytay", "Silang East", "Silang (Aguinaldo)"],
-            "Cavite Expressway": ["Roxas Blvd", "MIA Road", "Zapote", "Bacoor", "Kawit"],
-            "NAIA Expressway": ["Skyway", "Sales", "Andrews Ave", "NAIA T3", "NAIA T1/T2", "Macapagal Blvd", "CAVITEX"],
-            "Tarlac-Pangasinan-La Union Exp": ["Tarlac", "Victoria", "Pura", "Ramos", "Anao", "Carmen", "Urdaneta", "Binalonan", "Pozorrubio", "Sison", "Rosario"],
-            "Cebu-Cordova Link Expressway": ["Cebu City", "Cordova"]
+        async function autoRouteTo(destination, plate) {
+            if (!navigator.geolocation) return alert("Please enable GPS to use navigation.");
+            
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const origin = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                
+                // Get Vehicle Efficiency for Calculator
+                const fleet = await getVehicles();
+                const v = fleet.find(car => car.plateNumber === plate) || { efficiency: 14 };
+
+                directionsService.route({
+                    origin: origin,
+                    destination: destination,
+                    travelMode: 'DRIVING'
+                }, (response, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(response);
+                        const route = response.routes[0].legs[0];
+                        
+                        // Calculate Budget info
+                        const distKm = route.distance.value / 1000;
+                        const liters = distKm / v.efficiency;
+                        const fuelCost = liters * 75; // Baseline PH price
+
+                        document.getElementById('res-dist-time').innerText = `${route.distance.text} / ${route.duration.text}`;
+                        document.getElementById('res-fuel').innerText = `${liters.toFixed(2)}L Needed`;
+                        document.getElementById('res-total-cost').innerText = `₱${fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        document.getElementById('route-summary-panel').classList.remove('hidden');
+                        
+                        if(window.innerWidth < 1024) document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+
+        // --- ADMIN LOGIC: Live Fleet Tracking ---
+        async function startAdminPolling() {
+            updateFleetMap();
+            setInterval(updateFleetMap, 15000); // Update every 15 seconds
+        }
+
+        async function updateFleetMap() {
+            try {
+                const res = await fetch(`${API_BASE}/action-logs`);
+                const logs = await res.json();
+                
+                // Get only the latest entry for each driver
+                const latestLogs = {};
+                logs.forEach(log => {
+                    if (!latestLogs[log.driver_name]) latestLogs[log.driver_name] = log;
+                });
+
+                const activeDrivers = Object.values(latestLogs);
+                document.getElementById('active-count').innerText = `${activeDrivers.length} ACTIVE`;
+
+                // Update Sidebar List
+                const list = document.getElementById('fleet-list');
+                list.innerHTML = activeDrivers.map(log => {
+                    const isOld = (new Date() - new Date(log.timestamp)) > 3600000; // Over 1 hour old
+                    const statusColor = isOld ? 'text-gray-400' : 'text-emerald-500';
+                    return `
+                    <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="focusOnDriver('${log.latitude}', '${log.longitude}')">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-sm text-gray-800">${log.driver_name}</h4>
+                            <span class="text-[9px] font-bold text-gray-400">${new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">${log.plate_number}</span>
+                            <span class="text-[10px] font-medium text-gray-400">•</span>
+                            <span class="text-[10px] ${statusColor} font-bold uppercase">${log.action}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-2 italic truncate"><i class="fa-solid fa-location-dot mr-1"></i> ${log.location}</p>
+                    </div>
+                `}).join('');
+
+                // Update Map Markers
+                markers.forEach(m => m.setMap(null));
+                markers = [];
+
+                activeDrivers.forEach(log => {
+                    if (log.latitude === "N/A") return;
+                    const marker = new google.maps.Marker({
+                        position: { lat: parseFloat(log.latitude), lng: parseFloat(log.longitude) },
+                        map: map,
+                        title: log.driver_name,
+                        icon: {
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            scale: 5,
+                            fillColor: "#3674FF",
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: "#FFFFFF"
+                        }
+                    });
+
+                    const info = new google.maps.InfoWindow({
+                        content: `<div class="p-2"><b class="text-blue-600">${log.driver_name}</b><br><span class="text-xs text-gray-500">${log.action}</span></div>`
+                    });
+                    marker.addListener("click", () => info.open(map, marker));
+                    markers.push(marker);
+                });
+
+            } catch (e) { console.error("Fleet fetch error:", e); }
+        }
+
+        window.focusOnDriver = function(lat, lng) {
+            if (lat === "N/A") return alert("No GPS coordinates available for this record.");
+            map.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
+            map.setZoom(16);
         };
 
-        let segmentCounter = 0;
+        window.closeSummary = () => document.getElementById('route-summary-panel').classList.add('hidden');
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (typeof renderNavigation === 'function') { renderNavigation('travel-map'); }
-            loadGoogleMaps(); 
-            loadFleetOptions(); 
-            addTollSegment();
-        });
-
-        window.addTollSegment = function() {
-            segmentCounter++;
-            const id = segmentCounter;
-            const container = document.getElementById('tollSegments');
-            
-            let expOptions = `<option value="" disabled selected>-- Select expressway --</option>`;
-            for (const exp in expressways) { expOptions += `<option value="${exp}">${exp}</option>`; }
-
-            container.insertAdjacentHTML('beforeend', `
-                <div id="segment-${id}" class="segment-block">
-                    <div class="mb-3">
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Toll Road</label>
-                        <select id="exp-${id}" onchange="updateExits(${id})" class="w-full bg-slate-100 border border-transparent text-slate-700 text-sm rounded-lg p-3 outline-none focus:border-blue-400 focus:bg-white transition-all">
-                            ${expOptions}
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-1 gap-3 mb-1">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Entry Point</label>
-                            <select id="entry-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-slate-100 border border-transparent text-slate-700 text-sm rounded-lg p-3 outline-none focus:border-blue-400 focus:bg-white disabled:opacity-50 transition-all" disabled><option value="" disabled selected>-- Select entry point --</option></select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Exit Point</label>
-                            <select id="exit-${id}" onchange="calculateSegmentToll(${id})" class="w-full bg-slate-100 border border-transparent text-slate-700 text-sm rounded-lg p-3 outline-none focus:border-blue-400 focus:bg-white disabled:opacity-50 transition-all" disabled><option value="" disabled selected>-- Select exit point --</option></select>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center text-sm font-bold mt-2 border-b border-gray-200 pb-4">
-                        <span id="route-text-${id}" class="text-gray-500 text-xs hidden"></span>
-                        <div class="flex-1 text-right">
-                            <span id="price-text-${id}" data-cost="0" class="text-blue-900 hidden">₱0.00</span>
-                        </div>
-                    </div>
-                </div>
-            `);
-        }
-
-        window.updateExits = function(id) {
-            const expSelect = document.getElementById(`exp-${id}`);
-            const exits = expressways[expSelect.value] || [];
-            let options = `<option value="" disabled selected>-- Select point --</option>`;
-            exits.forEach((exit, index) => { options += `<option value="${exit}" data-index="${index}">${exit}</option>`; });
-            
-            document.getElementById(`entry-${id}`).innerHTML = options;
-            document.getElementById(`exit-${id}`).innerHTML = options;
-            document.getElementById(`entry-${id}`).disabled = false;
-            document.getElementById(`exit-${id}`).disabled = false;
-        }
-
-        window.calculateSegmentToll = function(id) {
-            const entrySelect = document.getElementById(`entry-${id}`);
-            const exitSelect = document.getElementById(`exit-${id}`);
-            const priceText = document.getElementById(`price-text-${id}`);
-
-            if (entrySelect.value && exitSelect.value) {
-                const eIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
-                const xIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
-                // Estimation formula simulating toll calculations
-                let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 39 + 46 : 0; 
-                
-                priceText.innerText = `₱${cost.toFixed(2)}`;
-                priceText.setAttribute('data-cost', cost);
-                priceText.classList.remove('hidden');
-            }
-            updateTotalToll();
-        }
-
-        // --- ROUTING & SIMULATION LOGIC ---
-        window.simulateRouting = function() {
-            if (!directionsService) return alert("Google Maps is still loading.");
-            
-            const origin = document.getElementById('routeOrigin').value;
-            const destination = document.getElementById('routeDest').value;
-            const selectedPlate = document.getElementById('routeVehicle').value;
-
-            if (!selectedPlate) return alert("Please select a Vehicle.");
-            if (!origin || !destination) return alert("Please enter Origin and Destination.");
-            
-            // Look up vehicle dynamically
-            const vehicle = fleetData.find(v => v.plateNumber === selectedPlate);
-            const vehicleEfficiency = vehicle && vehicle.efficiency ? parseFloat(vehicle.efficiency) : 14;
-            const fuelType = vehicle && vehicle.fuelType ? vehicle.fuelType : 'Gasoline';
-            const dynamicFuelPrice = estimatedPrices[fuelType] || 75.00;
-            
-            const btn = document.getElementById('planRouteBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Calculating...`;
-            btn.disabled = true;
-
-            directionsService.route({
-                origin: origin,
-                destination: destination,
-                travelMode: google.maps.TravelMode.DRIVING,
-                avoidTolls: document.getElementById('toggleToll').checked
-            }, (response, status) => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-
-                if (status === "OK") {
-                    // Draw map route
-                    directionsRenderer.setDirections(response);
-                    const route = response.routes[0].legs[0];
-                    
-                    const distanceKm = parseFloat(route.distance.value) / 1000;
-                    const litersNeeded = (distanceKm / vehicleEfficiency);
-                    const fuelCost = (litersNeeded * dynamicFuelPrice);
-
-                    // Update Summary Text
-                    document.getElementById('summaryOriginText').innerText = origin;
-                    document.getElementById('summaryDestText').innerText = destination;
-                    document.getElementById('summaryDistance').innerText = route.distance.text;
-                    document.getElementById('summaryDuration').innerText = route.duration.text;
-                    document.getElementById('summaryLiters').innerText = `${litersNeeded.toFixed(2)}L`;
-                    
-                    document.getElementById('summaryFuelType').innerText = fuelType;
-                    document.getElementById('summaryPriceLabel').innerText = `₱${dynamicFuelPrice.toFixed(2)}/L`;
-                    document.getElementById('summaryFuelCost').innerText = `₱${fuelCost.toFixed(2)}`;
-
-                    buildSummary(parseFloat(fuelCost));
-
-                    // Switch Panels
-                    document.getElementById('plannerForm').classList.add('hidden');
-                    document.getElementById('plannerSummary').classList.remove('hidden');
-                    document.getElementById('plannerSummary').classList.add('flex');
-                    
-                    if(window.innerWidth < 1024) { document.getElementById('map').scrollIntoView({ behavior: 'smooth' }); }
-
-                } else {
-                    alert("Route not found. Please try a different origin or destination.");
-                }
-            });
-        }
-
-        function buildSummary(fuelCost) {
-            const container = document.getElementById('summaryTollBreakdown');
-            container.innerHTML = ''; 
-            let totalToll = 0;
-            
-            document.querySelectorAll('.segment-block').forEach(seg => {
-                const id = seg.id.split('-')[1];
-                const expName = document.getElementById(`exp-${id}`).value;
-                const entryName = document.getElementById(`entry-${id}`).value;
-                const exitName = document.getElementById(`exit-${id}`).value;
-                const cost = parseFloat(document.getElementById(`price-text-${id}`).getAttribute('data-cost') || 0);
-                
-                if (expName && entryName && exitName && cost > 0) {
-                    totalToll += cost;
-                    container.insertAdjacentHTML('beforeend', `
-                        <div class="flex justify-between p-3.5 border-b border-gray-100 items-center">
-                            <div class="flex flex-col">
-                                <span class="text-gray-600">${expName}</span>
-                                <span class="text-[10px] text-gray-400 mt-0.5">${entryName} → ${exitName}</span>
-                            </div>
-                            <span class="font-bold text-gray-900">₱${cost.toFixed(2)}</span>
-                        </div>
-                    `);
-                }
-            });
-
-            document.getElementById('summaryTotalToll').innerText = `₱${totalToll.toFixed(2)}`;
-            document.getElementById('grandTotalCost').innerText = `₱${(fuelCost + totalToll).toFixed(2)}`;
-        }
-
-        function updateTotalToll() {
-            let total = 0;
-            document.querySelectorAll('[id^="price-text-"]').forEach(span => total += parseFloat(span.getAttribute('data-cost') || 0));
-            document.getElementById('totalTollCost').innerText = `₱${total.toFixed(2)}`;
-        }
-
-        window.resetPlanner = function() {
-            if (directionsRenderer) directionsRenderer.setDirections({routes: []});
-            if (map) { map.setCenter({ lat: 14.5632, lng: 121.0142 }); map.setZoom(13); }
-            document.getElementById('plannerSummary').classList.add('hidden');
-            document.getElementById('plannerSummary').classList.remove('flex');
-            document.getElementById('plannerForm').classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
