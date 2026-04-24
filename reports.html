@@ -49,10 +49,10 @@
                 <i class="fa-solid fa-filter text-blue-400"></i> Database Filters
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Date Range</label>
-                    <select id="filterDatePreset" onchange="toggleCustomDates()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900">
+                    <select id="filterDatePreset" onchange="toggleCustomDates()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 transition-colors">
                         <option value="">All Time</option>
                         <option value="today">Today</option>
                         <option value="yesterday">Yesterday</option>
@@ -67,19 +67,26 @@
                 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Department</label>
-                    <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors">
                         <option value="">All Departments</option>
                         <option value="ELPD">ELPD</option>
                         <option value="OSAS">OSAS</option>
                         <option value="IT">IT</option>
                         <option value="REGISTRAR">REGISTRAR</option>
                         <option value="FINANCE">FINANCE</option>
+                        <option value="ADMISSIONS">ADMISSIONS</option>
+                        <option value="ADCOM">ADCOM</option>
+                        <option value="CLINIC">CLINIC</option>
+                        <option value="PURCHASING">PURCHASING</option>
                         <option value="ADMIN">ADMIN</option>
+                        <option value="SHS">SHS</option>
+                        <option value="COLLEGE">COLLEGE</option>
+                        <option value="LIBRARY">LIBRARY</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Task Category</label>
-                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors">
                         <option value="">All Tasks</option>
                         <option value="Asset Collection">Asset Collection</option>
                         <option value="Document Routing">Document Routing</option>
@@ -89,7 +96,7 @@
                 </div>
             </div>
 
-            <div id="customDateRow" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 pt-4 border-t border-gray-100">
+            <div id="customDateRow" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mb-4 pt-4 border-t border-gray-100">
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
                     <input type="date" id="filterStart" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
@@ -100,18 +107,15 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 pb-8 mt-4">
-                <button onclick="applyFilters()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
+            <div class="flex flex-col md:flex-row justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
+                <button onclick="clearFilters()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 border border-gray-200 text-sm">
+                    <i class="fa-solid fa-eraser"></i> Clear
+                </button>
+                <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
                     <i class="fa-solid fa-magnifying-glass"></i> Search Database
                 </button>
-                <button onclick="clearFilters()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3.5 rounded-xl transition-colors flex justify-center items-center gap-2 border border-gray-200">
-                    <i class="fa-solid fa-eraser"></i> Clear Filters
-                </button>
-            </div>
-
-            <div class="pt-6">
-                <button onclick="exportToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2 text-sm uppercase tracking-wider">
-                    <i class="fa-solid fa-file-excel text-lg"></i> Export Filtered Report To Excel
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-file-excel text-lg"></i> Export to Excel
                 </button>
             </div>
         </div>
@@ -280,6 +284,10 @@
                     statusBadge = `<span class="text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
                 } else if(log.action === "Started Navigation") {
                     statusBadge = `<span class="text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
+                } else if(log.action === "Driver Shift Clock-In") {
+                    statusBadge = `<span class="text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-clock mr-1"></i> Shift Start</span>`;
+                } else if(log.action === "Driver Shift Clock-Out") {
+                    statusBadge = `<span class="text-gray-700 bg-gray-200 px-2 py-1 rounded border border-gray-300 font-bold text-[10px] uppercase"><i class="fa-solid fa-stopwatch mr-1"></i> Shift End</span>`;
                 }
 
                 let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
