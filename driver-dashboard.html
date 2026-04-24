@@ -251,9 +251,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
-                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Loading vehicles...</option>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Assigned Vehicle</label>
+                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
+                        <option value="" disabled selected>Loading assigned vehicles...</option>
                     </select>
                 </div>
 
@@ -333,9 +333,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
-                    <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="" disabled selected>Loading vehicles...</option>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Assigned Vehicle</label>
+                    <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
+                        <option value="" disabled selected>Loading assigned vehicles...</option>
                     </select>
                 </div>
 
@@ -418,6 +418,7 @@
             }
         }
 
+        // --- STRICT DISPATCH LOCKING LOGIC ---
         window.updateModalVehicleDropdown = function(type) {
             const dateInputId = type === 'fuel' ? 'fDate' : 'tollDate';
             const selectId = type === 'fuel' ? 'fVehicle' : 'tollVehicle';
@@ -428,31 +429,32 @@
 
             if (!dateInput || allVehicles.length === 0) return;
 
-            const dailyTasks = allTasks.filter(t => t.date === dateInput);
-            const vehicleAssignments = {};
-            dailyTasks.forEach(t => {
-                if (t.vehicle && t.driver) vehicleAssignments[t.vehicle] = t.driver;
-            });
+            // Find tasks explicitly dispatched to THIS driver on the selected date
+            const myDailyTasks = allTasks.filter(t => t.date === dateInput && t.driver === myName);
+            
+            // Get unique vehicle plates from those tasks
+            const myAssignedPlates = [...new Set(myDailyTasks.map(t => t.vehicle).filter(v => v))];
 
-            selectEl.innerHTML = '<option value="" disabled selected>Select vehicle...</option>';
-            let autoSelectPlate = null;
+            selectEl.innerHTML = '';
 
-            allVehicles.forEach(v => {
-                const plate = v.plateNumber.trim();
-                const assignedTo = vehicleAssignments[plate];
+            if (myAssignedPlates.length === 0) {
+                // LOCKOUT: Prevent selection and form submission
+                selectEl.innerHTML = `<option value="" disabled selected>❌ No vehicle assigned to you for this date</option>`;
+            } else {
+                selectEl.innerHTML = '<option value="" disabled selected>Select assigned vehicle...</option>';
+                let autoSelectPlate = null;
 
-                if (assignedTo && assignedTo !== myName) {
-                    selectEl.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50 font-medium">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
-                } else if (assignedTo === myName) {
-                    selectEl.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-700 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to you)</option>`;
-                    autoSelectPlate = v.plateNumber;
-                } else {
-                    selectEl.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
+                myAssignedPlates.forEach(plate => {
+                    const vObj = allVehicles.find(v => v.plateNumber === plate);
+                    const modelName = vObj ? vObj.model : 'Unknown Model';
+                    selectEl.innerHTML += `<option value="${plate}" class="text-emerald-700 bg-emerald-50 font-bold">✅ ${plate} (${modelName})</option>`;
+                    autoSelectPlate = plate;
+                });
+
+                // Auto-select if they only have 1 assigned vehicle today
+                if (myAssignedPlates.length === 1 && autoSelectPlate) {
+                    selectEl.value = autoSelectPlate;
                 }
-            });
-
-            if (autoSelectPlate) {
-                selectEl.value = autoSelectPlate;
             }
         };
 
