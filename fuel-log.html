@@ -40,35 +40,60 @@
             </div>
         </div>
 
-        <div id="adminFilters" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 p-6 flex flex-col md:flex-row gap-4 items-end">
-            <div class="w-full md:w-1/3">
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Filter by Department</label>
-                <select id="filterDept" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
-                    <option value="">All Departments</option>
-                    <option value="ELPD">ELPD</option>
-                    <option value="OSAS">OSAS</option>
-                    <option value="IT">IT</option>
-                    <option value="REGISTRAR">REGISTRAR</option>
-                    <option value="FINANCE">FINANCE</option>
-                    <option value="ADMISSIONS">ADMISSIONS</option>
-                    <option value="ADCOM">ADCOM</option>
-                    <option value="CLINIC">CLINIC</option>
-                    <option value="PURCHASING">PURCHASING</option>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="SHS">SHS</option>
-                    <option value="COLLEGE">COLLEGE</option>
-                    <option value="LIBRARY">LIBRARY</option>
-                </select>
+        <div id="adminFilters" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 p-6 flex flex-col gap-4">
+            <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Filter by Department</label>
+                    <select id="filterDept" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                        <option value="">All Departments</option>
+                        <option value="ELPD">ELPD</option>
+                        <option value="OSAS">OSAS</option>
+                        <option value="IT">IT</option>
+                        <option value="REGISTRAR">REGISTRAR</option>
+                        <option value="FINANCE">FINANCE</option>
+                        <option value="ADMISSIONS">ADMISSIONS</option>
+                        <option value="ADCOM">ADCOM</option>
+                        <option value="CLINIC">CLINIC</option>
+                        <option value="PURCHASING">PURCHASING</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="SHS">SHS</option>
+                        <option value="COLLEGE">COLLEGE</option>
+                        <option value="LIBRARY">LIBRARY</option>
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Date Range</label>
+                    <select id="filterDatePreset" onchange="toggleCustomDates(); applyFuelFilters();" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="thisWeek">This Week</option>
+                        <option value="thisMonth">This Month</option>
+                        <option value="lastMonth">Last Month</option>
+                        <option value="thisYear">This Year</option>
+                        <option value="custom">Custom Range...</option>
+                    </select>
+                </div>
+
+                <div class="w-full md:w-1/4 flex gap-2">
+                    <button onclick="applyFuelFilters(true)" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-3 rounded-xl transition-colors text-sm">Clear Filters</button>
+                    <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i> Export
+                    </button>
+                </div>
             </div>
-            <div class="w-full md:w-1/3">
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Filter by Month</label>
-                <input type="month" id="filterMonth" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
-            </div>
-            <div class="w-full md:w-1/3 flex gap-2">
-                <button onclick="applyFuelFilters()" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-3 rounded-xl transition-colors text-sm">Clear Filters</button>
-                <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> Export
-                </button>
+
+            <div id="customDateRow" class="hidden flex-col md:flex-row gap-4 items-end pt-2 border-t border-gray-100 mt-2">
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Start Date</label>
+                    <input type="date" id="filterStart" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-blue-500">
+                </div>
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">End Date</label>
+                    <input type="date" id="filterEnd" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-blue-500">
+                </div>
             </div>
         </div>
 
@@ -140,36 +165,99 @@
             loadFuelLogs();
         });
 
+        function toggleCustomDates() {
+            const preset = document.getElementById('filterDatePreset').value;
+            const customRow = document.getElementById('customDateRow');
+            if (preset === 'custom') customRow.classList.remove('hidden');
+            else customRow.classList.add('hidden');
+        }
+
+        // Calculates exact date bounds based on preset selected
+        function getDateRange(preset) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Start of today
+            
+            let start = new Date(today);
+            let end = new Date(today);
+            end.setHours(23, 59, 59, 999); // End of today
+
+            switch(preset) {
+                case 'today': break;
+                case 'yesterday':
+                    start.setDate(start.getDate() - 1);
+                    end.setDate(end.getDate() - 1);
+                    break;
+                case '7days':
+                    start.setDate(start.getDate() - 6);
+                    break;
+                case 'thisWeek':
+                    const day = start.getDay();
+                    const diff = start.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+                    start.setDate(diff);
+                    break;
+                case 'thisMonth':
+                    start.setDate(1);
+                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59); // Last day
+                    break;
+                case 'lastMonth':
+                    start.setMonth(start.getMonth() - 1);
+                    start.setDate(1);
+                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59);
+                    break;
+                case 'thisYear':
+                    start.setMonth(0, 1);
+                    end = new Date(start.getFullYear(), 11, 31, 23, 59, 59);
+                    break;
+                case 'custom':
+                    const customStart = document.getElementById('filterStart').value;
+                    const customEnd = document.getElementById('filterEnd').value;
+                    if(customStart) start = new Date(customStart + "T00:00:00"); else start = null;
+                    if(customEnd) end = new Date(customEnd + "T23:59:59"); else end = null;
+                    break;
+                default:
+                    return null; // All Time
+            }
+            return { start, end };
+        }
+
         async function loadFuelLogs() {
             try {
                 allLogs = await getLogs();
-                // If driver, strictly lock data to their username
                 if (userRole !== 'admin') {
                     allLogs = allLogs.filter(log => log.driver === currentUser);
                 }
-                applyFuelFilters(); // Applies filters and renders
+                applyFuelFilters();
             } catch (error) {
-                document.getElementById('fuelLogsTable').innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-500 font-bold">Failed to load records. Ensure backend is running.</td></tr>`;
+                document.getElementById('fuelLogsTable').innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-500 font-bold">Failed to load records.</td></tr>`;
             }
         }
 
-        function applyFuelFilters() {
-            const deptFilter = document.getElementById('filterDept') ? document.getElementById('filterDept').value : "";
-            const monthFilter = document.getElementById('filterMonth') ? document.getElementById('filterMonth').value : "";
-
-            // If clearing filters via button
-            if(arguments.length > 0) {
+        function applyFuelFilters(clear = false) {
+            if (clear) {
                 document.getElementById('filterDept').value = "";
-                document.getElementById('filterMonth').value = "";
-                filteredLogs = [...allLogs];
-            } else {
-                filteredLogs = allLogs.filter(log => {
-                    let match = true;
-                    if (deptFilter && !log.department.includes(deptFilter)) match = false;
-                    if (monthFilter && !log.date.startsWith(monthFilter)) match = false;
-                    return match;
-                });
+                document.getElementById('filterDatePreset').value = "";
+                document.getElementById('filterStart').value = "";
+                document.getElementById('filterEnd').value = "";
+                toggleCustomDates();
             }
+
+            const deptFilter = document.getElementById('filterDept') ? document.getElementById('filterDept').value : "";
+            const presetFilter = document.getElementById('filterDatePreset') ? document.getElementById('filterDatePreset').value : "";
+            
+            const dateRange = getDateRange(presetFilter);
+
+            filteredLogs = allLogs.filter(log => {
+                let match = true;
+                
+                if (deptFilter && !log.department.includes(deptFilter)) match = false;
+                
+                if (dateRange && dateRange.start && dateRange.end) {
+                    const logDate = new Date(log.date + "T12:00:00"); // Approximate mid-day for pure date strings
+                    if (logDate < dateRange.start || logDate > dateRange.end) match = false;
+                }
+
+                return match;
+            });
 
             renderLogsTable(filteredLogs);
         }

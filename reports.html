@@ -49,15 +49,22 @@
                 <i class="fa-solid fa-filter text-blue-400"></i> Database Filters
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
-                    <input type="date" id="filterStart" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Date Range</label>
+                    <select id="filterDatePreset" onchange="toggleCustomDates()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="thisWeek">This Week</option>
+                        <option value="thisMonth">This Month</option>
+                        <option value="lastMonth">Last Month</option>
+                        <option value="thisYear">This Year</option>
+                        <option value="custom">Custom Range...</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
-                    <input type="date" id="filterEnd" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
-                </div>
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Department</label>
                     <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
@@ -82,7 +89,18 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 pb-8">
+            <div id="customDateRow" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 pt-4 border-t border-gray-100">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
+                    <input type="date" id="filterStart" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
+                    <input type="date" id="filterEnd" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100 pb-8 mt-4">
                 <button onclick="applyFilters()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass"></i> Search Database
                 </button>
@@ -141,6 +159,60 @@
             fetchLogs();
         });
 
+        function toggleCustomDates() {
+            const preset = document.getElementById('filterDatePreset').value;
+            const customRow = document.getElementById('customDateRow');
+            if (preset === 'custom') customRow.classList.remove('hidden');
+            else customRow.classList.add('hidden');
+        }
+
+        function getDateRange(preset) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            
+            let start = new Date(today);
+            let end = new Date(today);
+            end.setHours(23, 59, 59, 999);
+
+            switch(preset) {
+                case 'today': break;
+                case 'yesterday':
+                    start.setDate(start.getDate() - 1);
+                    end.setDate(end.getDate() - 1);
+                    break;
+                case '7days':
+                    start.setDate(start.getDate() - 6);
+                    break;
+                case 'thisWeek':
+                    const day = start.getDay();
+                    const diff = start.getDate() - day + (day === 0 ? -6 : 1); 
+                    start.setDate(diff);
+                    break;
+                case 'thisMonth':
+                    start.setDate(1);
+                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59); 
+                    break;
+                case 'lastMonth':
+                    start.setMonth(start.getMonth() - 1);
+                    start.setDate(1);
+                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59);
+                    break;
+                case 'thisYear':
+                    start.setMonth(0, 1);
+                    end = new Date(start.getFullYear(), 11, 31, 23, 59, 59);
+                    break;
+                case 'custom':
+                    const customStart = document.getElementById('filterStart').value;
+                    const customEnd = document.getElementById('filterEnd').value;
+                    if(customStart) start = new Date(customStart + "T00:00:00"); else start = null;
+                    if(customEnd) end = new Date(customEnd + "T23:59:59"); else end = null;
+                    break;
+                default:
+                    return null; // All Time
+            }
+            return { start, end };
+        }
+
         async function fetchLogs() {
             try {
                 const res = await fetch(`${API_BASE}/action-logs`);
@@ -153,18 +225,19 @@
         }
 
         function applyFilters() {
-            const fStart = document.getElementById('filterStart').value;
-            const fEnd = document.getElementById('filterEnd').value;
             const fTask = document.getElementById('filterTask').value.toLowerCase();
             const fDept = document.getElementById('filterDept').value; 
+            const presetFilter = document.getElementById('filterDatePreset').value;
+            const dateRange = getDateRange(presetFilter);
 
             filteredLogs = allLogs.filter(log => {
                 let match = true;
-                if (fStart || fEnd) {
-                    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
-                    if (fStart && logDate < fStart) match = false;
-                    if (fEnd && logDate > fEnd) match = false;
+                
+                if (dateRange && dateRange.start && dateRange.end) {
+                    const logDate = new Date(log.timestamp);
+                    if (logDate < dateRange.start || logDate > dateRange.end) match = false;
                 }
+                
                 if (fTask && !log.task.toLowerCase().includes(fTask)) match = false;
                 if (fDept && log.department !== fDept) match = false;
                 return match;
@@ -173,10 +246,12 @@
         }
 
         function clearFilters() {
+            document.getElementById('filterDatePreset').value = '';
             document.getElementById('filterStart').value = '';
             document.getElementById('filterEnd').value = '';
             document.getElementById('filterTask').value = '';
             document.getElementById('filterDept').value = '';
+            toggleCustomDates();
             filteredLogs = [...allLogs];
             renderTable(filteredLogs);
         }
