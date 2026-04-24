@@ -52,6 +52,7 @@ const logSchema = new mongoose.Schema({
 const taskSchema = new mongoose.Schema({
     driver: String,
     vehicle: String,
+    taskType: String,
     description: String,
     destination: String,
     date: String,

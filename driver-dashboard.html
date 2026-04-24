@@ -130,39 +130,27 @@
                 <div class="p-8">
                     <p id="status-text" class="text-xs font-bold text-gray-400 mb-6 tracking-widest uppercase">Status: Waiting for shift start...</p>
 
-                    <div class="space-y-5 mb-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Task Type</label>
-                                <select id="task-dropdown" class="w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                                    <option value="">Select Specific Task</option>       
-                                    <option value="Asset Collection">Asset Collection</option>            
-                                    <option value="Document Routing">Document Routing</option>            
-                                    <option value="Hardware Transport">Hardware Transport</option>        
-                                    <option value="Bank Transaction">Bank Transaction</option>
-                                    <option value="Other">Other (Specify Task)</option>
-                                </select>
-                                <input type="text" id="task-details" class="hidden mt-3 w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Specify details...">
+                    <div id="active-task-info" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 shadow-inner">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Active Dispatch Details</p>
+                            <span id="display-task-vehicle" class="bg-white text-blue-800 border border-blue-200 px-2 py-1 rounded-md text-[10px] font-bold tracking-widest shadow-sm">VEHICLE</span>
+                        </div>
+                        <h3 id="display-task-desc" class="text-xl font-bold text-blue-900 leading-tight">No task selected</h3>
+                        
+                        <div class="mt-4 space-y-2">
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-location-dot text-blue-400 mt-0.5"></i>
+                                <div>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Destination</p>
+                                    <p id="display-task-dest" class="text-sm text-gray-800 font-medium">N/A</p>
+                                </div>
                             </div>
-                            
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Destination</label>
-                                <select id="location-dropdown" class="w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
-                                    <option value="">Select Destination</option>            
-                                    <optgroup label="iACADEMY Campuses">             
-                                        <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus</option>                
-                                        <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza</option>            
-                                    </optgroup>    
-                                    <optgroup label="Tech & Computing Partners">
-                                        <option value="Amazon Web Services">Amazon Web Services</option>
-                                        <option value="ASUS">ASUS</option>
-                                      </optgroup>         
-                                    <optgroup label="Custom Destination">                
-                                        <option value="Other">Other (Specify Destination)</option>            
-                                    </optgroup> 
-      
-                                </select>
-                                <input type="text" id="location-details" class="hidden mt-3 w-full border border-gray-200 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Type exact destination...">
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-tag text-blue-400 mt-0.5"></i>
+                                <div>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Task Category</p>
+                                    <p id="display-task-type" class="text-sm text-gray-800 font-medium">N/A</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -319,6 +307,8 @@
         const API_BASE = 'https://iacademy-rfid.onrender.com/api';
         let currentActiveTaskId = null;
         let currentActiveVehicle = "N/A";
+        let currentActiveTaskName = "N/A";
+        let currentActiveTaskDest = "N/A";
         const statusText = document.getElementById('status-text');
 
         window.globalLogout = function() { localStorage.clear(); window.location.href = 'login.html'; };
@@ -361,8 +351,8 @@
                         
                         ${(!isDone && !isRebook) ? `
                         <div class="mt-6 pt-5 border-t border-gray-100">
-                            <button onclick="startAssignedTask('${t._id}', '${t.description}', '${t.destination}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
-                                Auto-Fill Details
+                            <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description}', '${t.destination}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                                Start Execution
                             </button>
                         </div>
                         ` : ''}
@@ -437,58 +427,33 @@
         }
 
         // --- ADVANCED TASK EXECUTION LOGIC ---
-        const taskDropdown = document.getElementById('task-dropdown');
-        const taskDetails = document.getElementById('task-details');
-        const locationDropdown = document.getElementById('location-dropdown');
-        const locationDetails = document.getElementById('location-details');
-
-        window.startAssignedTask = function(taskId, taskType, destName, assignedVehicle) {
+        window.startAssignedTask = function(taskId, taskType, taskDesc, destName, assignedVehicle) {
             currentActiveTaskId = taskId;
             currentActiveVehicle = assignedVehicle || "N/A";
             
-            let foundTask = Array.from(taskDropdown.options).some(opt => {
-                if (opt.value === taskType) { taskDropdown.value = taskType; return true; }
-                return false;
-            });
-            if (!foundTask) {
-                taskDropdown.value = 'Other';
-                taskDetails.value = taskType;
-                taskDetails.classList.remove('hidden');
-            }
+            // Save these globally so they get sent to the ActionLog automatically
+            currentActiveTaskName = `${taskType}: ${taskDesc}`;
+            currentActiveTaskDest = destName;
+            
+            // Update the read-only UI
+            document.getElementById('display-task-desc').innerText = taskDesc;
+            document.getElementById('display-task-dest').innerText = destName;
+            document.getElementById('display-task-type').innerText = taskType;
+            document.getElementById('display-task-vehicle').innerText = currentActiveVehicle;
+            
+            // Show the panel
+            document.getElementById('active-task-info').classList.remove('hidden');
 
-            let foundLoc = Array.from(locationDropdown.options).some(opt => {
-                if (opt.value === destName) { locationDropdown.value = destName; return true; }
-                return false;
-            });
-            if (!foundLoc) {
-                locationDropdown.value = 'Other';
-                locationDetails.value = destName;
-                locationDetails.classList.remove('hidden');
-            }
-
-            statusText.textContent = `STATUS: READY (${currentActiveVehicle})`;
+            statusText.textContent = `STATUS: READY FOR TRANSIT`;
             statusText.classList.replace('text-gray-400', 'text-blue-600');
             document.getElementById('execution-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
-        taskDropdown.addEventListener('change', (e) => {
-            if (e.target.value === 'Bank Transaction' || e.target.value === 'Other') {
-                taskDetails.placeholder = e.target.value === 'Bank Transaction' ? "Specify transaction..." : "Specify details...";
-                taskDetails.classList.remove('hidden');
-            } else { taskDetails.classList.add('hidden'); taskDetails.value = ""; }
-        });
-
-        locationDropdown.addEventListener('change', (e) => {
-            if (e.target.value === 'Other') locationDetails.classList.remove('hidden');
-            else { locationDetails.classList.add('hidden'); locationDetails.value = ""; }
-        });
-
         function getFinalTaskAndLocation() {
-            let finalTask = taskDropdown.value || "Not Selected";
-            if ((finalTask === "Bank Transaction" || finalTask === "Other") && taskDetails.value) finalTask += ` (${taskDetails.value})`;
-            let finalLoc = locationDropdown.value || "Not Selected";
-            if (finalLoc === "Other" && locationDetails.value) finalLoc = locationDetails.value;
-            return { finalTask, finalLoc };
+            return { 
+                finalTask: currentActiveTaskName, 
+                finalLoc: currentActiveTaskDest 
+            };
         }
 
         // --- GPS & COMPRESSION HELPERS ---
@@ -705,8 +670,15 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
                 document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);        
                 uploadedImageData = "None"; fileNameDisplay.textContent = "Attach Photo";                
-                taskDetails.classList.add('hidden'); taskDetails.value = ""; locationDetails.classList.add('hidden'); locationDetails.value = "";
-                taskDropdown.value = ""; locationDropdown.value = ""; document.getElementById('comments').value = "";
+                document.getElementById('comments').value = "";
+                
+                // Reset execution panel state
+                document.getElementById('active-task-info').classList.add('hidden');
+                document.getElementById('display-task-desc').innerText = "No task selected";
+                document.getElementById('display-task-dest').innerText = "N/A";
+                document.getElementById('display-task-type').innerText = "N/A";
+                document.getElementById('display-task-vehicle').innerText = "VEHICLE";
+                
                 loadMyTasks();
             }
         });
