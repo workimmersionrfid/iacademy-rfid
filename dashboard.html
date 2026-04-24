@@ -124,10 +124,48 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Destination</label>
-                        <input type="text" id="tDestination" placeholder="e.g. Makati Campus" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                        <select id="tDestinationSelect" required onchange="toggleCustomDestination()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all">
+                            <option value="" disabled selected>Select destination...</option>
+                            <optgroup label="iACADEMY Campuses">
+                                <option value="iACADEMY Nexus (Yakal St.)">iACADEMY Nexus (Yakal St.)</option>
+                                <option value="iACADEMY Plaza (Buendia)">iACADEMY Plaza (Buendia)</option>
+                            </optgroup>
+                            <optgroup label="Tech & Computing Partners">
+                                <option value="Amazon Web Services">Amazon Web Services</option>
+                                <option value="ASUS">ASUS</option>
+                                <option value="Huawei">Huawei</option>
+                                <option value="Ubisoft">Ubisoft</option>
+                                <option value="Alibaba Cloud Academy">Alibaba Cloud Academy</option>
+                            </optgroup>
+                            <optgroup label="Animation & Creative">
+                                <option value="Toon City">Toon City</option>
+                                <option value="Netflix Philippines">Netflix Philippines</option>
+                                <option value="Toon Boom Animation">Toon Boom Animation</option>
+                            </optgroup>
+                            <optgroup label="Business, Finance & Marketing">
+                                <option value="Metrobank">Metrobank</option>
+                                <option value="Macquarie">Macquarie</option>
+                                <option value="Sunlife">Sunlife</option>
+                                <option value="McCann">McCann</option>
+                                <option value="Mullenlowe Treyna">Mullenlowe Treyna</option>
+                            </optgroup>
+                            <optgroup label="Other Partners & Agencies">
+                                <option value="Unilab">Unilab</option>
+                                <option value="Knowledge Channel">Knowledge Channel</option>
+                                <option value="Adarna House">Adarna House</option>
+                                <option value="Gov: CHED / DepEd">Gov: CHED / DepEd</option>
+                                <option value="Gov: Climate Change Commission">Gov: Climate Change Commission</option>
+                            </optgroup>
+                            <optgroup label="Custom Destination">
+                                <option value="Other">Other (Specify Destination)</option>
+                            </optgroup>
+                        </select>
+                        <input type="text" id="tDestinationCustom" placeholder="Type exact destination..." class="hidden mt-3 w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Task Description</label>
                         <input type="text" id="tDescription" placeholder="e.g. Deliver documents to registrar" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
@@ -305,6 +343,20 @@
             }
         }
 
+        // --- NEW: Toggle Custom Destination Input ---
+        function toggleCustomDestination() {
+            const select = document.getElementById('tDestinationSelect');
+            const customInput = document.getElementById('tDestinationCustom');
+            if (select.value === 'Other') {
+                customInput.classList.remove('hidden');
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                customInput.required = false;
+                customInput.value = '';
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             renderNavigation('dashboard');
             document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
@@ -450,15 +502,21 @@
 
         async function submitTask(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
+            const btn = e.target.querySelector('button[type="submit"]');
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
             btn.disabled = true;
+
+            // Handle custom destination logic
+            let finalDestination = document.getElementById('tDestinationSelect').value;
+            if (finalDestination === 'Other') {
+                finalDestination = document.getElementById('tDestinationCustom').value;
+            }
 
             const taskData = {
                 driver: document.getElementById('tDriver').value,
                 vehicle: document.getElementById('tVehicle').value,
                 taskType: document.getElementById('tType').value,
-                destination: document.getElementById('tDestination').value,
+                destination: finalDestination,
                 description: document.getElementById('tDescription').value,
                 date: document.getElementById('tDate').value,
                 status: 'Pending'
@@ -473,6 +531,7 @@
                 if (res.ok) {
                     alert('Task dispatched successfully!');
                     e.target.reset();
+                    toggleCustomDestination(); // Hide custom input again
                     document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
                     loadDashboardData();
                 }
@@ -482,7 +541,7 @@
 
         document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
+            const btn = e.target.querySelector('button[type="submit"]');
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
             btn.disabled = true;
 
