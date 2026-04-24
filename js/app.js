@@ -4,13 +4,29 @@ function renderNavigation(activePageId) {
     const navContainer = document.getElementById('shared-nav');
     if (!navContainer) return;
 
-    const navItems = [
-        { id: 'dashboard', name: 'Dashboard', href: 'dashboard.html' },
-        { id: 'reports', name: 'Reports & Analytics', href: 'reports.html' }, // <-- ADD THIS LINE
-        { id: 'fuel-log', name: 'Mileage and Fuel Log', href: 'fuel-log.html' },
-        { id: 'calculator', name: 'Calculator', href: 'calculator.html' },
-        { id: 'travel-map', name: 'Travel Map', href: 'travel-map.html' },
-    ];
+    const role = localStorage.getItem('userRole');
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username') || '';
+
+    // 1. DYNAMIC NAVIGATION BASED ON ROLE
+    let navItems = [];
+    
+    if (role === 'admin') {
+        navItems = [
+            { id: 'dashboard', name: 'Control Center', href: 'dashboard.html' },
+            { id: 'reports', name: 'Reports & Analytics', href: 'reports.html' },
+            { id: 'fuel-log', name: 'Fuel & Mileage Logs', href: 'fuel-log.html' },
+            { id: 'calculator', name: 'Trip Calculator', href: 'calculator.html' },
+            { id: 'travel-map', name: 'Fleet Map & Routing', href: 'travel-map.html' },
+        ];
+    } else if (role === 'driver') {
+        navItems = [
+            { id: 'dashboard', name: 'My Tasks', href: 'driver-dashboard.html' },
+            { id: 'fuel-log', name: 'My Fuel Logs', href: 'fuel-log.html' },
+            { id: 'calculator', name: 'Budget Calculator', href: 'calculator.html' },
+            { id: 'travel-map', name: 'My Itinerary & Map', href: 'travel-map.html' },
+        ];
+    }
 
     const linksHTML = navItems.map(item => {
         const isActive = item.id === activePageId;
@@ -25,25 +41,22 @@ function renderNavigation(activePageId) {
         `;
     }).join('');
 
-    // --- NEW: Dynamic Icon Logic ---
-    const token = localStorage.getItem('token');
-    const username = localStorage.getItem('username') || '';
-
-    // If logged in, show Logout. If logged out, show Login.
+    // 2. DYNAMIC PROFILE & AUTH BUTTONS
     const authButtonHTML = token 
         ? `<button onclick="globalLogout()" class="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
                 <i class="fa-solid fa-right-from-bracket text-lg"></i>
-                <span>Log Out</span>
+                <span class="hidden md:inline">Log Out</span>
            </button>`
         : `<button onclick="window.location.href='login.html'" class="flex items-center gap-2 text-sm font-bold text-[#3674FF] hover:text-[#1349CC] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
                 <i class="fa-solid fa-right-to-bracket text-lg"></i>
-                <span>Log In</span>
+                <span class="hidden md:inline">Log In</span>
            </button>`;
 
     const userProfileHTML = token 
         ? `<div class="flex items-center gap-2 text-sm font-bold text-gray-700 mr-2" title="Logged in as ${username}">
                 <i class="fa-regular fa-user text-xl"></i>
-                <span class="hidden md:inline">${username}</span>
+                <span class="hidden lg:inline">${username}</span>
+                <span class="hidden lg:inline text-xs font-normal text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded ml-1">${role}</span>
            </div>`
         : `<button onclick="window.location.href='login.html'" class="text-xl hover:text-[#3674FF] transition-colors mr-2" title="Sign In">
                 <i class="fa-regular fa-user"></i>
@@ -55,20 +68,20 @@ function renderNavigation(activePageId) {
                 
                 <div class="flex items-center gap-3 py-4">
                     <i class="fa-solid fa-building text-[#3674FF] text-3xl"></i>
-                    <span class="font-bold text-2xl tracking-tight text-[#333333]">iACADEMY RFID</span>
+                    <span class="font-bold text-xl md:text-2xl tracking-tight text-[#333333] hidden sm:block">iACADEMY RFID</span>
                 </div>
 
-                <nav class="hidden lg:flex items-center gap-8 text-[15px]">
+                <nav class="hidden md:flex items-center gap-4 lg:gap-8 text-[13px] lg:text-[15px]">
                     ${linksHTML}
                 </nav>
 
-                <div class="flex items-center gap-4 text-[#666666]">
+                <div class="flex items-center gap-2 lg:gap-4 text-[#666666]">
+                    ${role === 'admin' ? `
                     <button onclick="triggerGlobalSearch()" class="text-xl hover:text-[#3674FF] transition-colors" title="Search">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
+                    </button>` : ''}
                     
                     ${userProfileHTML}
-
                     ${authButtonHTML}
                 </div>
             </div>
@@ -77,41 +90,14 @@ function renderNavigation(activePageId) {
 }
 
 // --- GLOBAL FUNCTIONS ---
-
-// Replaces the old logout function in individual files
 window.globalLogout = function() {
     localStorage.clear();
     window.location.href = 'login.html';
 };
 
-// Search Placeholder (We can connect this to a real table filter later!)
 window.triggerGlobalSearch = function() {
     const query = prompt("Search for a Driver, Vehicle, or Task:");
     if (query) {
-        alert("Search initiated for: " + query + "\n\n(We will connect this to filter your dashboard tables in a later step!)");
+        alert("Search initiated for: " + query + "\n\n(Table filtering logic can be attached here)");
     }
 };
-
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if(!modal) return;
-    const box = modal.children[0];
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    setTimeout(() => {
-        box.classList.remove('scale-95', 'opacity-0');
-        box.classList.add('scale-100', 'opacity-100');
-    }, 10);
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if(!modal) return;
-    const box = modal.children[0];
-    box.classList.remove('scale-100', 'opacity-100');
-    box.classList.add('scale-95', 'opacity-0');
-    setTimeout(() => {
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-    }, 200); 
-}
