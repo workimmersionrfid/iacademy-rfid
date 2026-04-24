@@ -201,6 +201,29 @@
                 const fleet = await getVehicles();
                 const v = fleet.find(car => car.plateNumber === plate) || { efficiency: 14 };
 
+                // --- NEW: Automatically push location to database so Admin can see them ---
+                try {
+                    await fetch(`${API_BASE}/action-logs`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            driver_name: username,
+                            plate_number: plate || "N/A",
+                            action: "Started Navigation",
+                            task: "Map Routing",
+                            location: destination,
+                            delivery_status: "En Route",
+                            comments: "None",
+                            document_attached: "None",
+                            latitude: pos.coords.latitude.toString(),
+                            longitude: pos.coords.longitude.toString()
+                        })
+                    });
+                } catch (e) {
+                    console.warn("Could not ping location to admin tracker.");
+                }
+                // -------------------------------------------------------------------------
+
                 directionsService.route({
                     origin: origin,
                     destination: destination,
@@ -225,7 +248,6 @@
                 });
             });
         }
-
         // --- ADMIN LOGIC: Live Fleet Tracking ---
         async function startAdminPolling() {
             updateFleetMap();
