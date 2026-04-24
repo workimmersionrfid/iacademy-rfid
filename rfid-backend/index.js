@@ -36,6 +36,7 @@ const vehicleSchema = new mongoose.Schema({
     fuelType: String
 });
 
+// Original Fuel Log Schema
 const logSchema = new mongoose.Schema({
     vehicle: String,
     driver: String,
@@ -50,6 +51,17 @@ const logSchema = new mongoose.Schema({
     notes: String
 });
 
+// NEW: Toll Log Schema
+const tollSchema = new mongoose.Schema({
+    vehicle: String,
+    driver: String,
+    department: { type: String, required: true },
+    date: String,
+    expressway: String,
+    amount: Number,
+    notes: String
+});
+
 const taskSchema = new mongoose.Schema({
     driver: String,
     vehicle: String,
@@ -61,29 +73,29 @@ const taskSchema = new mongoose.Schema({
     status: { type: String, default: 'Pending' }
 });
 
-// NEW: Advanced Action Logs (Photos, Signatures, GPS)
 const actionLogSchema = new mongoose.Schema({
     driver_name: String,
     plate_number: String,
     department: String,
-    action: String, // e.g., "Travel Update", "Final Task Handover"
+    action: String, 
     task: String,
     location: String,
     delivery_status: String,
     comments: String,
-    document_attached: String, // For the Base64 Photo Proof
+    document_attached: String, 
     latitude: String,
     longitude: String,
     completion_type: String,
     incomplete_reasons: String,
     reschedule_date: String,
-    signature: String, // For the Base64 E-Signature
+    signature: String, 
     timestamp: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', userSchema);
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 const FuelLog = mongoose.model('FuelLog', logSchema);
+const TollLog = mongoose.model('TollLog', tollSchema); // <-- NEW MODEL REGISTERED
 const Task = mongoose.model('Task', taskSchema);
 const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 
@@ -119,16 +131,14 @@ app.post('/api/auth/login', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- DRIVER LIST ROUTE ---
+// --- DRIVER LIST & PROFILE ROUTES ---
 app.get('/api/drivers', async (req, res) => {
     try {
-        // We added 'workDays' here so the frontend can read the schedule
         const drivers = await User.find({ role: 'driver' }, 'username department workDays');
         res.json(drivers);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- UPDATE DRIVER PROFILE (Admin Route) ---
 app.put('/api/drivers/:id/profile', async (req, res) => {
     try {
         const { department, workDays } = req.body;
@@ -179,6 +189,22 @@ app.post('/api/logs', async (req, res) => {
         const newLog = new FuelLog(req.body);
         await newLog.save();
         res.status(201).json(newLog);
+    } catch (err) { res.status(400).json({ message: err.message }); }
+});
+
+// --- NEW: TOLL LOG ROUTES ---
+app.get('/api/tolls', async (req, res) => {
+    try {
+        const tolls = await TollLog.find().sort({ _id: -1 });
+        res.json(tolls);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post('/api/tolls', async (req, res) => {
+    try {
+        const newToll = new TollLog(req.body);
+        await newToll.save();
+        res.status(201).json(newToll);
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
 

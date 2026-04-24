@@ -28,16 +28,16 @@
                     document.getElementById('driverDept').innerText = Array.isArray(parsed) ? parsed.join(', ') : parsed;
                 } catch(e) { document.getElementById('driverDept').innerText = deptData || 'Pending'; }
                 
-                // Initialize the shared global navbar
                 if (typeof renderNavigation === 'function') {
                     renderNavigation('dashboard');
                 }
 
-                loadMyTasks(); loadFleetForFuel();
+                loadMyTasks(); loadFleetForForms();
 
-                // Pre-fill date input with today's date
                 const dateInput = document.getElementById('fDate');
                 if(dateInput) dateInput.valueAsDate = new Date();
+                const tollDateInput = document.getElementById('tollDate');
+                if(tollDateInput) tollDateInput.valueAsDate = new Date();
             }
         });
     </script>
@@ -96,7 +96,7 @@
                 </div>
             </button>
 
-            <button onclick="alert('Toll logging coming soon!')" class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
+            <button onclick="document.getElementById('tollModal').classList.remove('hidden')" class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
                 <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4 transition-colors group-hover:bg-blue-100">
                     <i class="fa-solid fa-ticket text-blue-500 text-xl"></i>
                 </div>
@@ -237,7 +237,6 @@
             </div>
             
             <form id="fuelForm" onsubmit="submitFuel(event)" class="p-6 space-y-4">
-                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
                     <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
@@ -300,6 +299,66 @@
             </form>
         </div>
     </div>
+
+    <div id="tollModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 my-8">
+            <div class="p-5 bg-blue-900 flex justify-between items-center">
+                <h3 class="font-bold text-white text-base">Add Toll Expense</h3>
+                <button onclick="document.getElementById('tollModal').classList.add('hidden')" class="text-blue-200 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="tollForm" onsubmit="submitToll(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Vehicle</label>
+                    <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="" disabled selected>Select vehicle</option>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Date</label>
+                        <input type="date" id="tollDate" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Expressway</label>
+                        <select id="tollExpressway" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                            <option value="" disabled selected>Select Toll</option>
+                            <option value="NLEX">NLEX</option>
+                            <option value="SCTEX">SCTEX</option>
+                            <option value="SLEX">SLEX</option>
+                            <option value="Skyway">Skyway</option>
+                            <option value="MCX">MCX</option>
+                            <option value="STAR Tollway">STAR Tollway</option>
+                            <option value="CALAX">CALAX</option>
+                            <option value="CAVITEX">CAVITEX</option>
+                            <option value="NAIAx">NAIAx</option>
+                            <option value="TPLEX">TPLEX</option>
+                            <option value="CCLEX">CCLEX</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Amount (₱)</label>
+                    <input type="number" id="tollAmount" step="0.01" required placeholder="0.00" class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-blue-900 font-bold">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Entry / Exit Points & Notes (Optional)</label>
+                    <textarea id="tollNotes" rows="2" placeholder="e.g., Balintawak to Bocaue" class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 custom-scrollbar"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('tollModal').classList.add('hidden')" class="w-1/3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold py-3.5 rounded-xl transition-colors text-sm">Cancel</button>
+                    <button type="submit" class="w-2/3 bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm">Save Toll</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <script src="js/app.js"></script>
 
@@ -352,7 +411,7 @@
                         
                         ${(!isDone && !isRebook) ? `
                         <div class="mt-6 pt-5 border-t border-gray-100">
-                            <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description}', '${t.destination}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                            <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
                                 Start Execution
                             </button>
                         </div>
@@ -363,17 +422,26 @@
             } catch (err) { console.error(err); }
         }
 
-        async function loadFleetForFuel() {
+        async function loadFleetForForms() {
             try {
                 const res = await fetch(`${API_BASE}/vehicles`);
                 const vehicles = await res.json();
-                const select = document.getElementById('fVehicle');
-                select.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
-                vehicles.forEach(v => select.innerHTML += `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`);
+                
+                const selectFuel = document.getElementById('fVehicle');
+                const selectToll = document.getElementById('tollVehicle');
+                
+                selectFuel.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
+                selectToll.innerHTML = '<option value="" disabled selected>Choose assigned vehicle</option>';
+                
+                vehicles.forEach(v => {
+                    const opt = `<option value="${v.plateNumber}">${v.plateNumber} (${v.model})</option>`;
+                    selectFuel.innerHTML += opt;
+                    selectToll.innerHTML += opt;
+                });
             } catch (err) { console.error(err); }
         }
 
-        // --- AUTO-CALCULATE TOTAL COST ---
+        // --- FUEL CALCULATION & SUBMISSION ---
         function calculateTotalFuelCost() {
             const price = parseFloat(document.getElementById('fPrice').value) || 0;
             const liters = parseFloat(document.getElementById('fLiters').value) || 0;
@@ -407,9 +475,7 @@
 
             try {
                 const res = await fetch(`${API_BASE}/logs`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(logData)
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(logData)
                 });
                 
                 if (res.ok) {
@@ -419,8 +485,45 @@
                     document.getElementById('fTotalCostDisplay').innerText = '₱0.00';
                     document.getElementById('fDate').valueAsDate = new Date();
                 }
+            } catch (err) { alert('Server error saving fuel log.'); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
+
+        // --- NEW: TOLL SUBMISSION LOGIC ---
+        async function submitToll(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...'; 
+            btn.disabled = true;
+
+            const tollData = {
+                vehicle: document.getElementById('tollVehicle').value,
+                driver: localStorage.getItem('username'),
+                department: localStorage.getItem('userDept') || 'Unknown',
+                date: document.getElementById('tollDate').value,
+                expressway: document.getElementById('tollExpressway').value,
+                amount: parseFloat(document.getElementById('tollAmount').value),
+                notes: document.getElementById('tollNotes').value || ''
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/tolls`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tollData)
+                });
+                
+                if (res.ok) {
+                    alert('Toll log saved successfully!');
+                    document.getElementById('tollModal').classList.add('hidden');
+                    e.target.reset();
+                    document.getElementById('tollDate').valueAsDate = new Date();
+                } else {
+                    alert('Failed to save toll log.');
+                }
             } catch (err) { 
-                alert('Server error saving fuel log.'); 
+                alert('Server error saving toll log.'); 
             } finally { 
                 btn.innerHTML = originalText; 
                 btn.disabled = false; 
@@ -431,18 +534,14 @@
         window.startAssignedTask = function(taskId, taskType, taskDesc, destName, assignedVehicle) {
             currentActiveTaskId = taskId;
             currentActiveVehicle = assignedVehicle || "N/A";
-            
-            // Save these globally so they get sent to the ActionLog automatically
             currentActiveTaskName = `${taskType}: ${taskDesc}`;
             currentActiveTaskDest = destName;
             
-            // Update the read-only UI
             document.getElementById('display-task-desc').innerText = taskDesc;
             document.getElementById('display-task-dest').innerText = destName;
             document.getElementById('display-task-type').innerText = taskType;
             document.getElementById('display-task-vehicle').innerText = currentActiveVehicle;
             
-            // Show the panel
             document.getElementById('active-task-info').classList.remove('hidden');
 
             statusText.textContent = `STATUS: READY FOR TRANSIT`;
@@ -451,10 +550,7 @@
         };
 
         function getFinalTaskAndLocation() {
-            return { 
-                finalTask: currentActiveTaskName, 
-                finalLoc: currentActiveTaskDest 
-            };
+            return { finalTask: currentActiveTaskName, finalLoc: currentActiveTaskDest };
         }
 
         // --- GPS & COMPRESSION HELPERS ---
@@ -495,11 +591,11 @@
             statusText.textContent = "STATUS: SAVING...";
             statusText.classList.replace('text-blue-600', 'text-gray-500');
             statusText.classList.replace('text-gray-400', 'text-gray-500');
+            // Force the department into the payload based on local storage
+            payload.department = localStorage.getItem('userDept') || 'GENERAL';
             try {        
                 const response = await fetch(`${API_BASE}/action-logs`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) 
                 });
                 if (response.ok) { 
                     statusText.textContent = `STATUS: ${successMsg.toUpperCase()}`; 
@@ -673,7 +769,6 @@
                 uploadedImageData = "None"; fileNameDisplay.textContent = "Attach Photo";                
                 document.getElementById('comments').value = "";
                 
-                // Reset execution panel state
                 document.getElementById('active-task-info').classList.add('hidden');
                 document.getElementById('display-task-desc').innerText = "No task selected";
                 document.getElementById('display-task-dest').innerText = "N/A";
