@@ -240,19 +240,13 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Fuel Type</label>
-                        <select id="fFuelType" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            <option value="" disabled selected>Select type</option>
-                            <option value="Ron91">Ron91</option>
-                            <option value="Ron95">Ron95</option>
-                            <option value="Ron97">Ron97</option>
-                            <option value="Diesel">Diesel</option>
-                        </select>
+                        <input type="text" id="fFuelType" disabled placeholder="Auto-filled" class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-gray-50 outline-none text-gray-600 font-bold transition-all">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Assigned Vehicle</label>
-                    <select id="fVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
+                    <select id="fVehicle" onchange="updateFuelTypeDisplay()" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
                         <option value="" disabled selected>Loading assigned vehicles...</option>
                     </select>
                 </div>
