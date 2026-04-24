@@ -117,24 +117,25 @@ app.post('/api/auth/login', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- DRIVER LIST ROUTE (For the Admin Dropdown) ---
+// --- DRIVER LIST ROUTE ---
 app.get('/api/drivers', async (req, res) => {
     try {
-        const drivers = await User.find({ role: 'driver' }, 'username department');
+        // We added 'workDays' here so the frontend can read the schedule
+        const drivers = await User.find({ role: 'driver' }, 'username department workDays');
         res.json(drivers);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- UPDATE DRIVER DEPARTMENT (Admin Route) ---
-app.put('/api/drivers/:id/department', async (req, res) => {
+// --- UPDATE DRIVER PROFILE (Admin Route) ---
+app.put('/api/drivers/:id/profile', async (req, res) => {
     try {
-        const { department } = req.body;
+        const { department, workDays } = req.body;
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id, 
-            { department: department }, 
+            { department: department, workDays: workDays }, 
             { new: true }
         );
-        res.json({ message: 'Department updated successfully', user: updatedUser });
+        res.json({ message: 'Profile updated successfully', user: updatedUser });
     } catch (err) { 
         res.status(500).json({ message: err.message }); 
     }
