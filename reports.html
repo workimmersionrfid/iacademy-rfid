@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <style>
+        .daterangepicker .ranges li.active { background-color: #1e3a8a !important; }
+        .daterangepicker td.active, .daterangepicker td.active:hover { background-color: #1e3a8a !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
     
     <script>
         tailwind.config = {
@@ -24,11 +36,6 @@
             if (!token || role !== 'admin') window.location.href = 'login.html';
         });
     </script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    </style>
 </head>
 <body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
 
@@ -55,19 +62,13 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-4">
+                
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Date Range</label>
-                    <select id="filterDatePreset" onchange="toggleCustomDates()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 transition-colors cursor-pointer">
-                        <option value="">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                        <option value="7days">Last 7 Days</option>
-                        <option value="thisWeek">This Week</option>
-                        <option value="thisMonth">This Month</option>
-                        <option value="lastMonth">Last Month</option>
-                        <option value="thisYear">This Year</option>
-                        <option value="custom">Custom Range...</option>
-                    </select>
+                    <div class="relative">
+                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"></i>
+                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 cursor-pointer" placeholder="Select date range...">
+                    </div>
                 </div>
                 
                 <div>
@@ -94,7 +95,7 @@
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Driver</label>
                     <select id="filterDriver" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
                         <option value="">All Drivers</option>
-                        </select>
+                    </select>
                 </div>
 
                 <div>
@@ -106,17 +107,6 @@
                         <option value="Hardware Transport">Hardware Transport</option>
                         <option value="Bank Transaction">Bank Transaction</option>
                     </select>
-                </div>
-            </div>
-
-            <div id="customDateRow" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mb-4 pt-4 border-t border-gray-100">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
-                    <input type="date" id="filterStart" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
-                    <input type="date" id="filterEnd" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500">
                 </div>
             </div>
 
@@ -211,6 +201,39 @@
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof renderNavigation === 'function') renderNavigation('reports');
             fetchInitialData();
+
+            // INITIALIZE DATE RANGE PICKER
+            $('#dateRangePicker').daterangepicker({
+                opens: 'right',
+                autoUpdateInput: false,
+                locale: {
+                    format: 'MM/DD/YYYY',
+                    cancelLabel: 'Clear'
+                },
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Month to date': [moment().startOf('month'), moment()],
+                    'Last week (start on Sun)': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                    'Last week (start on Mon)': [moment().subtract(1, 'week').startOf('isoWeek'), moment().subtract(1, 'week').endOf('isoWeek')],
+                    'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                    'Past 7 days': [moment().subtract(6, 'days'), moment()],
+                    'Past 30 days': [moment().subtract(29, 'days'), moment()],
+                    'Past 60 days': [moment().subtract(59, 'days'), moment()]
+                }
+            });
+
+            // When user clicks "Apply" on the calendar
+            $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                applyFilters(); 
+            });
+
+            // When user clicks "Clear" on the calendar
+            $('#dateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+                applyFilters(); 
+            });
         });
 
         async function fetchInitialData() {
@@ -237,73 +260,30 @@
             }
         }
 
-        function toggleCustomDates() {
-            const preset = document.getElementById('filterDatePreset').value;
-            const customRow = document.getElementById('customDateRow');
-            if (preset === 'custom') customRow.classList.remove('hidden');
-            else customRow.classList.add('hidden');
-        }
-
-        function getDateRange(preset) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
-            
-            let start = new Date(today);
-            let end = new Date(today);
-            end.setHours(23, 59, 59, 999);
-
-            switch(preset) {
-                case 'today': break;
-                case 'yesterday':
-                    start.setDate(start.getDate() - 1);
-                    end.setDate(end.getDate() - 1);
-                    break;
-                case '7days':
-                    start.setDate(start.getDate() - 6);
-                    break;
-                case 'thisWeek':
-                    const day = start.getDay();
-                    const diff = start.getDate() - day + (day === 0 ? -6 : 1); 
-                    start.setDate(diff);
-                    break;
-                case 'thisMonth':
-                    start.setDate(1);
-                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59); 
-                    break;
-                case 'lastMonth':
-                    start.setMonth(start.getMonth() - 1);
-                    start.setDate(1);
-                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59);
-                    break;
-                case 'thisYear':
-                    start.setMonth(0, 1);
-                    end = new Date(start.getFullYear(), 11, 31, 23, 59, 59);
-                    break;
-                case 'custom':
-                    const customStart = document.getElementById('filterStart').value;
-                    const customEnd = document.getElementById('filterEnd').value;
-                    if(customStart) start = new Date(customStart + "T00:00:00"); else start = null;
-                    if(customEnd) end = new Date(customEnd + "T23:59:59"); else end = null;
-                    break;
-                default:
-                    return null; // All Time
-            }
-            return { start, end };
-        }
-
         function applyFilters() {
             const fTask = document.getElementById('filterTask').value.toLowerCase();
             const fDept = document.getElementById('filterDept').value; 
             const fDriver = document.getElementById('filterDriver').value; 
-            const presetFilter = document.getElementById('filterDatePreset').value;
-            const dateRange = getDateRange(presetFilter);
+            
+            // Get dates directly from the new picker
+            const isDateSelected = $('#dateRangePicker').val() !== '';
+            let startBoundary = null;
+            let endBoundary = null;
+
+            if (isDateSelected) {
+                const datePicker = $('#dateRangePicker').data('daterangepicker');
+                startBoundary = datePicker.startDate.toDate();
+                endBoundary = datePicker.endDate.toDate();
+                startBoundary.setHours(0, 0, 0, 0);
+                endBoundary.setHours(23, 59, 59, 999);
+            }
 
             filteredLogs = allLogs.filter(log => {
                 let match = true;
                 
-                if (dateRange && dateRange.start && dateRange.end) {
+                if (startBoundary && endBoundary) {
                     const logDate = new Date(log.timestamp);
-                    if (logDate < dateRange.start || logDate > dateRange.end) match = false;
+                    if (logDate < startBoundary || logDate > endBoundary) match = false;
                 }
                 
                 if (fTask && !log.task.toLowerCase().includes(fTask)) match = false;
@@ -312,17 +292,16 @@
                 
                 return match;
             });
+            
             renderTable(filteredLogs);
         }
 
         function clearFilters() {
-            document.getElementById('filterDatePreset').value = '';
-            document.getElementById('filterStart').value = '';
-            document.getElementById('filterEnd').value = '';
+            $('#dateRangePicker').val(''); // Clear the picker input
             document.getElementById('filterTask').value = '';
             document.getElementById('filterDept').value = '';
             document.getElementById('filterDriver').value = '';
-            toggleCustomDates();
+            
             filteredLogs = [...allLogs];
             renderTable(filteredLogs);
         }

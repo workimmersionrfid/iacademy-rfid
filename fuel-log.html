@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <style>
+        .daterangepicker .ranges li.active { background-color: #1e3a8a !important; }
+        .daterangepicker td.active, .daterangepicker td.active:hover { background-color: #1e3a8a !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -71,17 +83,10 @@
                 
                 <div class="w-full md:w-1/4">
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Date Range</label>
-                    <select id="filterDatePreset" onchange="toggleCustomDates(); applyFuelFilters();" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900">
-                        <option value="">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                        <option value="7days">Last 7 Days</option>
-                        <option value="thisWeek">This Week</option>
-                        <option value="thisMonth">This Month</option>
-                        <option value="lastMonth">Last Month</option>
-                        <option value="thisYear">This Year</option>
-                        <option value="custom">Custom Range...</option>
-                    </select>
+                    <div class="relative">
+                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"></i>
+                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 cursor-pointer" placeholder="Select date range...">
+                    </div>
                 </div>
 
                 <div class="w-full md:w-1/4 flex gap-2">
@@ -89,17 +94,6 @@
                     <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-excel"></i> Export
                     </button>
-                </div>
-            </div>
-
-            <div id="customDateRow" class="hidden flex-col md:flex-row gap-4 items-end pt-2 border-t border-gray-100 mt-2">
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Start Date</label>
-                    <input type="date" id="filterStart" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-blue-500">
-                </div>
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">End Date</label>
-                    <input type="date" id="filterEnd" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-blue-500">
                 </div>
             </div>
         </div>
@@ -161,10 +155,10 @@
     <script src="js/app.js"></script>
     
     <script>
-        const API_BASE = 'https://iacademy-rfid.onrender.com/api'; // Ensure this uses your backend proxy
+        const API_BASE = 'https://iacademy-rfid.onrender.com/api'; 
         let allLogs = [];
         let filteredLogs = [];
-        let allDrivers = []; // Added to store driver list
+        let allDrivers = []; 
         
         const userRole = localStorage.getItem('userRole');
         const currentUser = localStorage.getItem('username');
@@ -172,67 +166,43 @@
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof renderNavigation === 'function') renderNavigation('fuel-log');
             if (userRole === 'admin') document.getElementById('adminFilters').classList.remove('hidden');
+            
+            // INITIALIZE DATE RANGE PICKER
+            $('#dateRangePicker').daterangepicker({
+                opens: 'left',
+                autoUpdateInput: false,
+                locale: {
+                    format: 'MM/DD/YYYY',
+                    cancelLabel: 'Clear'
+                },
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Month to date': [moment().startOf('month'), moment()],
+                    'Last week (start on Sun)': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                    'Last week (start on Mon)': [moment().subtract(1, 'week').startOf('isoWeek'), moment().subtract(1, 'week').endOf('isoWeek')],
+                    'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                    'Past 7 days': [moment().subtract(6, 'days'), moment()],
+                    'Past 30 days': [moment().subtract(29, 'days'), moment()],
+                    'Past 60 days': [moment().subtract(59, 'days'), moment()]
+                }
+            });
+
+            $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                applyFuelFilters(); 
+            });
+
+            $('#dateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+                applyFuelFilters(); 
+            });
+
             loadFuelLogs();
         });
 
-        function toggleCustomDates() {
-            const preset = document.getElementById('filterDatePreset').value;
-            const customRow = document.getElementById('customDateRow');
-            if (preset === 'custom') customRow.classList.remove('hidden');
-            else customRow.classList.add('hidden');
-        }
-
-        // Calculates exact date bounds based on preset selected
-        function getDateRange(preset) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Start of today
-            
-            let start = new Date(today);
-            let end = new Date(today);
-            end.setHours(23, 59, 59, 999); // End of today
-
-            switch(preset) {
-                case 'today': break;
-                case 'yesterday':
-                    start.setDate(start.getDate() - 1);
-                    end.setDate(end.getDate() - 1);
-                    break;
-                case '7days':
-                    start.setDate(start.getDate() - 6);
-                    break;
-                case 'thisWeek':
-                    const day = start.getDay();
-                    const diff = start.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
-                    start.setDate(diff);
-                    break;
-                case 'thisMonth':
-                    start.setDate(1);
-                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59); // Last day
-                    break;
-                case 'lastMonth':
-                    start.setMonth(start.getMonth() - 1);
-                    start.setDate(1);
-                    end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59);
-                    break;
-                case 'thisYear':
-                    start.setMonth(0, 1);
-                    end = new Date(start.getFullYear(), 11, 31, 23, 59, 59);
-                    break;
-                case 'custom':
-                    const customStart = document.getElementById('filterStart').value;
-                    const customEnd = document.getElementById('filterEnd').value;
-                    if(customStart) start = new Date(customStart + "T00:00:00"); else start = null;
-                    if(customEnd) end = new Date(customEnd + "T23:59:59"); else end = null;
-                    break;
-                default:
-                    return null; // All Time
-            }
-            return { start, end };
-        }
-
         async function loadFuelLogs() {
             try {
-                // Fetch logs and drivers concurrently
                 const [logsRes, driversRes] = await Promise.all([
                     fetch(`${API_BASE}/logs`),
                     fetch(`${API_BASE}/drivers`)
@@ -241,11 +211,9 @@
                 allLogs = await logsRes.json();
                 allDrivers = await driversRes.json();
 
-                // Populate the new Driver Filter Dropdown
                 const driverSelect = document.getElementById('filterDriver');
                 if(driverSelect) {
                     allDrivers.forEach(d => {
-                        // Prevent duplicates if function runs twice
                         if(![...driverSelect.options].some(opt => opt.value === d.username)) {
                             driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
                         }
@@ -266,32 +234,34 @@
         function applyFuelFilters(clear = false) {
             if (clear) {
                 document.getElementById('filterDept').value = "";
-                document.getElementById('filterDriver').value = ""; // Clear new filter
-                document.getElementById('filterDatePreset').value = "";
-                document.getElementById('filterStart').value = "";
-                document.getElementById('filterEnd').value = "";
-                toggleCustomDates();
+                document.getElementById('filterDriver').value = ""; 
+                $('#dateRangePicker').val('');
             }
 
             const deptFilter = document.getElementById('filterDept') ? document.getElementById('filterDept').value : "";
-            const driverFilter = document.getElementById('filterDriver') ? document.getElementById('filterDriver').value : ""; // Get driver filter
-            const presetFilter = document.getElementById('filterDatePreset') ? document.getElementById('filterDatePreset').value : "";
+            const driverFilter = document.getElementById('filterDriver') ? document.getElementById('filterDriver').value : ""; 
             
-            const dateRange = getDateRange(presetFilter);
+            const isDateSelected = $('#dateRangePicker').val() !== '';
+            let startBoundary = null;
+            let endBoundary = null;
+
+            if (isDateSelected) {
+                const datePicker = $('#dateRangePicker').data('daterangepicker');
+                startBoundary = datePicker.startDate.toDate();
+                endBoundary = datePicker.endDate.toDate();
+                startBoundary.setHours(0, 0, 0, 0);
+                endBoundary.setHours(23, 59, 59, 999);
+            }
 
             filteredLogs = allLogs.filter(log => {
                 let match = true;
                 
-                // Department Match
                 if (deptFilter && !log.department.includes(deptFilter)) match = false;
-                
-                // NEW: Driver Match
                 if (driverFilter && log.driver !== driverFilter) match = false;
 
-                // Date Match
-                if (dateRange && dateRange.start && dateRange.end) {
-                    const logDate = new Date(log.date + "T12:00:00"); // Approximate mid-day for pure date strings
-                    if (logDate < dateRange.start || logDate > dateRange.end) match = false;
+                if (startBoundary && endBoundary) {
+                    const logDate = new Date(log.date + "T12:00:00"); 
+                    if (logDate < startBoundary || logDate > endBoundary) match = false;
                 }
 
                 return match;
