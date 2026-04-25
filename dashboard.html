@@ -7,6 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
     <script>
         tailwind.config = {
             theme: {
@@ -32,6 +38,10 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* DateRangePicker Custom Theme */
+        .daterangepicker .ranges li.active { background-color: #1e3a8a !important; }
+        .daterangepicker td.active, .daterangepicker td.active:hover { background-color: #1e3a8a !important; }
     </style>
 </head>
 <body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
@@ -109,8 +119,8 @@
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
                 <button id="btnRefreshBoard" onclick="refreshDashboard()" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-all">
-    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
-</button>
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+                </button>
             </div>
             <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                 <table class="w-full text-left border-collapse min-w-[800px]">
@@ -233,16 +243,10 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Timeframe</label>
-                                <select id="logDateFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
-                                    <option value="All">All Time</option>
-                                    <option value="Today">Today</option>
-                                    <option value="Tomorrow">Tomorrow</option>
-                                    <option value="Yesterday">Yesterday</option>
-                                    <option value="ThisMonth">This Month</option>
-                                    <option value="LastMonth">Last Month</option>
-                                    <option value="ThisYear">This Year</option>
-                                    <option value="Custom">Custom Range...</option>
-                                </select>
+                                <div class="relative">
+                                    <i class="fa-regular fa-calendar absolute left-2.5 top-1/2 -translate-y-1/2 text-blue-500 text-xs"></i>
+                                    <input type="text" id="dashDateRangePicker" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg py-2 pl-8 pr-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all" placeholder="All Time">
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Department</label>
@@ -257,18 +261,6 @@
                                 </select>
                             </div>
                         </div>
-
-                        <div id="customDashDateRow" class="hidden grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-200">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Start Date</label>
-                                <input type="date" id="dashStartDate" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-all">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">End Date</label>
-                                <input type="date" id="dashEndDate" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-all">
-                            </div>
-                        </div>
-
                     </div>
                     <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar p-2">
                         <table class="w-full text-left border-collapse">
@@ -615,6 +607,37 @@
             loadGoogleMaps();
             loadDashboardData();
             document.getElementById('dDate').addEventListener('change', updateModalDropdowns);
+
+            // INITIALIZE DATE RANGE PICKER
+            $('#dashDateRangePicker').daterangepicker({
+                opens: 'right',
+                autoUpdateInput: false,
+                locale: {
+                    format: 'MM/DD/YYYY',
+                    cancelLabel: 'Clear'
+                },
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Month to date': [moment().startOf('month'), moment()],
+                    'Last week (start on Sun)': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                    'Last week (start on Mon)': [moment().subtract(1, 'week').startOf('isoWeek'), moment().subtract(1, 'week').endOf('isoWeek')],
+                    'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                    'Past 7 days': [moment().subtract(6, 'days'), moment()],
+                    'Past 30 days': [moment().subtract(29, 'days'), moment()],
+                    'Past 60 days': [moment().subtract(59, 'days'), moment()]
+                }
+            });
+
+            $('#dashDateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                renderLogsList(); 
+            });
+
+            $('#dashDateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+                renderLogsList(); 
+            });
         });
 
         function renderDeptCards() {
@@ -680,14 +703,11 @@
             const btn = document.getElementById('btnRefreshBoard');
             const originalHTML = btn.innerHTML;
             
-            // Change button to show a spinner
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Refreshing...`;
             btn.disabled = true;
             
-            // Wait for the fresh data to load
             await loadDashboardData();
             
-            // Revert button back to normal
             btn.innerHTML = originalHTML;
             btn.disabled = false;
         }
@@ -695,28 +715,21 @@
         // --- UNIFIED MULTI-FILTER REPORTS LOGIC ---
         window.renderLogsList = function() {
             const lList = document.getElementById('logsList');
-            const dateFilter = document.getElementById('logDateFilter').value;
             const deptFilter = document.getElementById('logDeptFilter').value;
             const driverFilter = document.getElementById('logDriverFilter').value;
             
-            // NEW: Toggle custom date UI
-            const customRow = document.getElementById('customDashDateRow');
-            if (dateFilter === 'Custom') customRow.classList.remove('hidden');
-            else customRow.classList.add('hidden');
+            // Get dates directly from the new picker
+            const isDateSelected = $('#dashDateRangePicker').val() !== '';
+            let startBoundary = null;
+            let endBoundary = null;
 
-            const now = new Date();
-            const todayStr = now.toISOString().split('T')[0];
-            
-            let tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-            let yesterday = new Date(now);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+            if (isDateSelected) {
+                const datePicker = $('#dashDateRangePicker').data('daterangepicker');
+                startBoundary = datePicker.startDate.toDate();
+                endBoundary = datePicker.endDate.toDate();
+                startBoundary.setHours(0, 0, 0, 0);
+                endBoundary.setHours(23, 59, 59, 999);
+            }
 
             // Apply all filters simultaneously
             let filteredLogs = allCombinedLogs.filter(l => {
@@ -724,31 +737,9 @@
                 if (driverFilter !== 'All' && l.driver !== driverFilter) return false;
                 if (deptFilter !== 'All' && l.department !== deptFilter) return false;
 
-                if (dateFilter !== 'All') {
-                    const logDateStr = l.timestamp; 
+                if (startBoundary && endBoundary) {
                     const logDateObj = new Date(l.timestamp);
-                    const logMonth = logDateObj.getMonth();
-                    const logYear = logDateObj.getFullYear();
-
-                    if (dateFilter === 'Today' && logDateStr !== todayStr) return false;
-                    if (dateFilter === 'Tomorrow' && logDateStr !== tomorrowStr) return false;
-                    if (dateFilter === 'Yesterday' && logDateStr !== yesterdayStr) return false;
-                    if (dateFilter === 'ThisMonth' && (logMonth !== currentMonth || logYear !== currentYear)) return false;
-                    if (dateFilter === 'ThisYear' && logYear !== currentYear) return false;
-                    if (dateFilter === 'LastMonth') {
-                        let lastM = currentMonth - 1;
-                        let lastY = currentYear;
-                        if (lastM < 0) { lastM = 11; lastY--; }
-                        if (logMonth !== lastM || logYear !== lastY) return false;
-                    }
-                    
-                    // NEW: Custom Logic
-                    if (dateFilter === 'Custom') {
-                        const startVal = document.getElementById('dashStartDate').value;
-                        const endVal = document.getElementById('dashEndDate').value;
-                        if (startVal && logDateStr < startVal) return false;
-                        if (endVal && logDateStr > endVal) return false;
-                    }
+                    if (logDateObj < startBoundary || logDateObj > endBoundary) return false;
                 }
                 return true;
             });
