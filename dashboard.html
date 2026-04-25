@@ -139,7 +139,7 @@
                 </div>
 
                 <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Date Range</label>
                             <div class="relative">
@@ -170,8 +170,16 @@
                                 <option value="Other">Other</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status</label>
+                            <select id="dispatchStatusFilter" onchange="renderLiveBoard()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                <option value="All">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Rebook">Needs Rebook</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                     <table class="w-full text-left border-collapse min-w-[800px]">
@@ -1275,6 +1283,7 @@
             const deptFilter = document.getElementById('dispatchDeptFilter').value;
             const driverFilter = document.getElementById('dispatchDriverFilter').value;
             const taskFilter = document.getElementById('dispatchTaskFilter').value;
+            const statusFilter = document.getElementById('dispatchStatusFilter').value; // NEW STATUS FILTER
             
             const isDateSelected = $('#dispatchDateRange').val() !== '';
             let startBoundary = null, endBoundary = null;
@@ -1291,6 +1300,9 @@
                 if (deptFilter !== 'All' && t.department !== deptFilter) return false;
                 if (driverFilter !== 'All' && t.driver !== driverFilter) return false;
                 if (taskFilter !== 'All' && t.taskType !== taskFilter) return false;
+                
+                // Evaluate the new Status logic
+                if (statusFilter !== 'All' && t.status !== statusFilter) return false;
 
                 if (startBoundary && endBoundary) {
                     const taskDateObj = new Date(t.date);
@@ -1328,7 +1340,7 @@
                 `}).join('');
             }
         }
-
+        
         function renderVehicleList() {
             const vList = document.getElementById('vehicleList');
             if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
