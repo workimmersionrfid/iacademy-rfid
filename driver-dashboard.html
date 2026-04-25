@@ -246,8 +246,15 @@
 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Assigned Vehicle</label>
-                    <select id="fVehicle" onchange="updateFuelTypeDisplay()" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
+                    <select id="fVehicle" onchange="onVehicleSelect('fuel')" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
                         <option value="" disabled selected>Loading assigned vehicles...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Charge to Department</label>
+                    <select id="fLogDept" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold text-blue-900">
+                        <option value="" disabled selected>Select a vehicle first...</option>
                     </select>
                 </div>
 
@@ -328,8 +335,15 @@
 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Assigned Vehicle</label>
-                    <select id="tollVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
+                    <select id="tollVehicle" onchange="onVehicleSelect('toll')" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-medium text-blue-900">
                         <option value="" disabled selected>Loading assigned vehicles...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Charge to Department</label>
+                    <select id="tollLogDept" required class="w-full border border-gray-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold text-blue-900">
+                        <option value="" disabled selected>Select a vehicle first...</option>
                     </select>
                 </div>
 
@@ -355,14 +369,20 @@
 
     <script>
         const API_BASE = 'https://iacademy-rfid.onrender.com/api';
+        
         let currentActiveTaskId = null;
         let currentActiveVehicle = "N/A";
         let currentActiveTaskName = "N/A";
         let currentActiveTaskDest = "N/A";
+        let currentActiveTaskDept = "GENERAL"; 
+
         const statusText = document.getElementById('status-text');
 
         let allVehicles = [];
         let allTasks = [];
+        
+        // UPDATED: Now holds an array of all unique departments for a vehicle on a specific date
+        let vehicleDeptMap = {}; 
 
         window.globalLogout = function() { localStorage.clear(); window.location.href = 'login.html'; };
 
@@ -412,27 +432,35 @@
             }
         }
 
-        // --- STRICT DISPATCH LOCKING LOGIC ---
         window.updateModalVehicleDropdown = function(type) {
             const dateInputId = type === 'fuel' ? 'fDate' : 'tollDate';
             const selectId = type === 'fuel' ? 'fVehicle' : 'tollVehicle';
+            const deptId = type === 'fuel' ? 'fLogDept' : 'tollLogDept';
             
             const dateInput = document.getElementById(dateInputId).value;
             const selectEl = document.getElementById(selectId);
+            const deptEl = document.getElementById(deptId);
             const myName = localStorage.getItem('username');
 
             if (!dateInput || allVehicles.length === 0) return;
 
-            // Find tasks explicitly dispatched to THIS driver on the selected date
             const myDailyTasks = allTasks.filter(t => t.date === dateInput && t.driver === myName);
             
-            // Get unique vehicle plates from those tasks
+            // Build the multi-department map
+            vehicleDeptMap = {};
+            myDailyTasks.forEach(t => {
+                if (t.vehicle) {
+                    if (!vehicleDeptMap[t.vehicle]) vehicleDeptMap[t.vehicle] = new Set();
+                    vehicleDeptMap[t.vehicle].add(t.department || 'GENERAL');
+                }
+            });
+
             const myAssignedPlates = [...new Set(myDailyTasks.map(t => t.vehicle).filter(v => v))];
 
             selectEl.innerHTML = '';
+            deptEl.innerHTML = '<option value="" disabled selected>Select a vehicle first...</option>';
 
             if (myAssignedPlates.length === 0) {
-                // LOCKOUT: Prevent selection and form submission
                 selectEl.innerHTML = `<option value="" disabled selected>❌ No vehicle assigned to you for this date</option>`;
             } else {
                 selectEl.innerHTML = '<option value="" disabled selected>Select assigned vehicle...</option>';
@@ -445,15 +473,43 @@
                     autoSelectPlate = plate;
                 });
 
-                // Auto-select if they only have 1 assigned vehicle today
                 if (myAssignedPlates.length === 1 && autoSelectPlate) {
                     selectEl.value = autoSelectPlate;
+                    onVehicleSelect(type); // Trigger updates
+                }
+            }
+        };
+
+        // NEW: Handles both Fuel Type logic and the new Department Dropdown logic
+        window.onVehicleSelect = function(type) {
+            const plateId = type === 'fuel' ? 'fVehicle' : 'tollVehicle';
+            const deptId = type === 'fuel' ? 'fLogDept' : 'tollLogDept';
+            
+            const plate = document.getElementById(plateId).value;
+            const deptSelect = document.getElementById(deptId);
+
+            // Handle Department Dropdown
+            if (!plate || !vehicleDeptMap[plate]) {
+                deptSelect.innerHTML = '<option value="" disabled selected>Select a vehicle first...</option>';
+            } else {
+                const depts = Array.from(vehicleDeptMap[plate]);
+                deptSelect.innerHTML = '<option value="" disabled selected>Select department to charge...</option>';
+                
+                depts.forEach(d => {
+                    deptSelect.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+
+                // Auto-select if there is only 1 department for this vehicle today
+                if (depts.length === 1) {
+                    deptSelect.value = depts[0];
                 }
             }
 
-            // NEW: Auto-fill fuel type instantly if we are in the fuel modal
-            if (type === 'fuel' && typeof updateFuelTypeDisplay === 'function') {
-                updateFuelTypeDisplay();
+            // Handle Fuel Type Auto-fill (only for Fuel modal)
+            if (type === 'fuel') {
+                const fuelInput = document.getElementById('fFuelType');
+                const vObj = allVehicles.find(v => v.plateNumber === plate);
+                fuelInput.value = vObj && vObj.fuelType ? vObj.fuelType : "Unknown";
             }
         };
 
@@ -491,7 +547,7 @@
                     
                     ${(!isDone && !isRebook) ? `
                     <div class="mt-6 pt-5 border-t border-gray-100">
-                        <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                        <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}', '${t.department || 'GENERAL'}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
                             Start Execution
                         </button>
                     </div>
@@ -500,18 +556,7 @@
                 `;
             }).join('');
         }
-window.updateFuelTypeDisplay = function() {
-            const plate = document.getElementById('fVehicle').value;
-            const fuelInput = document.getElementById('fFuelType');
-            if (!plate) {
-                fuelInput.value = "";
-                return;
-            }
-            const vObj = allVehicles.find(v => v.plateNumber === plate);
-            fuelInput.value = vObj && vObj.fuelType ? vObj.fuelType : "Unknown";
-        };
 
-        // --- FUEL CALCULATION & SUBMISSION ---
         function calculateTotalFuelCost() {
             const price = parseFloat(document.getElementById('fPrice').value) || 0;
             const liters = parseFloat(document.getElementById('fLiters').value) || 0;
@@ -522,24 +567,25 @@ window.updateFuelTypeDisplay = function() {
         document.getElementById('fPrice').addEventListener('input', calculateTotalFuelCost);
         document.getElementById('fLiters').addEventListener('input', calculateTotalFuelCost);
 
-       async function submitFuel(e) {
+        async function submitFuel(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...'; 
             btn.disabled = true;
 
-            // Securely grab the exact fuel type from the database array
             const vehiclePlate = document.getElementById('fVehicle').value;
             const vObj = allVehicles.find(v => v.plateNumber === vehiclePlate);
             const actualFuelType = vObj ? vObj.fuelType : "Unknown";
+            
+            const specificDept = document.getElementById('fLogDept').value; // Now pulls from the user's explicit choice
 
             const logData = {
                 vehicle: vehiclePlate,
                 driver: localStorage.getItem('username'),
-                department: localStorage.getItem('userDept') || 'Unknown',
+                department: specificDept, 
                 date: document.getElementById('fDate').value,
-                fuelType: actualFuelType, // <--- Uses the secure variable
+                fuelType: actualFuelType, 
                 liters: parseFloat(document.getElementById('fLiters').value),
                 price: parseFloat(document.getElementById('fPrice').value),
                 total: parseFloat(document.getElementById('fLiters').value) * parseFloat(document.getElementById('fPrice').value),
@@ -565,7 +611,6 @@ window.updateFuelTypeDisplay = function() {
             finally { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
-        // --- TOLL SUBMISSION LOGIC ---
         async function submitToll(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -573,10 +618,13 @@ window.updateFuelTypeDisplay = function() {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...'; 
             btn.disabled = true;
 
+            const vehiclePlate = document.getElementById('tollVehicle').value;
+            const specificDept = document.getElementById('tollLogDept').value; // Now pulls from the user's explicit choice
+
             const tollData = {
-                vehicle: document.getElementById('tollVehicle').value,
+                vehicle: vehiclePlate,
                 driver: localStorage.getItem('username'),
-                department: localStorage.getItem('userDept') || 'Unknown',
+                department: specificDept, 
                 date: document.getElementById('tollDate').value,
                 expressway: document.getElementById('tollExpressway').value,
                 amount: parseFloat(document.getElementById('tollAmount').value),
@@ -607,12 +655,12 @@ window.updateFuelTypeDisplay = function() {
             }
         }
 
-        // --- ADVANCED TASK EXECUTION LOGIC ---
-        window.startAssignedTask = function(taskId, taskType, taskDesc, destName, assignedVehicle) {
+        window.startAssignedTask = function(taskId, taskType, taskDesc, destName, assignedVehicle, taskDept) {
             currentActiveTaskId = taskId;
             currentActiveVehicle = assignedVehicle || "N/A";
             currentActiveTaskName = `${taskType}: ${taskDesc}`;
             currentActiveTaskDest = destName;
+            currentActiveTaskDept = taskDept || "GENERAL"; 
             
             document.getElementById('display-task-desc').innerText = taskDesc;
             document.getElementById('display-task-dest').innerText = destName;
@@ -630,7 +678,6 @@ window.updateFuelTypeDisplay = function() {
             return { finalTask: currentActiveTaskName, finalLoc: currentActiveTaskDest };
         }
 
-        // --- GPS & COMPRESSION HELPERS ---
         function getLiveLocation() {    
             return new Promise((resolve) => {        
                 if ("geolocation" in navigator) {            
@@ -663,12 +710,11 @@ window.updateFuelTypeDisplay = function() {
             });
         }
 
-        // --- CLOCK IN/OUT ---
         async function sendActionLog(payload, successMsg) {    
             statusText.textContent = "STATUS: SAVING...";
             statusText.classList.replace('text-blue-600', 'text-gray-500');
             statusText.classList.replace('text-gray-400', 'text-gray-500');
-            payload.department = localStorage.getItem('userDept') || 'GENERAL';
+            
             try {        
                 const response = await fetch(`${API_BASE}/action-logs`, { 
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) 
@@ -686,16 +732,23 @@ window.updateFuelTypeDisplay = function() {
         }
 
         document.getElementById('btn-clock-in').addEventListener('click', async () => {    
-            const coords = await getLiveLocation();    
-            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
+            const coords = await getLiveLocation();
+            
+            let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
+            try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
+
+            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
         });
 
         document.getElementById('btn-clock-out').addEventListener('click', async () => {    
             const coords = await getLiveLocation();    
-            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
+            
+            let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
+            try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
+
+            sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
         });
 
-        // --- TRAVEL UPDATES ---
         const transitStatus = document.getElementById('transit-dropdown');
         const uiTransit = document.getElementById('ui-transit');
         const btnLogTravel = document.getElementById('btn-log-travel');
@@ -722,6 +775,7 @@ window.updateFuelTypeDisplay = function() {
             
             const payload = {        
                 driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Travel Update",        
+                department: currentActiveTaskDept, 
                 task: finalTask, location: finalLoc, delivery_status: travelStatus,        
                 comments: document.getElementById('comments').value || "None",        
                 document_attached: "None", latitude: coords.lat, longitude: coords.lon    
@@ -735,7 +789,6 @@ window.updateFuelTypeDisplay = function() {
             }
         });
 
-        // --- FINAL HANDOVER ---
         const completionStatus = document.getElementById('completion-status');
         const uiCompleted = document.getElementById('ui-completed');
         const uiSuccessRemarks = document.getElementById('ui-success-remarks');
@@ -779,7 +832,6 @@ window.updateFuelTypeDisplay = function() {
         canvas.addEventListener('touchend', stopDrawing);
         document.getElementById('clear-signature').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true; });
 
-        // Submit Logic
         btnSubmitHandover.addEventListener('click', async () => {    
             const compType = completionStatus.value;    
             let failReasonsStr = "None", sigData = "None";    
@@ -806,6 +858,7 @@ window.updateFuelTypeDisplay = function() {
 
             const payload = {        
                 driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Final Task Handover",        
+                department: currentActiveTaskDept, 
                 task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
                 comments: document.getElementById('comments').value || "None",        
                 document_attached: uploadedImageData, latitude: coords.lat, longitude: coords.lon,        
@@ -832,6 +885,7 @@ window.updateFuelTypeDisplay = function() {
                     }
                     currentActiveTaskId = null;
                     currentActiveVehicle = "N/A";
+                    currentActiveTaskDept = "GENERAL"; 
                 }
 
                 transitStatus.value = ""; btnLogTravel.innerHTML = 'Log Travel Update';        
