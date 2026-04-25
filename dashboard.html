@@ -130,12 +130,49 @@
 
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+                
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                     <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
                     <button id="btnRefreshBoard" onclick="refreshDashboard()" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-all">
                         <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
                     </button>
                 </div>
+
+                <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Date Range</label>
+                            <div class="relative">
+                                <i class="fa-regular fa-calendar absolute left-2.5 top-1/2 -translate-y-1/2 text-blue-500 text-xs"></i>
+                                <input type="text" id="dispatchDateRange" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg py-2 pl-8 pr-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all" placeholder="All Time">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Department</label>
+                            <select id="dispatchDeptFilter" onchange="renderLiveBoard()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                <option value="All">All Departments</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Driver</label>
+                            <select id="dispatchDriverFilter" onchange="renderLiveBoard()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                <option value="All">All Drivers</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Task Category</label>
+                            <select id="dispatchTaskFilter" onchange="renderLiveBoard()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                <option value="All">All Tasks</option>
+                                <option value="Asset Collection">Asset Collection</option>
+                                <option value="Document Routing">Document Routing</option>
+                                <option value="Hardware Transport">Hardware Transport</option>
+                                <option value="Bank Transaction">Bank Transaction</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                     <table class="w-full text-left border-collapse min-w-[800px]">
                         <thead class="sticky top-0 bg-white z-10 shadow-sm">
@@ -152,7 +189,6 @@
                     </table>
                 </div>
             </div>
-        </div>
 
         <div id="tab-fleet" class="tab-content hidden animate-fade-in grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit relative overflow-hidden">
@@ -674,6 +710,29 @@
                 $(this).val('');
                 renderLogsList(); 
             });
+
+            // Initialize Dispatch Date Range Picker
+            $('#dispatchDateRange').daterangepicker({
+                opens: 'right',
+                autoUpdateInput: false,
+                locale: { format: 'MM/DD/YYYY', cancelLabel: 'Clear' },
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Tomorrow': [moment().add(1, 'days'), moment().add(1, 'days')],
+                    'Next 7 Days': [moment(), moment().add(6, 'days')],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')]
+                }
+            });
+
+            $('#dispatchDateRange').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                renderLiveBoard(); 
+            });
+
+            $('#dispatchDateRange').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+                renderLiveBoard(); 
+            });
         });
 
         function renderDeptCards() {
@@ -719,6 +778,13 @@
                 allDrivers.forEach(d => {
                     driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
                 });
+
+                const dDeptSelect = document.getElementById('dispatchDeptFilter');
+                const dDriverSelect = document.getElementById('dispatchDriverFilter');
+                dDeptSelect.innerHTML = '<option value="All">All Departments</option>';
+                dDriverSelect.innerHTML = '<option value="All">All Drivers</option>';
+                departmentsList.forEach(dept => dDeptSelect.innerHTML += `<option value="${dept}">${dept}</option>`);
+                allDrivers.forEach(d => dDriverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`);
 
             } catch(e) { console.error("Could not load dashboard data", e); }
 
@@ -1202,16 +1268,45 @@
         }
 
         // --- UI RENDER HELPERS ---
-        function renderLiveBoard() {
+       function renderLiveBoard() {
             const tBoard = document.getElementById('taskBoard');
-            if (allTasks.length === 0) {
-                tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks dispatched yet.</td></tr>`;
+            
+            // 1. Grab Filter Values
+            const deptFilter = document.getElementById('dispatchDeptFilter').value;
+            const driverFilter = document.getElementById('dispatchDriverFilter').value;
+            const taskFilter = document.getElementById('dispatchTaskFilter').value;
+            
+            const isDateSelected = $('#dispatchDateRange').val() !== '';
+            let startBoundary = null, endBoundary = null;
+            if (isDateSelected) {
+                const datePicker = $('#dispatchDateRange').data('daterangepicker');
+                startBoundary = datePicker.startDate.toDate();
+                endBoundary = datePicker.endDate.toDate();
+                startBoundary.setHours(0, 0, 0, 0);
+                endBoundary.setHours(23, 59, 59, 999);
+            }
+
+            // 2. Apply Filters to allTasks
+            let filteredTasks = allTasks.filter(t => {
+                if (deptFilter !== 'All' && t.department !== deptFilter) return false;
+                if (driverFilter !== 'All' && t.driver !== driverFilter) return false;
+                if (taskFilter !== 'All' && t.taskType !== taskFilter) return false;
+
+                if (startBoundary && endBoundary) {
+                    const taskDateObj = new Date(t.date);
+                    if (taskDateObj < startBoundary || taskDateObj > endBoundary) return false;
+                }
+                return true;
+            });
+
+            // 3. Render the filtered array
+            if (filteredTasks.length === 0) {
+                tBoard.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No tasks match your search criteria.</td></tr>`;
             } else {
-                tBoard.innerHTML = allTasks.map(t => {
+                tBoard.innerHTML = filteredTasks.map(t => {
                     const isDone = t.status === 'Completed';
                     const isRebook = t.status === 'Rebook';
                     
-                    // NEW: The Rebook badge is now a clickable button!
                     let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-blue-100 uppercase tracking-widest shadow-sm">Completed</span>`
                                    : (isRebook ? `<button onclick="openRebookModal('${t._id}')" class="bg-red-50 hover:bg-red-600 hover:text-white hover:border-red-600 text-red-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-red-200 uppercase tracking-widest transition-all cursor-pointer shadow-sm group"><i class="fa-solid fa-rotate-right mr-1 group-hover:animate-spin"></i> Rebook</button>`
                                    : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-gray-200 uppercase tracking-widest shadow-sm">Pending</span>`);
