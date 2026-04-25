@@ -485,6 +485,50 @@
         </div>
     </div>
 
+    <div id="rebookModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 my-8 transform scale-95 opacity-0 transition-all duration-200" id="rebookBox">
+            <div class="p-5 bg-red-800 flex justify-between items-center">
+                <h3 class="font-bold text-white text-base"><i class="fa-solid fa-rotate-right mr-2"></i> Rebook Task</h3>
+                <button onclick="closeRebookModal()" class="text-red-200 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="rebookForm" onsubmit="submitRebook(event)" class="p-6 space-y-4">
+                <input type="hidden" id="rTaskId">
+                <input type="hidden" id="rTaskDept">
+
+                <div>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mb-1">Task & Destination</p>
+                    <p id="rTaskDesc" class="text-xs font-medium text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-200 line-clamp-2"></p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">New Date</label>
+                    <input type="date" id="rDate" onchange="updateRebookDropdowns()" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 text-gray-700 font-bold">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Reassign Driver</label>
+                    <select id="rDriver" onchange="updateRebookVehicleDropdown()" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-medium text-gray-800">
+                        <option value="" disabled selected>Select new date first...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Reassign Vehicle</label>
+                    <select id="rVehicle" required class="w-full border border-gray-200 rounded-lg p-3 text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-medium text-gray-800">
+                        <option value="" disabled selected>Select driver first...</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-gray-100 mt-4">
+                    <button type="button" onclick="closeRebookModal()" class="w-1/3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-bold py-3.5 rounded-xl transition-colors text-sm shadow-sm">Cancel</button>
+                    <button type="submit" id="btnSubmitRebook" class="w-2/3 bg-red-700 hover:bg-red-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm">Confirm Rebook</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     
@@ -848,7 +892,6 @@
             }
         }
 
-
         // --- CUSTOM DESTINATION LOGIC ---
         window.toggleCustomDestination = function() {
             const select = document.getElementById('tDestinationSelect');
@@ -999,7 +1042,7 @@
                     const distanceKm = parseFloat(route.distance.value) / 1000;
                     const liters = (distanceKm / efficiency);
                     const fuelCost = (liters * pricePerLiter);
-                    const tollCost = updateDispatchToll();
+                    const tollCost = window.updateDispatchToll();
                     
                     calculatedBudget = fuelCost + tollCost;
 
@@ -1097,9 +1140,11 @@
                 tBoard.innerHTML = allTasks.map(t => {
                     const isDone = t.status === 'Completed';
                     const isRebook = t.status === 'Rebook';
-                    let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-blue-100 uppercase tracking-widest">Completed</span>`
-                                   : (isRebook ? `<span class="bg-red-50 text-red-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-red-200 uppercase tracking-widest">Rebook</span>`
-                                   : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-gray-200 uppercase tracking-widest">Pending</span>`);
+                    
+                    // NEW: The Rebook badge is now a clickable button!
+                    let statusHtml = isDone ? `<span class="bg-blue-50 text-blue-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-blue-100 uppercase tracking-widest shadow-sm">Completed</span>`
+                                   : (isRebook ? `<button onclick="openRebookModal('${t._id}')" class="bg-red-50 hover:bg-red-600 hover:text-white hover:border-red-600 text-red-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-red-200 uppercase tracking-widest transition-all cursor-pointer shadow-sm group"><i class="fa-solid fa-rotate-right mr-1 group-hover:animate-spin"></i> Rebook</button>`
+                                   : `<span class="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-md text-[10px] border border-gray-200 uppercase tracking-widest shadow-sm">Pending</span>`);
 
                     return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
@@ -1295,6 +1340,128 @@
                     if (res.ok) loadDashboardData(); 
                 } catch (err) { console.error("Error deleting vehicle:", err); }
             }
+        }
+
+        // --- REBOOK LOGIC ---
+        window.openRebookModal = function(taskId) {
+            const task = allTasks.find(t => t._id === taskId);
+            if (!task) return;
+
+            document.getElementById('rTaskId').value = task._id;
+            document.getElementById('rTaskDept').value = task.department || 'GENERAL';
+            document.getElementById('rTaskDesc').innerText = `${task.destination} — ${task.description}`;
+            
+            // Clear old inputs
+            document.getElementById('rDate').value = "";
+            document.getElementById('rDriver').innerHTML = '<option value="" disabled selected>Select new date first...</option>';
+            document.getElementById('rVehicle').innerHTML = '<option value="" disabled selected>Select driver first...</option>';
+
+            const modal = document.getElementById('rebookModal');
+            const box = document.getElementById('rebookBox');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 10);
+        }
+
+        window.closeRebookModal = function() {
+            const modal = document.getElementById('rebookModal');
+            const box = document.getElementById('rebookBox');
+            box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 200);
+        }
+
+        // Validate Drivers for the New Date
+        window.updateRebookDropdowns = function() {
+            const dateInput = document.getElementById('rDate').value;
+            if (!dateInput) return;
+
+            const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(dateInput).getDay()];
+            const rDriverSelect = document.getElementById('rDriver');
+            const dept = document.getElementById('rTaskDept').value;
+            
+            rDriverSelect.innerHTML = '<option value="" disabled selected>Select available driver...</option>';
+            let availableDrivers = allDrivers.filter(d => !d.workDays || d.workDays.includes(dayName));
+
+            if (dept && dept !== 'GENERAL') {
+                availableDrivers = availableDrivers.filter(d => {
+                    const deptArray = Array.isArray(d.department) ? d.department : (d.department ? [d.department] : []);
+                    return deptArray.includes(dept);
+                });
+            }
+            
+            if (availableDrivers.length === 0) rDriverSelect.innerHTML = `<option value="" disabled selected>No drivers in ${dept} scheduled for ${dayName}</option>`;
+            else availableDrivers.forEach(d => rDriverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`);
+
+            updateRebookVehicleDropdown();
+        }
+
+        // Validate Vehicles for the New Date (Checking Coding and current assignments)
+        window.updateRebookVehicleDropdown = function() {
+            const dateInput = document.getElementById('rDate').value;
+            const selectedDriver = document.getElementById('rDriver').value;
+            const rVehicleSelect = document.getElementById('rVehicle');
+
+            if (!dateInput) return;
+            const dayIndex = new Date(dateInput).getDay();
+
+            const vehicleAssignments = {};
+            allTasks.filter(t => t.date === dateInput).forEach(t => {
+                if (t.vehicle && t.driver) vehicleAssignments[t.vehicle] = t.driver;
+            });
+
+            let codingDigits = dayIndex === 1 ? ['1', '2'] : dayIndex === 2 ? ['3', '4'] : dayIndex === 3 ? ['5', '6'] : dayIndex === 4 ? ['7', '8'] : dayIndex === 5 ? ['9', '0'] : []; 
+
+            rVehicleSelect.innerHTML = '<option value="" disabled selected>Select available vehicle...</option>';
+            let availableCount = 0; let autoSelectPlate = null;
+
+            allVehicles.forEach(v => {
+                const plate = v.plateNumber.trim();
+                const lastDigit = plate.charAt(plate.length - 1);
+                const assignedTo = vehicleAssignments[plate];
+
+                if (assignedTo && assignedTo !== selectedDriver) {
+                    rVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
+                } else if (assignedTo === selectedDriver) {
+                    rVehicleSelect.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-600 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to ${selectedDriver})</option>`;
+                    autoSelectPlate = v.plateNumber; availableCount++;
+                } else if (codingDigits.includes(lastDigit)) {
+                    rVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-red-500 bg-red-50">❌ ${v.plateNumber} - CODING</option>`;
+                } else {
+                    rVehicleSelect.innerHTML += `<option value="${v.plateNumber}">✅ ${v.plateNumber} (${v.model})</option>`;
+                    availableCount++;
+                }
+            });
+
+            if (availableCount === 0) rVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles</option>`;
+            else if (autoSelectPlate) rVehicleSelect.value = autoSelectPlate;
+        }
+
+        // Save the changes to MongoDB
+        window.submitRebook = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitRebook');
+            const origText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+            btn.disabled = true;
+
+            const taskId = document.getElementById('rTaskId').value;
+
+            try {
+                const res = await fetch(`https://iacademy-rfid.onrender.com/api/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        date: document.getElementById('rDate').value,
+                        driver: document.getElementById('rDriver').value,
+                        vehicle: document.getElementById('rVehicle').value,
+                        status: 'Pending' // Converts it back to pending!
+                    })
+                });
+
+                if (res.ok) {
+                    closeRebookModal();
+                    loadDashboardData(); 
+                } else alert("Failed to rebook task.");
+            } catch (err) { alert("Network error."); } finally { btn.innerHTML = origText; btn.disabled = false; }
         }
     </script>
 </body>
