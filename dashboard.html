@@ -86,7 +86,7 @@
                     <i class="fa-solid fa-peso-sign text-blue-500 text-xl"></i>
                 </div>
                 <div class="mt-4">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Fuel Spent</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Expenses</p>
                     <h3 id="statSpent" class="text-3xl font-black text-blue-900">₱0.00</h3>
                 </div>
             </div>
@@ -218,21 +218,56 @@
 
                 <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
                     <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="font-bold text-xl text-blue-900">Recent Fuel Logs</h2>
+                    <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+                        
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-xl text-blue-900">Reports & Analytics</h2>
+                            <div class="text-right">
+                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Filtered Total</p>
+                                <p id="filteredTotal" class="font-black text-blue-800 text-xl leading-none">₱0.00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Timeframe</label>
+                                <select id="logDateFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                    <option value="All">All Time</option>
+                                    <option value="Today">Today</option>
+                                    <option value="Tomorrow">Tomorrow</option>
+                                    <option value="Yesterday">Yesterday</option>
+                                    <option value="ThisMonth">This Month</option>
+                                    <option value="LastMonth">Last Month</option>
+                                    <option value="ThisYear">This Year</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Department</label>
+                                <select id="logDeptFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                    <option value="All">All Departments</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Driver</label>
+                                <select id="logDriverFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                    <option value="All">All Drivers</option>
+                                </select>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar p-2">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky top-0 bg-white z-10 shadow-sm">
                                 <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
                                     <th class="p-4 font-bold">Date</th>
-                                    <th class="p-4 font-bold">Dept / Driver</th>
-                                    <th class="p-4 font-bold">Vehicle Details</th>
-                                    <th class="p-4 font-bold text-right">Total Cost</th>
+                                    <th class="p-4 font-bold">Type & Driver</th>
+                                    <th class="p-4 font-bold">Expense Details</th>
+                                    <th class="p-4 font-bold text-right">Cost</th>
                                 </tr>
                             </thead>
                             <tbody id="logsList" class="text-sm divide-y divide-gray-50">
-                                <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading logs...</td></tr>
+                                <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading reports...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -458,6 +493,7 @@
         let allVehicles = [];
         let allDrivers = [];
         let allTasks = []; 
+        let allCombinedLogs = []; 
         let currentDispatchDept = ""; 
         
         let dispatchMap, dirService, dirRenderer;
@@ -536,26 +572,149 @@
         }
 
         async function loadDashboardData() {
-            allVehicles = await getVehicles();
-            allDrivers = await getDrivers();   
-            const logs = await getLogs();
-            
             try {
-                const res = await fetch('https://iacademy-rfid.onrender.com/api/tasks');
-                allTasks = await res.json(); 
-            } catch(e) { console.error("Could not load tasks"); }
+                allVehicles = await getVehicles();
+                allDrivers = await getDrivers();   
+
+                const [tasksRes, logsRes, tollsRes] = await Promise.all([
+                    fetch('https://iacademy-rfid.onrender.com/api/tasks'),
+                    fetch('https://iacademy-rfid.onrender.com/api/logs'),
+                    fetch('https://iacademy-rfid.onrender.com/api/tolls')
+                ]);
+                
+                allTasks = await tasksRes.json();
+                const fLogs = await logsRes.json();
+                const tLogs = await tollsRes.json();
+
+                const formattedFuel = fLogs.map(l => ({...l, logType: 'Fuel', timestamp: l.date}));
+                const formattedToll = tLogs.map(l => ({...l, logType: 'Toll', timestamp: l.date}));
+                allCombinedLogs = [...formattedFuel, ...formattedToll].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                // Populate Dropdowns for Unified Logs Filter
+                const deptSelect = document.getElementById('logDeptFilter');
+                deptSelect.innerHTML = '<option value="All">All Departments</option>';
+                departmentsList.forEach(dept => {
+                    deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+                });
+
+                const driverSelect = document.getElementById('logDriverFilter');
+                driverSelect.innerHTML = '<option value="All">All Drivers</option>';
+                allDrivers.forEach(d => {
+                    driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
+                });
+
+            } catch(e) { console.error("Could not load dashboard data", e); }
 
             document.getElementById('statVehicles').innerText = allVehicles.length;
             document.getElementById('statTasks').innerText = allTasks.length; 
-            document.getElementById('statLogs').innerText = logs.length;
+            document.getElementById('statLogs').innerText = allCombinedLogs.length;
             
-            const totalSpent = logs.reduce((sum, log) => sum + (log.total || 0), 0);
+            const totalSpent = allCombinedLogs.reduce((sum, log) => sum + (log.total || log.amount || 0), 0);
             document.getElementById('statSpent').innerText = `₱${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             renderLiveBoard();
             renderVehicleList();
-            renderLogsList(logs);
+            renderLogsList(); 
             renderAdminDriverList();
+        }
+
+        // --- UNIFIED MULTI-FILTER REPORTS LOGIC ---
+        window.renderLogsList = function() {
+            const lList = document.getElementById('logsList');
+            const dateFilter = document.getElementById('logDateFilter').value;
+            const deptFilter = document.getElementById('logDeptFilter').value;
+            const driverFilter = document.getElementById('logDriverFilter').value;
+            
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            
+            let tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            let yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            // Apply all filters simultaneously
+            let filteredLogs = allCombinedLogs.filter(l => {
+                
+                if (driverFilter !== 'All' && l.driver !== driverFilter) return false;
+                if (deptFilter !== 'All' && l.department !== deptFilter) return false;
+
+                if (dateFilter !== 'All') {
+                    const logDateStr = l.timestamp; 
+                    const logDateObj = new Date(l.timestamp);
+                    const logMonth = logDateObj.getMonth();
+                    const logYear = logDateObj.getFullYear();
+
+                    if (dateFilter === 'Today' && logDateStr !== todayStr) return false;
+                    if (dateFilter === 'Tomorrow' && logDateStr !== tomorrowStr) return false;
+                    if (dateFilter === 'Yesterday' && logDateStr !== yesterdayStr) return false;
+                    if (dateFilter === 'ThisMonth' && (logMonth !== currentMonth || logYear !== currentYear)) return false;
+                    if (dateFilter === 'ThisYear' && logYear !== currentYear) return false;
+                    if (dateFilter === 'LastMonth') {
+                        let lastM = currentMonth - 1;
+                        let lastY = currentYear;
+                        if (lastM < 0) { lastM = 11; lastY--; }
+                        if (logMonth !== lastM || logYear !== lastY) return false;
+                    }
+                }
+                return true;
+            });
+
+            // Update Dynamic Budget Total
+            const filteredSpent = filteredLogs.reduce((sum, log) => sum + (log.total || log.amount || 0), 0);
+            document.getElementById('filteredTotal').innerText = `₱${filteredSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            if (filteredLogs.length === 0) {
+                lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No logs found for the selected criteria.</td></tr>`;
+            } else {
+                lList.innerHTML = filteredLogs.map(l => {
+                    const isFuel = l.logType === 'Fuel';
+                    const icon = isFuel ? '<i class="fa-solid fa-gas-pump text-blue-500"></i>' : '<i class="fa-solid fa-ticket text-orange-500"></i>';
+                    const badgeClass = isFuel ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-orange-50 text-orange-700 border-orange-200';
+                    const typeLabel = isFuel ? 'FUEL' : 'TOLL';
+                    
+                    let detailHTML = '';
+                    if (isFuel) {
+                        const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
+                        detailHTML = `
+                            <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${l.notes ? `<i class="fa-solid fa-message text-blue-300 ml-2" title="${l.notes}"></i>` : ''}</div>
+                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                                <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700">${l.liters}L ${l.fuelType || ''}</span>
+                            </div>
+                        `;
+                    } else {
+                        detailHTML = `
+                            <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${l.notes ? `<i class="fa-solid fa-message text-orange-300 ml-2" title="${l.notes}"></i>` : ''}</div>
+                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                                <i class="fa-solid fa-road mr-1 text-gray-400"></i> ${l.expressway || 'Toll Road'}
+                            </div>
+                        `;
+                    }
+
+                    const cost = isFuel ? (l.total || 0) : (l.amount || 0);
+
+                    return `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4 text-gray-500 text-xs font-medium whitespace-nowrap">${l.date}</td>
+                        <td class="p-4">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border ${badgeClass}">${icon} ${typeLabel}</span>
+                            </div>
+                            <span class="text-xs font-bold text-gray-800">${l.driver} <span class="text-gray-400 font-normal ml-1">(${l.department})</span></span>
+                        </td>
+                        <td class="p-4">
+                            ${detailHTML}
+                        </td>
+                        <td class="p-4 text-right font-bold text-blue-900">₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    </tr>`
+                }).join('');
+            }
         }
 
         // --- DISPATCH MODAL LOGIC & VEHICLE LOCKING ---
@@ -748,6 +907,8 @@
             if (entrySelect.value && exitSelect.value && entrySelect.value !== "Entry" && exitSelect.value !== "Exit") {
                 const eIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
                 const xIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
+                
+                // Simulated Math: Calculates realistic distance-based toll
                 let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 39 + 46 : 0; 
                 
                 priceText.innerText = `₱${cost.toFixed(2)}`;
@@ -930,31 +1091,6 @@
                         <td class="p-4 text-gray-800 font-medium">${v.year} ${v.model} <br><span class="text-xs text-gray-500 font-normal">${v.efficiency} km/L • ${v.fuelType}</span></td>
                         <td class="p-4 text-right"><button onclick="deleteVehicle('${v._id}')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-lg"></i></button></td>
                     </tr>`).join('');
-        }
-
-        function renderLogsList(logs) {
-            const lList = document.getElementById('logsList');
-            if (logs.length === 0) {
-                lList.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No fuel logs submitted yet.</td></tr>`;
-            } else {
-                lList.innerHTML = logs.map(l => {
-                    const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
-                    const fuelText = l.fuelType || 'Unknown';
-                    const notesBadge = l.notes ? `<i class="fa-solid fa-message text-blue-300 ml-2" title="${l.notes}"></i>` : '';
-                    return `
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="p-4 text-gray-500 text-xs font-medium">${l.date}</td>
-                        <td class="p-4"><span class="font-bold text-gray-800">${l.department}</span><br><span class="text-xs text-gray-500 mt-1">${l.driver}</span></td>
-                        <td class="p-4">
-                            <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${notesBadge}</div>
-                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
-                                <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700">${l.liters}L ${fuelText}</span>
-                            </div>
-                        </td>
-                        <td class="p-4 text-right font-bold text-blue-900">₱${(l.total || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    </tr>`
-                }).join('');
-            }
         }
 
         function renderAdminDriverList() {
