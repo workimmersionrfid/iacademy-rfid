@@ -210,7 +210,9 @@
                                     <label for="file-upload" class="block w-full text-center bg-white border border-gray-200 text-blue-700 p-3.5 rounded-xl font-bold cursor-pointer transition-colors shadow-sm hover:bg-blue-50">
                                         <i class="fa-solid fa-images mr-2"></i> <span id="file-name">Attach Photo(s)</span>
                                     </label>
-                                    <input type="file" id="file-upload" class="hidden" accept="image/*" multiple capture="environment">
+                                    <input type="file" id="file-upload" class="hidden" accept="image/*" multiple>
+                                    
+                                    <div id="previewContainer" class="flex flex-wrap gap-2 mt-4 empty:hidden"></div>
                                 </div>
                                 <div>
                                     <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">E-Signature (Required):</p>
@@ -407,7 +409,6 @@
         let allVehicles = [];
         let allTasks = [];
         
-        // UPDATED: Now holds an array of all unique departments for a vehicle on a specific date
         let vehicleDeptMap = {}; 
 
         window.globalLogout = function() { localStorage.clear(); window.location.href = 'login.html'; };
@@ -472,7 +473,6 @@
 
             const myDailyTasks = allTasks.filter(t => t.date === dateInput && t.driver === myName);
             
-            // Build the multi-department map
             vehicleDeptMap = {};
             myDailyTasks.forEach(t => {
                 if (t.vehicle) {
@@ -501,12 +501,11 @@
 
                 if (myAssignedPlates.length === 1 && autoSelectPlate) {
                     selectEl.value = autoSelectPlate;
-                    onVehicleSelect(type); // Trigger updates
+                    onVehicleSelect(type);
                 }
             }
         };
 
-        // NEW: Handles both Fuel Type logic and the new Department Dropdown logic
         window.onVehicleSelect = function(type) {
             const plateId = type === 'fuel' ? 'fVehicle' : 'tollVehicle';
             const deptId = type === 'fuel' ? 'fLogDept' : 'tollLogDept';
@@ -514,7 +513,6 @@
             const plate = document.getElementById(plateId).value;
             const deptSelect = document.getElementById(deptId);
 
-            // Handle Department Dropdown
             if (!plate || !vehicleDeptMap[plate]) {
                 deptSelect.innerHTML = '<option value="" disabled selected>Select a vehicle first...</option>';
             } else {
@@ -525,13 +523,11 @@
                     deptSelect.innerHTML += `<option value="${d}">${d}</option>`;
                 });
 
-                // Auto-select if there is only 1 department for this vehicle today
                 if (depts.length === 1) {
                     deptSelect.value = depts[0];
                 }
             }
 
-            // Handle Fuel Type Auto-fill (only for Fuel modal)
             if (type === 'fuel') {
                 const fuelInput = document.getElementById('fFuelType');
                 const vObj = allVehicles.find(v => v.plateNumber === plate);
@@ -604,7 +600,7 @@
             const vObj = allVehicles.find(v => v.plateNumber === vehiclePlate);
             const actualFuelType = vObj ? vObj.fuelType : "Unknown";
             
-            const specificDept = document.getElementById('fLogDept').value; // Now pulls from the user's explicit choice
+            const specificDept = document.getElementById('fLogDept').value; 
 
             const logData = {
                 vehicle: vehiclePlate,
@@ -645,7 +641,7 @@
             btn.disabled = true;
 
             const vehiclePlate = document.getElementById('tollVehicle').value;
-            const specificDept = document.getElementById('tollLogDept').value; // Now pulls from the user's explicit choice
+            const specificDept = document.getElementById('tollLogDept').value; 
 
             const tollData = {
                 vehicle: vehiclePlate,
@@ -695,7 +691,6 @@
             
             document.getElementById('active-task-info').classList.remove('hidden');
 
-            // NEW: Hide the lock screen, reveal the inputs!
             document.getElementById('no-task-placeholder').classList.add('hidden');
             document.getElementById('task-action-controls').classList.remove('hidden');
 
@@ -719,18 +714,26 @@
             });
         }
 
-        // NEW: MULTIPLE IMAGES COMPRESSION ARRAY
+        // --- NEW IMAGE UPLOAD PREVIEW LOGIC ---
         let uploadedImagesData = [];
         const fileNameDisplay = document.getElementById('file-name');
+        const previewContainer = document.getElementById('previewContainer');
         
         document.getElementById('file-upload').addEventListener('change', async (e) => {    
             if (e.target.files.length > 0) {        
                 fileNameDisplay.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...`;        
                 uploadedImagesData = []; // clear old array
+                previewContainer.innerHTML = ''; // clear visual thumbnails
                 
                 for (let i = 0; i < e.target.files.length; i++) {
                     const compressed = await compressImage(e.target.files[i]);
                     uploadedImagesData.push(compressed);
+                    
+                    // Display Thumbnail preview below the button
+                    const img = document.createElement('img');
+                    img.src = compressed;
+                    img.className = 'w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm';
+                    previewContainer.appendChild(img);
                 }
                 fileNameDisplay.innerHTML = `<i class="fa-solid fa-check text-emerald-500 mr-2"></i> ${uploadedImagesData.length} Photo(s) Attached`;        
             }
@@ -841,7 +844,6 @@
         const uiFailed = document.getElementById('ui-failed');
         const btnSubmitHandover = document.getElementById('btn-submit-handover');
 
-        // Toggle UI based on the 2 options
         completionStatus.addEventListener('change', (e) => {    
             uiSuccessful.classList.add('hidden');
             uiFailed.classList.add('hidden');
@@ -877,13 +879,11 @@
         canvas.addEventListener('touchend', stopDrawing);
         document.getElementById('clear-signature').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true; });
 
-        // Streamlined Submit Logic
         btnSubmitHandover.addEventListener('click', async () => {    
             const compType = completionStatus.value;    
             let failReasonsStr = "None", sigData = "None";    
             let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
             
-            // For Database Compatibility: We translate "Successful" to "Completed" for the Admin Reports page
             let dbCompletionType = "Failed"; 
             
             if (compType === "Successful") {        
@@ -918,7 +918,6 @@
                 department: currentActiveTaskDept, 
                 task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
                 comments: document.getElementById('comments').value || "None",        
-                // NEW: Send the array as a JSON string!
                 document_attached: uploadedImagesData.length > 0 ? JSON.stringify(uploadedImagesData) : "None", 
                 latitude: coords.lat, longitude: coords.lon,        
                 completion_type: dbCompletionType, 
@@ -953,14 +952,16 @@
                 uiTransit.classList.add('hidden'); completionStatus.value = "";         
                 uiSuccessful.classList.add('hidden'); uiFailed.classList.add('hidden'); btnSubmitHandover.classList.add('hidden');                
                 
-                // NEW: Re-lock the UI for the next task
                 document.getElementById('task-action-controls').classList.add('hidden');
                 document.getElementById('no-task-placeholder').classList.remove('hidden');
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
                 document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);        
                 
-                uploadedImagesData = []; fileNameDisplay.innerHTML = `<i class="fa-solid fa-images mr-2"></i> Attach Photo(s)`;                
+                uploadedImagesData = []; 
+                fileNameDisplay.innerHTML = `<i class="fa-solid fa-images mr-2"></i> Attach Photo(s)`;
+                previewContainer.innerHTML = ''; // Also clear the thumbnails on reset
+                
                 document.getElementById('comments').value = "";
                 
                 document.getElementById('active-task-info').classList.add('hidden');
