@@ -24,6 +24,11 @@
             if (!token || role !== 'admin') window.location.href = 'login.html';
         });
     </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
 </head>
 <body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
 
@@ -49,10 +54,10 @@
                 <i class="fa-solid fa-filter text-blue-400"></i> Database Filters
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-4">
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Date Range</label>
-                    <select id="filterDatePreset" onchange="toggleCustomDates()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 transition-colors">
+                    <select id="filterDatePreset" onchange="toggleCustomDates()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 transition-colors cursor-pointer">
                         <option value="">All Time</option>
                         <option value="today">Today</option>
                         <option value="yesterday">Yesterday</option>
@@ -67,7 +72,7 @@
                 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Department</label>
-                    <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors">
+                    <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
                         <option value="">All Departments</option>
                         <option value="ELPD">ELPD</option>
                         <option value="OSAS">OSAS</option>
@@ -84,9 +89,17 @@
                         <option value="LIBRARY">LIBRARY</option>
                     </select>
                 </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Driver</label>
+                    <select id="filterDriver" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
+                        <option value="">All Drivers</option>
+                        </select>
+                </div>
+
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Task Category</label>
-                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors">
+                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
                         <option value="">All Tasks</option>
                         <option value="Asset Collection">Asset Collection</option>
                         <option value="Document Routing">Document Routing</option>
@@ -107,16 +120,34 @@
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
-                <button onclick="clearFilters()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 border border-gray-200 text-sm">
-                    <i class="fa-solid fa-eraser"></i> Clear
-                </button>
-                <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-magnifying-glass"></i> Search Database
-                </button>
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-file-excel text-lg"></i> Export to Excel
-                </button>
+            <div class="flex flex-col md:flex-row items-center justify-between pt-6 mt-6 border-t border-gray-100">
+                
+                <div class="flex gap-4 mb-4 md:mb-0" id="filterStats">
+                    <div class="text-center px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-lg">
+                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Completed</p>
+                        <p id="statCompleted" class="text-lg font-black text-emerald-800">0</p>
+                    </div>
+                    <div class="text-center px-4 py-2 bg-red-50 border border-red-100 rounded-lg">
+                        <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Failed</p>
+                        <p id="statFailed" class="text-lg font-black text-red-800">0</p>
+                    </div>
+                    <div class="text-center px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg">
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Transit Updates</p>
+                        <p id="statTransit" class="text-lg font-black text-blue-800">0</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="clearFilters()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 border border-gray-200 text-sm shadow-sm">
+                        <i class="fa-solid fa-eraser"></i> Clear
+                    </button>
+                    <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search Database
+                    </button>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-file-excel text-lg"></i> Export
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -150,18 +181,42 @@
 
     </main>
 
-    <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     
     <script>
         const API_BASE = 'https://iacademy-rfid.onrender.com/api';
         let allLogs = [];
         let filteredLogs = [];
+        let allDrivers = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof renderNavigation === 'function') renderNavigation('reports');
-            fetchLogs();
+            fetchInitialData();
         });
+
+        async function fetchInitialData() {
+            try {
+                // Fetch Logs and Drivers concurrently
+                const [logsRes, driversRes] = await Promise.all([
+                    fetch(`${API_BASE}/action-logs`),
+                    fetch(`${API_BASE}/drivers`)
+                ]);
+                
+                allLogs = await logsRes.json();
+                allDrivers = await driversRes.json();
+
+                // Populate Driver Filter Dropdown
+                const driverSelect = document.getElementById('filterDriver');
+                allDrivers.forEach(d => {
+                    driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
+                });
+
+                filteredLogs = [...allLogs];
+                renderTable(filteredLogs);
+            } catch (error) {
+                document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 font-bold">Failed to load database.</td></tr>`;
+            }
+        }
 
         function toggleCustomDates() {
             const preset = document.getElementById('filterDatePreset').value;
@@ -217,20 +272,10 @@
             return { start, end };
         }
 
-        async function fetchLogs() {
-            try {
-                const res = await fetch(`${API_BASE}/action-logs`);
-                allLogs = await res.json();
-                filteredLogs = [...allLogs];
-                renderTable(filteredLogs);
-            } catch (error) {
-                document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 font-bold">Failed to load database.</td></tr>`;
-            }
-        }
-
         function applyFilters() {
             const fTask = document.getElementById('filterTask').value.toLowerCase();
             const fDept = document.getElementById('filterDept').value; 
+            const fDriver = document.getElementById('filterDriver').value; 
             const presetFilter = document.getElementById('filterDatePreset').value;
             const dateRange = getDateRange(presetFilter);
 
@@ -244,6 +289,8 @@
                 
                 if (fTask && !log.task.toLowerCase().includes(fTask)) match = false;
                 if (fDept && log.department !== fDept) match = false;
+                if (fDriver && log.driver_name !== fDriver) match = false;
+                
                 return match;
             });
             renderTable(filteredLogs);
@@ -255,6 +302,7 @@
             document.getElementById('filterEnd').value = '';
             document.getElementById('filterTask').value = '';
             document.getElementById('filterDept').value = '';
+            document.getElementById('filterDriver').value = '';
             toggleCustomDates();
             filteredLogs = [...allLogs];
             renderTable(filteredLogs);
@@ -264,59 +312,72 @@
             const tableBody = document.getElementById('resultsTable');
             document.getElementById('resultCount').innerText = `${logs.length} logs found`;
 
+            // Calculate Dynamic Status Stats
+            let statComp = 0, statFail = 0, statTrans = 0;
+
             if (logs.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-400 text-sm italic">No logs match your search criteria.</td></tr>`;
-                return;
+            } else {
+                tableBody.innerHTML = logs.map(log => {
+                    const dateObj = new Date(log.timestamp);
+                    const dateFormatted = dateObj.toISOString().split('T')[0];
+                    const timeFormatted = dateObj.toTimeString().split(' ')[0];
+
+                    let statusBadge = `<span class="text-gray-500">${log.delivery_status}</span>`;
+                    
+                    // Categorize for stats and badges
+                    if(log.action === "Final Task Handover") {
+                        if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") {
+                            statusBadge = `<span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
+                            statComp++;
+                        } else if(log.completion_type === "Failed") {
+                            statusBadge = `<span class="text-red-700 bg-red-50 px-2 py-1 rounded border border-red-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
+                            statFail++;
+                        }
+                    } else if(log.action === "Travel Update") {
+                        statusBadge = `<span class="text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
+                        statTrans++;
+                    } else if(log.action === "Started Navigation") {
+                        statusBadge = `<span class="text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
+                    } else if(log.action === "Driver Shift Clock-In") {
+                        statusBadge = `<span class="text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-clock mr-1"></i> Shift Start</span>`;
+                    } else if(log.action === "Driver Shift Clock-Out") {
+                        statusBadge = `<span class="text-gray-700 bg-gray-200 px-2 py-1 rounded border border-gray-300 font-bold text-[10px] uppercase"><i class="fa-solid fa-stopwatch mr-1"></i> Shift End</span>`;
+                    }
+
+                    let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
+                    let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
+
+                    return `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-4">
+                            <div class="font-bold text-gray-800">${dateFormatted}</div>
+                            <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1"></i> ${timeFormatted}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="font-bold text-gray-800"><i class="fa-regular fa-user text-blue-400 mr-1"></i> ${log.driver_name}</div>
+                            <div class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">${log.department || 'GENERAL'}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="font-bold text-blue-900">${log.action}</div>
+                            <div class="text-[10px] text-gray-500 mt-1 font-bold uppercase tracking-wider">${log.task}</div>
+                        </td>
+                        <td class="p-4 font-medium text-gray-600 text-sm">
+                            ${log.location}
+                        </td>
+                        <td class="p-4">
+                            ${statusBadge}
+                            ${incompleteReasons}
+                            ${comments}
+                        </td>
+                    </tr>`;
+                }).join('');
             }
 
-            tableBody.innerHTML = logs.map(log => {
-                const dateObj = new Date(log.timestamp);
-                const dateFormatted = dateObj.toISOString().split('T')[0];
-                const timeFormatted = dateObj.toTimeString().split(' ')[0];
-
-                let statusBadge = `<span class="text-gray-500">${log.delivery_status}</span>`;
-                if(log.action === "Final Task Handover") {
-                    if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") 
-                        statusBadge = `<span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
-                    else if(log.completion_type === "Failed")
-                        statusBadge = `<span class="text-red-700 bg-red-50 px-2 py-1 rounded border border-red-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
-                } else if(log.action === "Travel Update") {
-                    statusBadge = `<span class="text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
-                } else if(log.action === "Started Navigation") {
-                    statusBadge = `<span class="text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
-                } else if(log.action === "Driver Shift Clock-In") {
-                    statusBadge = `<span class="text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-clock mr-1"></i> Shift Start</span>`;
-                } else if(log.action === "Driver Shift Clock-Out") {
-                    statusBadge = `<span class="text-gray-700 bg-gray-200 px-2 py-1 rounded border border-gray-300 font-bold text-[10px] uppercase"><i class="fa-solid fa-stopwatch mr-1"></i> Shift End</span>`;
-                }
-
-                let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
-                let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
-
-                return `
-                <tr class="hover:bg-blue-50/30 transition-colors">
-                    <td class="p-4">
-                        <div class="font-bold text-gray-800">${dateFormatted}</div>
-                        <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1"></i> ${timeFormatted}</div>
-                    </td>
-                    <td class="p-4">
-                        <div class="font-bold text-gray-800"><i class="fa-regular fa-user text-blue-400 mr-1"></i> ${log.driver_name}</div>
-                        <div class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">${log.department || 'GENERAL'}</div>
-                    </td>
-                    <td class="p-4">
-                        <div class="font-bold text-blue-900">${log.action}</div>
-                        <div class="text-[10px] text-gray-500 mt-1 font-bold uppercase tracking-wider">${log.task}</div>
-                    </td>
-                    <td class="p-4 font-medium text-gray-600 text-sm">
-                        ${log.location}
-                    </td>
-                    <td class="p-4">
-                        ${statusBadge}
-                        ${incompleteReasons}
-                        ${comments}
-                    </td>
-                </tr>`;
-            }).join('');
+            // Update UI Stats
+            document.getElementById('statCompleted').innerText = statComp;
+            document.getElementById('statFailed').innerText = statFail;
+            document.getElementById('statTransit').innerText = statTrans;
         }
 
         function exportToExcel() {
