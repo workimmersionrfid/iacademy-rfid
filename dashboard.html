@@ -241,6 +241,7 @@
                                     <option value="ThisMonth">This Month</option>
                                     <option value="LastMonth">Last Month</option>
                                     <option value="ThisYear">This Year</option>
+                                    <option value="Custom">Custom Range...</option>
                                 </select>
                             </div>
                             <div>
@@ -254,6 +255,17 @@
                                 <select id="logDriverFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
                                     <option value="All">All Drivers</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div id="customDashDateRow" class="hidden grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-200">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Start Date</label>
+                                <input type="date" id="dashStartDate" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">End Date</label>
+                                <input type="date" id="dashEndDate" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-all">
                             </div>
                         </div>
 
@@ -687,6 +699,11 @@
             const deptFilter = document.getElementById('logDeptFilter').value;
             const driverFilter = document.getElementById('logDriverFilter').value;
             
+            // NEW: Toggle custom date UI
+            const customRow = document.getElementById('customDashDateRow');
+            if (dateFilter === 'Custom') customRow.classList.remove('hidden');
+            else customRow.classList.add('hidden');
+
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             
@@ -723,6 +740,14 @@
                         let lastY = currentYear;
                         if (lastM < 0) { lastM = 11; lastY--; }
                         if (logMonth !== lastM || logYear !== lastY) return false;
+                    }
+                    
+                    // NEW: Custom Logic
+                    if (dateFilter === 'Custom') {
+                        const startVal = document.getElementById('dashStartDate').value;
+                        const endVal = document.getElementById('dashEndDate').value;
+                        if (startVal && logDateStr < startVal) return false;
+                        if (endVal && logDateStr > endVal) return false;
                     }
                 }
                 return true;
