@@ -608,7 +608,29 @@
         let calculatedDistance = "0 km";
         let calculatedBudget = 0;
 
-        const departmentsList = ["ELPD", "OSAS", "IT", "REGISTRAR", "FINANCE", "ADMISSIONS", "ADCOM", "CLINIC", "PURCHASING", "ADMIN", "SHS", "COLLEGE", "LIBRARY"];
+       // 1. Logically grouped (7 Academic, 7 Admin/Ops)
+        const departmentsList = [
+            "SHS", "COLLEGE", "REGISTRAR", "ADMISSIONS", "OSAS", "LIBRARY", "CLINIC", 
+            "ADMIN", "FINANCE", "PURCHASING", "IT", "ELPD", "ADCOM", "GENERAL"
+        ];
+
+        // 2. Unique icons for faster visual scanning
+        const deptIcons = {
+            "SHS": "fa-school",
+            "COLLEGE": "fa-graduation-cap",
+            "REGISTRAR": "fa-folder-open",
+            "ADMISSIONS": "fa-id-card",
+            "OSAS": "fa-users",
+            "LIBRARY": "fa-book",
+            "CLINIC": "fa-notes-medical",
+            "ADMIN": "fa-building",
+            "FINANCE": "fa-coins",
+            "PURCHASING": "fa-cart-shopping",
+            "IT": "fa-computer",
+            "ELPD": "fa-chalkboard-user",
+            "ADCOM": "fa-bullhorn",
+            "GENERAL": "fa-box-open"
+        };
 
         const estimatedPrices = {
             "Diesel": 65.00, "Gasoline": 75.00, "Ron91": 72.00, "Ron95": 78.00, "Ron97": 82.00
@@ -1340,7 +1362,7 @@
                 `}).join('');
             }
         }
-        
+
         function renderVehicleList() {
             const vList = document.getElementById('vehicleList');
             if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
