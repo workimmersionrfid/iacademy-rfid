@@ -54,7 +54,6 @@
             <div class="relative z-10">
                 <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide">Administrator Portal</p>
                 <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Welcome To Control Center</h1>
-                
             </div>
             <div class="hidden md:block relative z-10 text-white/20">
                 <i class="fa-solid fa-truck-fast text-9xl"></i>
@@ -100,50 +99,66 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="font-bold text-xl text-blue-900">Department Dispatch Hub</h3>
-                    <p class="text-xs text-gray-500 mt-1">Select a department to plan an optimized multi-stop route and assign a driver.</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4" id="deptCardsContainer">
-                </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
-                <button id="btnRefreshBoard" onclick="refreshDashboard()" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-all">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+        <div class="border-b border-gray-200 mt-8">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto custom-scrollbar" aria-label="Tabs">
+                <button id="btn-dispatch" onclick="switchTab('dispatch')" class="tab-btn border-blue-800 text-blue-800 font-bold whitespace-nowrap py-4 px-1 border-b-2 text-sm transition-colors uppercase tracking-wide">
+                    <i class="fa-solid fa-route mr-2"></i> Dispatch Hub
                 </button>
+                <button id="btn-fleet" onclick="switchTab('fleet')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium transition-colors uppercase tracking-wide">
+                    <i class="fa-solid fa-car mr-2"></i> Fleet Management
+                </button>
+                <button id="btn-team" onclick="switchTab('team')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium transition-colors uppercase tracking-wide">
+                    <i class="fa-solid fa-users-gear mr-2"></i> Team & Schedules
+                </button>
+                <button id="btn-reports" onclick="switchTab('reports')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium transition-colors uppercase tracking-wide">
+                    <i class="fa-solid fa-chart-pie mr-2"></i> Analytics
+                </button>
+            </nav>
+        </div>
+
+        <div id="tab-dispatch" class="tab-content space-y-8 animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-bold text-xl text-blue-900">Department Dispatch Hub</h3>
+                        <p class="text-xs text-gray-500 mt-1">Select a department to plan an optimized multi-stop route and assign a driver.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4" id="deptCardsContainer"></div>
             </div>
-            <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
-                <table class="w-full text-left border-collapse min-w-[800px]">
-                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                        <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
-                            <th class="p-4 font-bold">Status</th>
-                            <th class="p-4 font-bold">Date & Driver</th>
-                            <th class="p-4 font-bold">Vehicle</th>
-                            <th class="p-4 font-bold w-1/2">Itinerary Details</th>
-                        </tr>
-                    </thead>
-                    <tbody id="taskBoard" class="text-sm divide-y divide-gray-50">
-                        <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading tasks...</td></tr>
-                    </tbody>
-                </table>
+
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
+                    <button id="btnRefreshBoard" onclick="refreshDashboard()" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-all">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+                    </button>
+                </div>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                                <th class="p-4 font-bold">Status</th>
+                                <th class="p-4 font-bold">Date & Driver</th>
+                                <th class="p-4 font-bold">Vehicle</th>
+                                <th class="p-4 font-bold w-1/2">Itinerary Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskBoard" class="text-sm divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading tasks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div id="tab-fleet" class="tab-content hidden animate-fade-in grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 p-8 h-fit relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
                 <h3 class="font-bold text-xl mb-6 text-blue-900">Register New Vehicle</h3>
-                
                 <form id="vehicleForm" class="space-y-5">
-                    
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Master Catalog: Make & Model</label>
                         <select id="vModel" onchange="autoFillSpecs()" required class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all font-bold text-blue-900">
@@ -204,100 +219,101 @@
                 </form>
             </div>
 
-            <div class="xl:col-span-2 space-y-8">
-                <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="font-bold text-xl text-blue-900">Active Fleet</h2>
-                    </div>
-                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar p-2">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                                <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
-                                    <th class="p-4 font-bold">Plate Number</th>
-                                    <th class="p-4 font-bold">Make & Model</th>
-                                    <th class="p-4 font-bold text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="vehicleList" class="text-sm divide-y divide-gray-50">
-                                <tr><td colspan="3" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading fleet...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="xl:col-span-2 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative h-fit">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+                <div class="p-6 border-b border-gray-100">
+                    <h2 class="font-bold text-xl text-blue-900">Active Fleet</h2>
                 </div>
-
-                <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
-                    <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-                        
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="font-bold text-xl text-blue-900">Reports & Analytics</h2>
-                            <div class="text-right">
-                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Filtered Total</p>
-                                <p id="filteredTotal" class="font-black text-blue-800 text-xl leading-none">₱0.00</p>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Timeframe</label>
-                                <div class="relative">
-                                    <i class="fa-regular fa-calendar absolute left-2.5 top-1/2 -translate-y-1/2 text-blue-500 text-xs"></i>
-                                    <input type="text" id="dashDateRangePicker" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg py-2 pl-8 pr-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all" placeholder="All Time">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Department</label>
-                                <select id="logDeptFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
-                                    <option value="All">All Departments</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Driver</label>
-                                <select id="logDriverFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
-                                    <option value="All">All Drivers</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar p-2">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                                <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
-                                    <th class="p-4 font-bold">Date</th>
-                                    <th class="p-4 font-bold">Type & Driver</th>
-                                    <th class="p-4 font-bold">Expense Details</th>
-                                    <th class="p-4 font-bold text-right">Cost</th>
-                                </tr>
-                            </thead>
-                            <tbody id="logsList" class="text-sm divide-y divide-gray-50">
-                                <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading reports...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar p-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                                <th class="p-4 font-bold">Plate Number</th>
+                                <th class="p-4 font-bold">Make & Model</th>
+                                <th class="p-4 font-bold text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehicleList" class="text-sm divide-y divide-gray-50">
+                            <tr><td colspan="3" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading fleet...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-bold text-xl text-blue-900">Driver Profiles & Scheduling</h2>
+        <div id="tab-team" class="tab-content hidden animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="font-bold text-xl text-blue-900">Driver Profiles & Scheduling</h2>
+                </div>
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar p-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                                <th class="p-4 font-bold">Driver Username</th>
+                                <th class="p-4 font-bold">Departments</th>
+                                <th class="p-4 font-bold">Work Schedule</th>
+                                <th class="p-4 font-bold text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminDriverList" class="text-sm divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading drivers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
-                <table class="w-full text-left border-collapse">
-                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                        <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
-                            <th class="p-4 font-bold">Driver Username</th>
-                            <th class="p-4 font-bold">Departments</th>
-                            <th class="p-4 font-bold">Work Schedule</th>
-                            <th class="p-4 font-bold text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminDriverList" class="text-sm divide-y divide-gray-50">
-                        <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading drivers...</td></tr>
-                    </tbody>
-                </table>
+        </div>
+
+        <div id="tab-reports" class="tab-content hidden animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-xl text-blue-900">Reports & Analytics</h2>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Filtered Total</p>
+                            <p id="filteredTotal" class="font-black text-blue-800 text-xl leading-none">₱0.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Timeframe</label>
+                            <div class="relative">
+                                <i class="fa-regular fa-calendar absolute left-2.5 top-1/2 -translate-y-1/2 text-blue-500 text-xs"></i>
+                                <input type="text" id="dashDateRangePicker" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg py-2 pl-8 pr-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all" placeholder="All Time">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Department</label>
+                            <select id="logDeptFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                <option value="All">All Departments</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Driver</label>
+                            <select id="logDriverFilter" onchange="renderLogsList()" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2 outline-none focus:ring-1 focus:ring-blue-500 shadow-sm cursor-pointer transition-all">
+                                <option value="All">All Drivers</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar p-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                                <th class="p-4 font-bold">Date</th>
+                                <th class="p-4 font-bold">Type & Driver</th>
+                                <th class="p-4 font-bold">Expense Details</th>
+                                <th class="p-4 font-bold text-right">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsList" class="text-sm divide-y divide-gray-50">
+                            <tr><td colspan="4" class="p-8 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i><br>Loading reports...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -597,6 +613,28 @@
             new google.maps.places.Autocomplete(document.getElementById('dOrigin'), autocompleteOptions);
             new google.maps.places.Autocomplete(document.getElementById('tDestinationCustom'), autocompleteOptions);
         }
+
+        // ==========================================
+        // --- TAB NAVIGATION LOGIC ---
+        // ==========================================
+        window.switchTab = function(tabId) {
+            // 1. Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // 2. Remove active styling from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-blue-800', 'text-blue-800', 'font-bold');
+                btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            
+            // 3. Show the selected tab content
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            // 4. Add active styling to the clicked button
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            activeBtn.classList.add('border-blue-800', 'text-blue-800', 'font-bold');
+        };
 
         // --- CORE LOAD LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
