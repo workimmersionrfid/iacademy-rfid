@@ -856,17 +856,6 @@
             }
         });
 
-        // The Signature and Image compression code stays exactly the same...
-        const fileNameDisplay = document.getElementById('file-name');
-        let uploadedImageData = "None";
-        document.getElementById('file-upload').addEventListener('change', async (e) => {    
-            if (e.target.files.length > 0) {        
-                fileNameDisplay.textContent = "Processing Photo...";        
-                uploadedImageData = await compressImage(e.target.files[0]);
-                fileNameDisplay.textContent = `Attached: ${e.target.files[0].name}`;        
-            }
-        });
-
         const canvas = document.getElementById('signature-pad');
         const ctx = canvas.getContext('2d');
         let isDrawing = false, signatureEmpty = true;
