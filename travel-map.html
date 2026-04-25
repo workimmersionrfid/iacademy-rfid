@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fleet Map - iACADEMY</title>
+    <title>Live Itinerary & Map - iACADEMY RFID</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -26,306 +26,359 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .pac-container { z-index: 99999 !important; border-radius: 0.75rem; font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-brand-bg text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-brand-bg text-slate-800 font-sans antialiased min-h-screen flex flex-col h-screen overflow-hidden">
     
-    <div id="shared-nav"></div>
+    <div id="shared-nav" class="shrink-0"></div>
     
-    <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
+    <main class="flex-1 max-w-[1500px] w-full mx-auto p-4 md:p-6 flex flex-col min-h-0">
         
-        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-6 md:p-10 relative overflow-hidden flex items-center justify-between">
-            <div class="relative z-10">
-                <p id="role-subtitle" class="text-blue-100 text-xs font-bold mb-1 tracking-widest uppercase">System Loading...</p>
-                <h1 id="role-title" class="text-2xl md:text-4xl font-bold text-white tracking-tight">Fleet Intelligence</h1>
+        <div class="bg-gradient-to-r from-blue-800 via-blue-600 to-blue-900 rounded-2xl shadow-md p-6 relative overflow-hidden flex items-center justify-between shrink-0 mb-6">
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between w-full gap-4">
+                <div>
+                    <p class="text-blue-200 text-xs font-bold mb-1 tracking-widest uppercase">GPS & Routing</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Live Itinerary & Map</h1>
+                </div>
+                
+                <div id="adminTrackerControls" class="hidden bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20 w-full md:w-auto">
+                    <label class="block text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">Track Driver Fleet</label>
+                    <select id="driverSelect" onchange="loadDriverItinerary()" class="w-full md:w-64 bg-white border-none text-blue-900 font-bold text-sm rounded-lg p-2 outline-none shadow-sm cursor-pointer">
+                        <option value="">Select a driver...</option>
+                    </select>
+                </div>
             </div>
-            <div class="hidden md:block relative z-10 text-white/20">
-                <i id="header-icon" class="fa-solid fa-satellite text-7xl md:text-9xl"></i>
+            <div class="hidden md:block absolute right-10 opacity-20 pointer-events-none">
+                <i class="fa-solid fa-map-location-dot text-8xl"></i>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+        <div class="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
             
-            <div class="lg:col-span-4 flex flex-col h-full order-2 lg:order-1 space-y-6">
+            <div class="w-full lg:w-1/3 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative shrink-0">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
+                    <h2 class="font-bold text-lg text-blue-900">Today's Route</h2>
+                    <span id="dateDisplay" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded uppercase tracking-widest">Today</span>
+                </div>
                 
-                <div id="admin-fleet-panel" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 flex flex-col h-[600px]">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
-                        <h2 class="font-bold text-blue-900">Live Driver Status</h2>
-                        <span id="active-count" class="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-1 rounded">0 ACTIVE</span>
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-5">
+                    
+                    <div id="driverStatusHeader" class="mb-5 p-4 bg-blue-50 rounded-xl border border-blue-100 hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shadow-md">
+                                <i class="fa-solid fa-user-astronaut"></i>
+                            </div>
+                            <div>
+                                <h3 id="displayDriverName" class="font-black text-blue-900 uppercase tracking-wide">Driver</h3>
+                                <p id="displayVehicle" class="text-xs font-bold text-blue-600 tracking-wider">Vehicle</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-blue-200/50 flex items-center gap-2">
+                            <span class="relative flex h-3 w-3">
+                                <span id="pulseIndicator" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            </span>
+                            <p id="displayLastUpdate" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Awaiting GPS Lock...</p>
+                        </div>
                     </div>
-                    <div id="fleet-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                        <p class="text-center text-gray-400 text-sm py-10">Loading fleet coordinates...</p>
-                    </div>
-                </div>
 
-                <div id="driver-itinerary-panel" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 flex flex-col h-[600px]">
-                    <div class="p-6 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
-                        <h2 class="font-bold text-blue-900">My Assigned Itinerary</h2>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase mt-1">Select a task to generate route</p>
-                    </div>
-                    <div id="itinerary-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                        <p class="text-center text-gray-400 text-sm py-10">Fetching your tasks...</p>
-                    </div>
-                </div>
-
-                <div id="route-summary-panel" class="hidden bg-blue-900 rounded-2xl shadow-lg p-6 text-white animate-[fadeIn_0.3s]">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-blue-200">Trip Estimate</h3>
-                        <button onclick="closeSummary()" class="text-blue-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex justify-between border-b border-blue-800 pb-2">
-                            <span class="text-xs text-blue-300">Distance / Time</span>
-                            <span id="res-dist-time" class="font-bold text-sm">--</span>
-                        </div>
-                        <div class="flex justify-between border-b border-blue-800 pb-2">
-                            <span class="text-xs text-blue-300">Est. Fuel Consumption</span>
-                            <span id="res-fuel" class="font-bold text-sm text-emerald-400">--</span>
-                        </div>
-                        <div class="pt-2 text-center">
-                            <p class="text-[10px] text-blue-400 uppercase font-bold mb-1">Total Trip Budget</p>
-                            <h3 id="res-total-cost" class="text-3xl font-black">₱0.00</h3>
-                        </div>
+                    <div class="relative border-l-2 border-gray-100 ml-4 space-y-8 pb-4" id="itineraryTimeline">
+                        <div class="text-center p-8 text-blue-400 text-sm font-medium -ml-4"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Loading Itinerary...</div>
                     </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative min-h-[500px] lg:h-[600px] order-1 lg:order-2">
+            <div class="w-full lg:w-2/3 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative min-h-[400px]">
                 <div id="map" class="absolute inset-0 w-full h-full z-10"></div>
                 
-                <div id="gps-status" class="hidden absolute top-4 left-4 z-20 bg-white/90 backdrop-blur px-3 py-2 rounded-full shadow-md border border-gray-100 flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">GPS Active</span>
+                <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-100 z-20 w-64">
+                    <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">Tracking Status</h4>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-solid fa-truck"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-800" id="mapStatusText">Connecting...</p>
+                            <p class="text-[10px] text-gray-500" id="mapActionText">Fetching live data</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             
         </div>
     </main>
 
-    <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script>
-        let map, directionsService, directionsRenderer, trafficLayer;
-        let markers = [];
-        const role = localStorage.getItem('userRole');
-        const username = localStorage.getItem('username');
         const API_BASE = 'https://iacademy-rfid.onrender.com/api';
+        
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let driverMarker = null;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderNavigation('travel-map');
-            setupRoleUI();
-            loadGoogleMaps();
-        });
+        const userRole = localStorage.getItem('userRole');
+        const currentUser = localStorage.getItem('username');
+        const todayStr = new Date().toISOString().split('T')[0];
 
-        function setupRoleUI() {
-            const sub = document.getElementById('role-subtitle');
-            const title = document.getElementById('role-title');
-            const icon = document.getElementById('header-icon');
-
-            if (role === 'admin') {
-                sub.innerText = "Command Center";
-                title.innerText = "Live Fleet Tracker";
-                icon.className = "fa-solid fa-tower-broadcast text-9xl";
-                document.getElementById('admin-fleet-panel').classList.remove('hidden');
-                startAdminPolling();
-            } else {
-                sub.innerText = "Navigation Hub";
-                title.innerText = "My Route Navigator";
-                icon.className = "fa-solid fa-location-arrow text-9xl";
-                document.getElementById('driver-itinerary-panel').classList.remove('hidden');
-                document.getElementById('gps-status').classList.remove('hidden');
-                loadDriverItinerary();
-            }
-        }
-
-        // --- MAP INITIALIZATION ---
+        // 1. Instant Load Map Using Your Direct API Key
         function loadGoogleMaps() {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&libraries=places&callback=initMapLogic`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&callback=initTrackingMap`;
             script.async = true;
+            script.defer = true;
             document.head.appendChild(script);
         }
 
-        window.initMapLogic = function() {
+        window.initTrackingMap = function() {
             map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 14.5632, lng: 121.0142 }, 
-                zoom: 13,
-                styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+                center: { lat: 14.5632, lng: 121.0142 }, // iACADEMY Default
+                zoom: 14,
+                disableDefaultUI: false,
+                mapTypeControl: false,
+                streetViewControl: false
             });
             
-            trafficLayer = new google.maps.TrafficLayer();
-            trafficLayer.setMap(map);
-
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 map: map,
-                polylineOptions: { strokeColor: '#3674FF', strokeWeight: 6 }
+                suppressMarkers: true, // We will draw custom markers
+                polylineOptions: { strokeColor: '#2563eb', strokeWeight: 6, strokeOpacity: 0.8 }
             });
+
+            initializeApp();
         }
 
-        // --- DRIVER LOGIC: Itinerary & Routing ---
-        async function loadDriverItinerary() {
-            const list = document.getElementById('itinerary-list');
-            try {
-                const res = await fetch(`${API_BASE}/tasks`);
-                const allTasks = await res.json();
-                const myTasks = allTasks.filter(t => t.driver === username && t.status === 'Pending');
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof renderNavigation === 'function') renderNavigation('travel-map');
+            document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            loadGoogleMaps();
+        });
 
-                if (myTasks.length === 0) {
-                    list.innerHTML = `<div class="text-center py-10 text-gray-400 text-sm">No pending tasks for today.</div>`;
-                    return;
-                }
-
-                list.innerHTML = myTasks.map(t => `
-                    <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-xl hover:border-blue-300 transition-all cursor-pointer group" onclick="autoRouteTo('${t.destination}', '${t.vehicle}')">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[9px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded tracking-widest uppercase">${t.vehicle}</span>
-                            <i class="fa-solid fa-chevron-right text-blue-200 group-hover:text-blue-500 transition-colors"></i>
-                        </div>
-                        <h3 class="font-bold text-blue-900 text-sm">${t.destination}</h3>
-                        <p class="text-[11px] text-gray-500 mt-1 line-clamp-1">${t.description}</p>
-                        <button class="mt-4 w-full bg-blue-600 text-white text-[10px] font-bold py-2 rounded-lg shadow-sm uppercase tracking-widest">Start Navigation</button>
-                    </div>
-                `).join('');
-            } catch (e) { console.error(e); }
-        }
-
-        async function autoRouteTo(destination, plate) {
-            if (!navigator.geolocation) return alert("Please enable GPS to use navigation.");
-            
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const origin = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-                
-                // Get Vehicle Efficiency for Calculator
-                const fleet = await getVehicles();
-                const v = fleet.find(car => car.plateNumber === plate) || { efficiency: 14 };
-
-                // --- NEW: Automatically push location to database so Admin can see them ---
+        async function initializeApp() {
+            if (userRole === 'admin') {
+                document.getElementById('adminTrackerControls').classList.remove('hidden');
                 try {
-                    await fetch(`${API_BASE}/action-logs`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            driver_name: username,
-                            plate_number: plate || "N/A",
-                            action: "Started Navigation",
-                            task: "Map Routing",
-                            location: destination,
-                            delivery_status: "En Route",
-                            comments: "None",
-                            document_attached: "None",
-                            latitude: pos.coords.latitude.toString(),
-                            longitude: pos.coords.longitude.toString()
-                        })
+                    const res = await fetch(`${API_BASE}/drivers`);
+                    const drivers = await res.json();
+                    const select = document.getElementById('driverSelect');
+                    drivers.forEach(d => {
+                        select.innerHTML += `<option value="${d.username}">${d.username}</option>`;
                     });
-                } catch (e) {
-                    console.warn("Could not ping location to admin tracker.");
-                }
-                // -------------------------------------------------------------------------
+                } catch (err) { console.error("Could not load drivers for admin filter."); }
+                
+                document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-gray-400 text-sm font-medium -ml-4">Select a driver from the top menu to view their live itinerary.</div>`;
+            } else {
+                // If it's a driver, immediately load their own itinerary
+                loadDriverItinerary(currentUser);
+            }
+        }
 
-                directionsService.route({
-                    origin: origin,
-                    destination: destination,
-                    travelMode: 'DRIVING'
-                }, (response, status) => {
+        async function loadDriverItinerary(forceUsername = null) {
+            const targetDriver = forceUsername || document.getElementById('driverSelect').value;
+            if (!targetDriver) return;
+
+            document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-blue-400 text-sm font-medium -ml-4"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Fetching Route Data...</div>`;
+
+            try {
+                // Fetch Tasks and Logs Concurrently
+                const [tasksRes, logsRes] = await Promise.all([
+                    fetch(`${API_BASE}/tasks`),
+                    fetch(`${API_BASE}/action-logs`)
+                ]);
+                
+                const allTasks = await tasksRes.json();
+                const allLogs = await logsRes.json();
+
+                // Filter for Target Driver and TODAY only
+                const todaysTasks = allTasks.filter(t => t.driver === targetDriver && t.date === todayStr);
+                
+                // Get the most recent log with valid GPS coordinates
+                const driverLogs = allLogs.filter(l => l.driver_name === targetDriver && l.latitude && l.latitude !== "N/A");
+                const latestLog = driverLogs.length > 0 ? driverLogs[0] : null;
+
+                renderItineraryUI(targetDriver, todaysTasks, latestLog);
+                updateLiveMap(todaysTasks, latestLog);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-red-500 text-sm font-bold -ml-4">Error loading itinerary data.</div>`;
+            }
+        }
+
+        function renderItineraryUI(driverName, tasks, latestLog) {
+            const header = document.getElementById('driverStatusHeader');
+            header.classList.remove('hidden');
+            document.getElementById('displayDriverName').innerText = driverName;
+            
+            if (tasks.length > 0) {
+                document.getElementById('displayVehicle').innerText = `Vehicle: ${tasks[0].vehicle}`;
+            } else {
+                document.getElementById('displayVehicle').innerText = `No vehicle assigned today`;
+            }
+
+            const lastUpdateText = document.getElementById('displayLastUpdate');
+            const pulse = document.getElementById('pulseIndicator');
+            
+            if (latestLog) {
+                const logTime = new Date(latestLog.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                lastUpdateText.innerText = `Last GPS Ping: ${logTime} (${latestLog.action})`;
+                lastUpdateText.classList.replace('text-gray-500', 'text-emerald-700');
+                pulse.classList.replace('bg-gray-400', 'bg-emerald-400');
+                pulse.nextElementSibling.classList.replace('bg-gray-500', 'bg-emerald-500');
+                
+                document.getElementById('mapStatusText').innerText = "Live Tracking Active";
+                document.getElementById('mapActionText').innerText = `${latestLog.action} at ${logTime}`;
+            } else {
+                lastUpdateText.innerText = `Awaiting GPS Data...`;
+                lastUpdateText.classList.replace('text-emerald-700', 'text-gray-500');
+                pulse.classList.replace('bg-emerald-400', 'bg-gray-400');
+                pulse.nextElementSibling.classList.replace('bg-emerald-500', 'bg-gray-500');
+                
+                document.getElementById('mapStatusText').innerText = "No GPS Signal";
+                document.getElementById('mapActionText').innerText = "Waiting for driver update";
+            }
+
+            const timeline = document.getElementById('itineraryTimeline');
+            
+            if (tasks.length === 0) {
+                timeline.innerHTML = `<div class="text-center p-8 text-gray-400 text-sm font-medium -ml-4">No tasks dispatched for today.</div>`;
+                return;
+            }
+
+            let html = '';
+            
+            // Add Start Point (Origin)
+            html += `
+                <div class="relative pl-6">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 bg-gray-200 border-2 border-white rounded-full z-10"></div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 opacity-60">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Origin / Start</span>
+                        <h4 class="font-bold text-gray-700 mt-0.5">iACADEMY Nexus</h4>
+                    </div>
+                </div>
+            `;
+
+            tasks.forEach((t, index) => {
+                const isCompleted = (t.status === 'Completed' || t.status === 'Rebook');
+                const isNext = (!isCompleted && (index === 0 || (tasks[index-1].status === 'Completed' || tasks[index-1].status === 'Rebook')));
+                
+                let dotColor = 'bg-gray-300';
+                let boxClass = 'bg-white opacity-50';
+                let titleColor = 'text-gray-500';
+                let icon = '';
+
+                if (isCompleted) {
+                    dotColor = t.status === 'Rebook' ? 'bg-orange-400' : 'bg-emerald-500';
+                    boxClass = 'bg-gray-50';
+                    titleColor = 'text-gray-400 line-through';
+                    icon = t.status === 'Rebook' ? '<i class="fa-solid fa-rotate-right text-orange-500 float-right"></i>' : '<i class="fa-solid fa-check text-emerald-500 float-right"></i>';
+                } else if (isNext) {
+                    dotColor = 'bg-blue-600 ring-4 ring-blue-100';
+                    boxClass = 'bg-blue-50 border-blue-200 shadow-sm';
+                    titleColor = 'text-blue-900';
+                    icon = '<i class="fa-solid fa-location-crosshairs text-blue-500 float-right animate-pulse"></i>';
+                } else {
+                    boxClass = 'bg-white border-gray-100';
+                    titleColor = 'text-gray-800';
+                }
+
+                html += `
+                    <div class="relative pl-6 mt-6">
+                        <div class="absolute -left-[9px] top-4 w-4 h-4 ${dotColor} border-2 border-white rounded-full z-10 transition-all"></div>
+                        <div class="p-4 rounded-xl border transition-all ${boxClass}">
+                            ${icon}
+                            <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">${t.taskType || 'Stop ' + (index + 1)}</span>
+                            <h4 class="font-bold text-base mt-0.5 ${titleColor}">${t.destination}</h4>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-1" title="${t.description}">${t.description}</p>
+                            ${isNext ? `<div class="mt-3 inline-block bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Next Destination</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            timeline.innerHTML = html;
+        }
+
+        function updateLiveMap(tasks, latestLog) {
+            if (!map || !directionsService) return;
+
+            // Clear existing routes/markers
+            directionsRenderer.setDirections({routes: []});
+
+            const pendingTasks = tasks.filter(t => t.status !== 'Completed' && t.status !== 'Rebook');
+            let currentLocation = { lat: 14.5632, lng: 121.0142 }; // Default iACADEMY Nexus
+
+            // 1. Set Live Driver Marker
+            if (latestLog && latestLog.latitude) {
+                currentLocation = { lat: parseFloat(latestLog.latitude), lng: parseFloat(latestLog.longitude) };
+                
+                // SVG Car Icon
+                const carIcon = {
+                    path: 'M17.402,0H5.643C2.526,0,0,3.467,0,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759c3.116,0,5.644-2.527,5.644-5.644 V6.584C23.044,3.467,20.518,0,17.402,0z M22.057,14.188v11.665l-2.729,0.351v-4.806L22.057,14.188z M20.625,10.773 c-1.016,3.9-2.219,8.51-2.219,8.51H4.638l-2.222-8.51C2.417,10.773,11.3,7.755,20.625,10.773z M3.748,21.713v4.492l-2.73-0.349 V14.502L3.748,21.713z M1.018,37.938V27.579l2.73,0.343v8.196L1.018,37.938z M2.575,40.882l2.218-3.336h13.771l2.219,3.336H2.575z M19.328,35.805v-7.872l2.729-0.355v10.048L19.328,35.805z',
+                    fillColor: '#2563eb', // Blue-600
+                    fillOpacity: 1,
+                    strokeWeight: 0,
+                    scale: 0.6,
+                    anchor: new google.maps.Point(11.5, 23.5)
+                };
+
+                if (!driverMarker) {
+                    driverMarker = new google.maps.Marker({
+                        position: currentLocation,
+                        map: map,
+                        icon: carIcon,
+                        title: 'Driver Live Location'
+                    });
+                } else {
+                    driverMarker.setPosition(currentLocation);
+                }
+                
+                map.setCenter(currentLocation);
+            }
+
+            // 2. Draw Route to Remaining Stops
+            if (pendingTasks.length > 0) {
+                
+                const finalDestination = pendingTasks[pendingTasks.length - 1].destination;
+                const waypoints = pendingTasks.slice(0, -1).map(t => ({
+                    location: t.destination,
+                    stopover: true
+                }));
+
+                const request = {
+                    origin: currentLocation,
+                    destination: finalDestination,
+                    waypoints: waypoints,
+                    optimizeWaypoints: false, // Keep admin's intended order!
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                directionsService.route(request, (response, status) => {
                     if (status === 'OK') {
                         directionsRenderer.setDirections(response);
-                        const route = response.routes[0].legs[0];
                         
-                        // Calculate Budget info
-                        const distKm = route.distance.value / 1000;
-                        const liters = distKm / v.efficiency;
-                        const fuelCost = liters * 75; // Baseline PH price
-
-                        document.getElementById('res-dist-time').innerText = `${route.distance.text} / ${route.duration.text}`;
-                        document.getElementById('res-fuel').innerText = `${liters.toFixed(2)}L Needed`;
-                        document.getElementById('res-total-cost').innerText = `₱${fuelCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        document.getElementById('route-summary-panel').classList.remove('hidden');
+                        // Optionally draw custom markers for destinations
+                        const legs = response.routes[0].legs;
+                        legs.forEach((leg, idx) => {
+                            new google.maps.Marker({
+                                position: leg.end_location,
+                                map: map,
+                                label: { text: `${idx + 1}`, color: "white", fontWeight: "bold" },
+                                title: leg.end_address
+                            });
+                        });
                         
-                        if(window.innerWidth < 1024) document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        console.error('Directions request failed due to ' + status);
                     }
                 });
-            });
+            } else if (tasks.length > 0 && pendingTasks.length === 0) {
+                // Route is completely finished!
+                document.getElementById('mapStatusText').innerText = "Route Completed";
+                document.getElementById('mapActionText').innerText = "All stops finished";
+                if(driverMarker) map.setZoom(16);
+            }
         }
-        // --- ADMIN LOGIC: Live Fleet Tracking ---
-        async function startAdminPolling() {
-            updateFleetMap();
-            setInterval(updateFleetMap, 15000); // Update every 15 seconds
-        }
-
-        async function updateFleetMap() {
-            try {
-                const res = await fetch(`${API_BASE}/action-logs`);
-                const logs = await res.json();
-                
-                // Get only the latest entry for each driver
-                const latestLogs = {};
-                logs.forEach(log => {
-                    if (!latestLogs[log.driver_name]) latestLogs[log.driver_name] = log;
-                });
-
-                const activeDrivers = Object.values(latestLogs);
-                document.getElementById('active-count').innerText = `${activeDrivers.length} ACTIVE`;
-
-                // Update Sidebar List
-                const list = document.getElementById('fleet-list');
-                list.innerHTML = activeDrivers.map(log => {
-                    const isOld = (new Date() - new Date(log.timestamp)) > 3600000; // Over 1 hour old
-                    const statusColor = isOld ? 'text-gray-400' : 'text-emerald-500';
-                    return `
-                    <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="focusOnDriver('${log.latitude}', '${log.longitude}')">
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-sm text-gray-800">${log.driver_name}</h4>
-                            <span class="text-[9px] font-bold text-gray-400">${new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                        </div>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">${log.plate_number}</span>
-                            <span class="text-[10px] font-medium text-gray-400">•</span>
-                            <span class="text-[10px] ${statusColor} font-bold uppercase">${log.action}</span>
-                        </div>
-                        <p class="text-[11px] text-gray-500 mt-2 italic truncate"><i class="fa-solid fa-location-dot mr-1"></i> ${log.location}</p>
-                    </div>
-                `}).join('');
-
-                // Update Map Markers
-                markers.forEach(m => m.setMap(null));
-                markers = [];
-
-                activeDrivers.forEach(log => {
-                    if (log.latitude === "N/A") return;
-                    const marker = new google.maps.Marker({
-                        position: { lat: parseFloat(log.latitude), lng: parseFloat(log.longitude) },
-                        map: map,
-                        title: log.driver_name,
-                        icon: {
-                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                            scale: 5,
-                            fillColor: "#3674FF",
-                            fillOpacity: 1,
-                            strokeWeight: 2,
-                            strokeColor: "#FFFFFF"
-                        }
-                    });
-
-                    const info = new google.maps.InfoWindow({
-                        content: `<div class="p-2"><b class="text-blue-600">${log.driver_name}</b><br><span class="text-xs text-gray-500">${log.action}</span></div>`
-                    });
-                    marker.addListener("click", () => info.open(map, marker));
-                    markers.push(marker);
-                });
-
-            } catch (e) { console.error("Fleet fetch error:", e); }
-        }
-
-        window.focusOnDriver = function(lat, lng) {
-            if (lat === "N/A") return alert("No GPS coordinates available for this record.");
-            map.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
-            map.setZoom(16);
-        };
-
-        window.closeSummary = () => document.getElementById('route-summary-panel').classList.add('hidden');
-
     </script>
 </body>
 </html>
