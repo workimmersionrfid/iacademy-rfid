@@ -34,20 +34,28 @@
     
     <main class="flex-1 max-w-[1500px] w-full mx-auto p-4 md:p-6 flex flex-col min-h-0">
         
-        <div class="bg-gradient-to-r from-blue-800 via-blue-600 to-blue-900 rounded-2xl shadow-md p-6 relative overflow-hidden flex items-center justify-between shrink-0 mb-6">
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between w-full gap-4">
-                <div>
-                    <p class="text-blue-200 text-xs font-bold mb-1 tracking-widest uppercase">GPS & Routing</p>
-                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Live Itinerary & Map</h1>
-                </div>
+        <div class="bg-gradient-to-r from-blue-800 via-blue-600 to-blue-900 rounded-2xl shadow-md p-6 relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between shrink-0 mb-6 gap-4">
+            <div class="relative z-10">
+                <p class="text-blue-200 text-xs font-bold mb-1 tracking-widest uppercase">GPS & Routing</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Itinerary & Map</h1>
+            </div>
+            
+            <div class="relative z-10 flex flex-col sm:flex-row gap-3 w-full lg:w-auto bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20">
                 
-                <div id="adminTrackerControls" class="hidden bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20 w-full md:w-auto">
-                    <label class="block text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">Track Driver Fleet</label>
-                    <select id="driverSelect" onchange="loadDriverItinerary()" class="w-full md:w-64 bg-white border-none text-blue-900 font-bold text-sm rounded-lg p-2 outline-none shadow-sm cursor-pointer">
-                        <option value="">Select a driver...</option>
+                <div id="adminDriverSelectWrapper" class="hidden w-full sm:w-auto">
+                    <label class="block text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">Driver</label>
+                    <select id="driverSelect" onchange="loadDriverItinerary()" class="w-full sm:w-48 bg-white border-none text-blue-900 font-bold text-sm rounded-lg p-2 outline-none shadow-sm cursor-pointer">
+                        <option value="">Select driver...</option>
                     </select>
                 </div>
+
+                <div class="w-full sm:w-auto">
+                    <label class="block text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">Date</label>
+                    <input type="date" id="itineraryDate" onchange="loadDriverItinerary()" class="w-full sm:w-40 bg-white border-none text-blue-900 font-bold text-sm rounded-lg p-2 outline-none shadow-sm cursor-pointer">
+                </div>
+
             </div>
+
             <div class="hidden md:block absolute right-10 opacity-20 pointer-events-none">
                 <i class="fa-solid fa-map-location-dot text-8xl"></i>
             </div>
@@ -58,8 +66,8 @@
             <div class="w-full lg:w-1/3 bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative shrink-0">
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                 <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                    <h2 class="font-bold text-lg text-blue-900">Today's Route</h2>
-                    <span id="dateDisplay" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded uppercase tracking-widest">Today</span>
+                    <h2 class="font-bold text-lg text-blue-900">Task Route</h2>
+                    <span id="dateDisplay" class="text-[10px] font-bold text-blue-600 bg-blue-100 border border-blue-200 px-2 py-1 rounded uppercase tracking-widest">Date</span>
                 </div>
                 
                 <div class="flex-1 overflow-y-auto custom-scrollbar p-5">
@@ -75,7 +83,7 @@
                             </div>
                         </div>
                         <div class="mt-3 pt-3 border-t border-blue-200/50 flex items-center gap-2">
-                            <span class="relative flex h-3 w-3">
+                            <span id="pulseWrapper" class="relative flex h-3 w-3">
                                 <span id="pulseIndicator" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                             </span>
@@ -98,7 +106,7 @@
                         <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-solid fa-truck"></i></div>
                         <div>
                             <p class="text-xs font-bold text-gray-800" id="mapStatusText">Connecting...</p>
-                            <p class="text-[10px] text-gray-500" id="mapActionText">Fetching live data</p>
+                            <p class="text-[10px] text-gray-500" id="mapActionText">Fetching route data</p>
                         </div>
                     </div>
                 </div>
@@ -118,9 +126,8 @@
 
         const userRole = localStorage.getItem('userRole');
         const currentUser = localStorage.getItem('username');
-        const todayStr = new Date().toISOString().split('T')[0];
 
-        // 1. Instant Load Map Using Your Direct API Key
+        // 1. Instant Load Map
         function loadGoogleMaps() {
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&callback=initTrackingMap`;
@@ -131,7 +138,7 @@
 
         window.initTrackingMap = function() {
             map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 14.5632, lng: 121.0142 }, // iACADEMY Default
+                center: { lat: 14.5632, lng: 121.0142 }, 
                 zoom: 14,
                 disableDefaultUI: false,
                 mapTypeControl: false,
@@ -141,7 +148,7 @@
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({
                 map: map,
-                suppressMarkers: true, // We will draw custom markers
+                suppressMarkers: true, 
                 polylineOptions: { strokeColor: '#2563eb', strokeWeight: 6, strokeOpacity: 0.8 }
             });
 
@@ -150,13 +157,16 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof renderNavigation === 'function') renderNavigation('travel-map');
-            document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
             loadGoogleMaps();
         });
 
         async function initializeApp() {
+            // Set default date to today
+            const dateInput = document.getElementById('itineraryDate');
+            dateInput.valueAsDate = new Date();
+
             if (userRole === 'admin') {
-                document.getElementById('adminTrackerControls').classList.remove('hidden');
+                document.getElementById('adminDriverSelectWrapper').classList.remove('hidden');
                 try {
                     const res = await fetch(`${API_BASE}/drivers`);
                     const drivers = await res.json();
@@ -164,23 +174,27 @@
                     drivers.forEach(d => {
                         select.innerHTML += `<option value="${d.username}">${d.username}</option>`;
                     });
-                } catch (err) { console.error("Could not load drivers for admin filter."); }
+                } catch (err) { console.error("Could not load drivers."); }
                 
-                document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-gray-400 text-sm font-medium -ml-4">Select a driver from the top menu to view their live itinerary.</div>`;
+                document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-gray-400 text-sm font-medium -ml-4">Select a driver from the top menu to view their itinerary.</div>`;
             } else {
-                // If it's a driver, immediately load their own itinerary
                 loadDriverItinerary(currentUser);
             }
         }
 
         async function loadDriverItinerary(forceUsername = null) {
             const targetDriver = forceUsername || document.getElementById('driverSelect').value;
-            if (!targetDriver) return;
+            const targetDate = document.getElementById('itineraryDate').value;
+            
+            if (!targetDriver || !targetDate) return;
+
+            // Format date for UI
+            const dateObj = new Date(targetDate);
+            document.getElementById('dateDisplay').innerText = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
             document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-blue-400 text-sm font-medium -ml-4"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Fetching Route Data...</div>`;
 
             try {
-                // Fetch Tasks and Logs Concurrently
                 const [tasksRes, logsRes] = await Promise.all([
                     fetch(`${API_BASE}/tasks`),
                     fetch(`${API_BASE}/action-logs`)
@@ -189,15 +203,20 @@
                 const allTasks = await tasksRes.json();
                 const allLogs = await logsRes.json();
 
-                // Filter for Target Driver and TODAY only
-                const todaysTasks = allTasks.filter(t => t.driver === targetDriver && t.date === todayStr);
+                // Filter Tasks strictly by the Selected Date
+                const selectedTasks = allTasks.filter(t => t.driver === targetDriver && t.date === targetDate);
                 
-                // Get the most recent log with valid GPS coordinates
-                const driverLogs = allLogs.filter(l => l.driver_name === targetDriver && l.latitude && l.latitude !== "N/A");
-                const latestLog = driverLogs.length > 0 ? driverLogs[0] : null;
+                // Find logs for the driver ON the selected date to plot their exact location for that day
+                const dateLogs = allLogs.filter(l => 
+                    l.driver_name === targetDriver && 
+                    l.latitude && l.latitude !== "N/A" &&
+                    new Date(l.timestamp).toISOString().startsWith(targetDate)
+                );
+                
+                const latestLog = dateLogs.length > 0 ? dateLogs[0] : null;
 
-                renderItineraryUI(targetDriver, todaysTasks, latestLog);
-                updateLiveMap(todaysTasks, latestLog);
+                renderItineraryUI(targetDriver, selectedTasks, latestLog, targetDate);
+                updateLiveMap(selectedTasks, latestLog, targetDate);
 
             } catch (err) {
                 console.error(err);
@@ -205,7 +224,7 @@
             }
         }
 
-        function renderItineraryUI(driverName, tasks, latestLog) {
+        function renderItineraryUI(driverName, tasks, latestLog, targetDate) {
             const header = document.getElementById('driverStatusHeader');
             header.classList.remove('hidden');
             document.getElementById('displayDriverName').innerText = driverName;
@@ -213,41 +232,49 @@
             if (tasks.length > 0) {
                 document.getElementById('displayVehicle').innerText = `Vehicle: ${tasks[0].vehicle}`;
             } else {
-                document.getElementById('displayVehicle').innerText = `No vehicle assigned today`;
+                document.getElementById('displayVehicle').innerText = `No vehicle assigned for this date`;
             }
 
             const lastUpdateText = document.getElementById('displayLastUpdate');
+            const pulseWrap = document.getElementById('pulseWrapper');
             const pulse = document.getElementById('pulseIndicator');
             
+            const isToday = (targetDate === new Date().toISOString().split('T')[0]);
+
             if (latestLog) {
                 const logTime = new Date(latestLog.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 lastUpdateText.innerText = `Last GPS Ping: ${logTime} (${latestLog.action})`;
                 lastUpdateText.classList.replace('text-gray-500', 'text-emerald-700');
+                pulseWrap.classList.remove('hidden');
                 pulse.classList.replace('bg-gray-400', 'bg-emerald-400');
                 pulse.nextElementSibling.classList.replace('bg-gray-500', 'bg-emerald-500');
                 
-                document.getElementById('mapStatusText').innerText = "Live Tracking Active";
+                document.getElementById('mapStatusText').innerText = isToday ? "Live Tracking Active" : "Historical GPS Data";
                 document.getElementById('mapActionText').innerText = `${latestLog.action} at ${logTime}`;
+                
+                // Stop the blinking pulse if we are looking at the past
+                if (!isToday) pulse.classList.remove('animate-ping');
+                else pulse.classList.add('animate-ping');
+
             } else {
-                lastUpdateText.innerText = `Awaiting GPS Data...`;
+                lastUpdateText.innerText = `No GPS Data for this date`;
                 lastUpdateText.classList.replace('text-emerald-700', 'text-gray-500');
-                pulse.classList.replace('bg-emerald-400', 'bg-gray-400');
-                pulse.nextElementSibling.classList.replace('bg-emerald-500', 'bg-gray-500');
+                pulseWrap.classList.add('hidden');
                 
                 document.getElementById('mapStatusText').innerText = "No GPS Signal";
-                document.getElementById('mapActionText').innerText = "Waiting for driver update";
+                document.getElementById('mapActionText').innerText = "Awaiting driver updates";
             }
 
             const timeline = document.getElementById('itineraryTimeline');
             
             if (tasks.length === 0) {
-                timeline.innerHTML = `<div class="text-center p-8 text-gray-400 text-sm font-medium -ml-4">No tasks dispatched for today.</div>`;
+                timeline.innerHTML = `<div class="text-center p-8 text-gray-400 text-sm font-medium -ml-4">No tasks found for this date.</div>`;
                 return;
             }
 
             let html = '';
             
-            // Add Start Point (Origin)
+            // Add Start Point
             html += `
                 <div class="relative pl-6">
                     <div class="absolute -left-[9px] top-1 w-4 h-4 bg-gray-200 border-2 border-white rounded-full z-10"></div>
@@ -272,7 +299,7 @@
                     boxClass = 'bg-gray-50';
                     titleColor = 'text-gray-400 line-through';
                     icon = t.status === 'Rebook' ? '<i class="fa-solid fa-rotate-right text-orange-500 float-right"></i>' : '<i class="fa-solid fa-check text-emerald-500 float-right"></i>';
-                } else if (isNext) {
+                } else if (isNext && isToday) {
                     dotColor = 'bg-blue-600 ring-4 ring-blue-100';
                     boxClass = 'bg-blue-50 border-blue-200 shadow-sm';
                     titleColor = 'text-blue-900';
@@ -290,7 +317,7 @@
                             <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">${t.taskType || 'Stop ' + (index + 1)}</span>
                             <h4 class="font-bold text-base mt-0.5 ${titleColor}">${t.destination}</h4>
                             <p class="text-xs text-gray-500 mt-1 line-clamp-1" title="${t.description}">${t.description}</p>
-                            ${isNext ? `<div class="mt-3 inline-block bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Next Destination</div>` : ''}
+                            ${(isNext && isToday) ? `<div class="mt-3 inline-block bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Next Destination</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -299,23 +326,20 @@
             timeline.innerHTML = html;
         }
 
-        function updateLiveMap(tasks, latestLog) {
+        function updateLiveMap(tasks, latestLog, targetDate) {
             if (!map || !directionsService) return;
 
-            // Clear existing routes/markers
             directionsRenderer.setDirections({routes: []});
 
             const pendingTasks = tasks.filter(t => t.status !== 'Completed' && t.status !== 'Rebook');
-            let currentLocation = { lat: 14.5632, lng: 121.0142 }; // Default iACADEMY Nexus
+            let currentLocation = { lat: 14.5632, lng: 121.0142 }; 
 
-            // 1. Set Live Driver Marker
             if (latestLog && latestLog.latitude) {
                 currentLocation = { lat: parseFloat(latestLog.latitude), lng: parseFloat(latestLog.longitude) };
                 
-                // SVG Car Icon
                 const carIcon = {
                     path: 'M17.402,0H5.643C2.526,0,0,3.467,0,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759c3.116,0,5.644-2.527,5.644-5.644 V6.584C23.044,3.467,20.518,0,17.402,0z M22.057,14.188v11.665l-2.729,0.351v-4.806L22.057,14.188z M20.625,10.773 c-1.016,3.9-2.219,8.51-2.219,8.51H4.638l-2.222-8.51C2.417,10.773,11.3,7.755,20.625,10.773z M3.748,21.713v4.492l-2.73-0.349 V14.502L3.748,21.713z M1.018,37.938V27.579l2.73,0.343v8.196L1.018,37.938z M2.575,40.882l2.218-3.336h13.771l2.219,3.336H2.575z M19.328,35.805v-7.872l2.729-0.355v10.048L19.328,35.805z',
-                    fillColor: '#2563eb', // Blue-600
+                    fillColor: (targetDate === new Date().toISOString().split('T')[0]) ? '#2563eb' : '#6b7280', // Blue if today, Gray if past
                     fillOpacity: 1,
                     strokeWeight: 0,
                     scale: 0.6,
@@ -323,41 +347,28 @@
                 };
 
                 if (!driverMarker) {
-                    driverMarker = new google.maps.Marker({
-                        position: currentLocation,
-                        map: map,
-                        icon: carIcon,
-                        title: 'Driver Live Location'
-                    });
+                    driverMarker = new google.maps.Marker({ position: currentLocation, map: map, icon: carIcon, title: 'Driver Location' });
                 } else {
+                    driverMarker.setIcon(carIcon);
                     driverMarker.setPosition(currentLocation);
                 }
                 
                 map.setCenter(currentLocation);
             }
 
-            // 2. Draw Route to Remaining Stops
             if (pendingTasks.length > 0) {
-                
                 const finalDestination = pendingTasks[pendingTasks.length - 1].destination;
-                const waypoints = pendingTasks.slice(0, -1).map(t => ({
-                    location: t.destination,
-                    stopover: true
-                }));
+                const waypoints = pendingTasks.slice(0, -1).map(t => ({ location: t.destination, stopover: true }));
 
-                const request = {
+                directionsService.route({
                     origin: currentLocation,
                     destination: finalDestination,
                     waypoints: waypoints,
-                    optimizeWaypoints: false, // Keep admin's intended order!
+                    optimizeWaypoints: false,
                     travelMode: google.maps.TravelMode.DRIVING
-                };
-
-                directionsService.route(request, (response, status) => {
+                }, (response, status) => {
                     if (status === 'OK') {
                         directionsRenderer.setDirections(response);
-                        
-                        // Optionally draw custom markers for destinations
                         const legs = response.routes[0].legs;
                         legs.forEach((leg, idx) => {
                             new google.maps.Marker({
@@ -367,13 +378,9 @@
                                 title: leg.end_address
                             });
                         });
-                        
-                    } else {
-                        console.error('Directions request failed due to ' + status);
                     }
                 });
             } else if (tasks.length > 0 && pendingTasks.length === 0) {
-                // Route is completely finished!
                 document.getElementById('mapStatusText').innerText = "Route Completed";
                 document.getElementById('mapActionText').innerText = "All stops finished";
                 if(driverMarker) map.setZoom(16);
