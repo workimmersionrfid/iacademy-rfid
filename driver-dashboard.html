@@ -173,43 +173,60 @@
 
                     <hr class="border-gray-100 my-8">
 
-                    <h3 class="font-bold text-blue-800 text-base mb-4">2. Final Handover</h3>
+                   <h3 class="font-bold text-blue-800 text-base mb-4">2. Final Handover</h3>
                     <select id="completion-status" class="w-full border border-gray-200 bg-blue-50/50 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold text-blue-900 mb-4 transition-all">
                         <option value="">-- Select Final Outcome --</option>
-                        <option value="Completed">Successful</option>
-                        <option value="Completed_Remarks">Successful (With Remarks)</option>
+                        <option value="Successful">Successful</option>
                         <option value="Failed">Delivery Failed</option>
                     </select>
 
-                    <div id="ui-success-remarks" class="hidden bg-gray-50 border border-gray-100 p-5 rounded-xl mb-4">
-                        <p class="text-gray-700 font-bold text-xs uppercase tracking-wider mb-3">Select Remarks:</p>
-                        <label class="flex items-center text-sm text-gray-600 cursor-pointer mb-3"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded"> Received by alternate person</label>
-                        <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded"> Packaging slightly damaged</label>
-                    </div>
-
-                    <div id="ui-completed" class="hidden bg-blue-50/50 border border-blue-100 p-6 rounded-xl mb-4 space-y-6">
+                    <div id="ui-successful" class="hidden bg-gray-50 border border-gray-100 p-5 rounded-xl mb-4 space-y-4">
                         <div>
-                            <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">Required Proof:</p>
-                            <label for="file-upload" class="block w-full text-center bg-white border border-gray-200 text-blue-700 p-3.5 rounded-xl font-bold cursor-pointer transition-colors shadow-sm">
-                                <i class="fa-solid fa-camera mr-2"></i> <span id="file-name">Attach Photo</span>
-                            </label>
-                            <input type="file" id="file-upload" class="hidden" accept="image/*" capture="environment">
+                            <p class="text-gray-700 font-bold text-xs uppercase tracking-wider mb-3">Remarks (Optional):</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded" value="Received by alternate person"> Received by alternate person</label>
+                                <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded" value="Packaging Slightly Damaged"> Packaging Slightly Damaged</label>
+                                <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded" value="Document Received"> Document Received</label>
+                                <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded" value="Withdrawal Successful"> Withdrawal Successful</label>
+                                <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded" value="Deposit Successful"> Deposit Successful</label>
+                                <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="remark-reason mr-3 w-4 h-4 rounded" value="Others"> Others</label>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">E-Signature (Required):</p>
-                            <canvas id="signature-pad" class="w-full bg-white border border-gray-200 rounded-xl touch-none shadow-sm" height="150"></canvas>
-                            <button id="clear-signature" class="mt-3 text-[11px] uppercase tracking-wider font-bold bg-white text-gray-500 px-4 py-2 rounded-lg border border-gray-200">Clear Signature</button>
-                        </div>
-                    </div>
-
-                    <div id="ui-failed" class="hidden bg-gray-50 border border-gray-100 p-5 rounded-xl mb-4">
-                        <p class="text-gray-700 font-bold text-xs uppercase tracking-wider mb-3">Select Failure Reasons:</p>
-                        <label class="flex items-center text-sm text-gray-600 cursor-pointer mb-3"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded"> Recipient Absent</label>
-                        <label class="flex items-center text-sm text-gray-600 cursor-pointer mb-4"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded"> Cannot Locate Address</label>
+                        
                         <hr class="border-gray-200 my-4">
-                        <p class="text-gray-700 font-bold text-xs uppercase tracking-wider mb-3">Next Steps:</p>
-                        <label class="flex items-center text-sm text-gray-600 cursor-pointer mb-3"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded" id="check-reschedule" value="Needs Rebooking"> Needs Rebooking by Admin</label>
-                        <label class="flex items-center text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded" id="check-later" value="Will retry today"> Will retry later today</label>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">Required Proof:</p>
+                                <label for="file-upload" class="block w-full text-center bg-white border border-gray-200 text-blue-700 p-3.5 rounded-xl font-bold cursor-pointer transition-colors shadow-sm hover:bg-blue-50">
+                                    <i class="fa-solid fa-camera mr-2"></i> <span id="file-name">Attach Photo</span>
+                                </label>
+                                <input type="file" id="file-upload" class="hidden" accept="image/*" capture="environment">
+                            </div>
+                            <div>
+                                <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">E-Signature (Required):</p>
+                                <canvas id="signature-pad" class="w-full bg-white border border-gray-200 rounded-xl touch-none shadow-sm" height="150"></canvas>
+                                <button id="clear-signature" class="mt-3 text-[11px] uppercase tracking-wider font-bold bg-white text-gray-500 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-100">Clear Signature</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ui-failed" class="hidden bg-red-50/30 border border-red-100 p-5 rounded-xl mb-4">
+                        <p class="text-red-800 font-bold text-xs uppercase tracking-wider mb-3">Select Failure Reasons:</p>
+                        <div class="grid grid-cols-1 gap-3 mb-4">
+                            <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded" value="Recipient Absent"> Recipient Absent</label>
+                            <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded" value="Cannot Locate Address"> Cannot Locate Address</label>
+                            <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded" value="Item Damaged"> Item Damaged</label>
+                            <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="fail-reason mr-3 w-4 h-4 rounded" value="Document Found Loss in the Vehicle"> Document Found Loss in the Vehicle</label>
+                        </div>
+                        
+                        <hr class="border-red-200 my-4">
+                        
+                        <p class="text-red-800 font-bold text-xs uppercase tracking-wider mb-3">Next Steps (Required):</p>
+                        <div class="grid grid-cols-1 gap-3">
+                            <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="radio" name="next-step" class="fail-next-step mr-3 w-4 h-4 rounded" id="check-reschedule" value="Needs Rebooking by Admin"> Needs Rebooking by Admin</label>
+                            <label class="flex items-center text-sm text-gray-700 cursor-pointer"><input type="radio" name="next-step" class="fail-next-step mr-3 w-4 h-4 rounded" id="check-later" value="Will retry later today"> Will retry later today</label>
+                        </div>
                     </div>
 
                     <textarea id="comments" placeholder="Additional Comments / Notes" class="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white mb-6 min-h-[100px] transition-all"></textarea>
@@ -790,18 +807,27 @@
         });
 
         const completionStatus = document.getElementById('completion-status');
-        const uiCompleted = document.getElementById('ui-completed');
-        const uiSuccessRemarks = document.getElementById('ui-success-remarks');
+        const uiSuccessful = document.getElementById('ui-successful');
         const uiFailed = document.getElementById('ui-failed');
         const btnSubmitHandover = document.getElementById('btn-submit-handover');
 
+        // Toggle UI based on the 2 options
         completionStatus.addEventListener('change', (e) => {    
-            [uiCompleted, uiSuccessRemarks, uiFailed, btnSubmitHandover].forEach(el => el.classList.add('hidden'));        
-            if (e.target.value === "Completed") { uiCompleted.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); } 
-            else if (e.target.value === "Completed_Remarks") { uiCompleted.classList.remove('hidden'); uiSuccessRemarks.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); } 
-            else if (e.target.value === "Failed") { uiFailed.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); }
+            uiSuccessful.classList.add('hidden');
+            uiFailed.classList.add('hidden');
+            btnSubmitHandover.classList.add('hidden');        
+            
+            if (e.target.value === "Successful") { 
+                uiSuccessful.classList.remove('hidden'); 
+                btnSubmitHandover.classList.remove('hidden'); 
+            } 
+            else if (e.target.value === "Failed") { 
+                uiFailed.classList.remove('hidden'); 
+                btnSubmitHandover.classList.remove('hidden'); 
+            }
         });
 
+        // The Signature and Image compression code stays exactly the same...
         const fileNameDisplay = document.getElementById('file-name');
         let uploadedImageData = "None";
         document.getElementById('file-upload').addEventListener('change', async (e) => {    
@@ -832,25 +858,37 @@
         canvas.addEventListener('touchend', stopDrawing);
         document.getElementById('clear-signature').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true; });
 
+        // Streamlined Submit Logic
         btnSubmitHandover.addEventListener('click', async () => {    
             const compType = completionStatus.value;    
             let failReasonsStr = "None", sigData = "None";    
             let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
             
-            if (compType === "Completed" || compType === "Completed_Remarks") {        
+            // For Database Compatibility: We translate "Successful" to "Completed" for the Admin Reports page
+            let dbCompletionType = "Failed"; 
+            
+            if (compType === "Successful") {        
                 if (uploadedImageData === "None") return alert("Please attach a photo proof."); 
                 if (signatureEmpty) return alert("Please provide recipient e-signature."); 
                 sigData = canvas.toDataURL("image/png");  
-                if (compType === "Completed_Remarks") {            
-                    const remarks = document.querySelectorAll('.remark-reason:checked');            
-                    if (remarks.length === 0) return alert("Please select at least one remark."); 
+                
+                const remarks = document.querySelectorAll('.remark-reason:checked');            
+                if (remarks.length > 0) {
                     failReasonsStr = Array.from(remarks).map(cb => cb.value).join(" | ");         
-                }    
+                    dbCompletionType = "Completed_Remarks";
+                } else {
+                    dbCompletionType = "Completed";
+                }
             }   
             if (compType === "Failed") {        
                 const checkboxes = document.querySelectorAll('.fail-reason:checked');
                 if (checkboxes.length === 0) return alert("Please select a failure reason."); 
-                failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(" | ");  
+                
+                const nextStep = document.querySelector('.fail-next-step:checked');
+                if (!nextStep) return alert("Please select a Next Step.");
+
+                failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(" | ") + " | Next Step: " + nextStep.value;  
+                dbCompletionType = "Failed";
             }    
             
             const coords = await getLiveLocation();
@@ -862,7 +900,8 @@
                 task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
                 comments: document.getElementById('comments').value || "None",        
                 document_attached: uploadedImageData, latitude: coords.lat, longitude: coords.lon,        
-                completion_type: compType, incomplete_reasons: failReasonsStr, signature: sigData    
+                completion_type: dbCompletionType, // Using mapped value for Admin Reports color coding
+                incomplete_reasons: failReasonsStr, signature: sigData    
             };
             
             const success = await sendActionLog(payload, "Handover Complete");    
@@ -891,9 +930,9 @@
                 transitStatus.value = ""; btnLogTravel.innerHTML = 'Log Travel Update';        
                 btnLogTravel.classList.replace('bg-blue-800', 'bg-blue-100'); btnLogTravel.classList.replace('text-white', 'text-blue-800');         
                 uiTransit.classList.add('hidden'); completionStatus.value = "";         
-                [uiCompleted, uiSuccessRemarks, uiFailed, btnSubmitHandover].forEach(el => el.classList.add('hidden'));                
+                uiSuccessful.classList.add('hidden'); uiFailed.classList.add('hidden'); btnSubmitHandover.classList.add('hidden');                
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);        
+                document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);        
                 uploadedImageData = "None"; fileNameDisplay.textContent = "Attach Photo";                
                 document.getElementById('comments').value = "";
                 
