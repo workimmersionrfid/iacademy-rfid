@@ -108,7 +108,7 @@
             <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h2 class="font-bold text-xl text-blue-900">Live Dispatch Board</h2>
-                <button onclick="loadDashboardData()" class="text-sm font-bold text-blue-600 hover:text-blue-800"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh</button>
+                <button id="btnRefreshBoard" onclick="refreshDashboard()" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition-all"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh</button>
             </div>
             <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar p-2">
                 <table class="w-full text-left border-collapse min-w-[800px]">
@@ -660,6 +660,13 @@
             renderVehicleList();
             renderLogsList(); 
             renderAdminDriverList();
+        }
+
+        window.refreshDashboard = async function() {
+            const btn = document.getElementById('btnRefreshBoard');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Refreshing...`;
+            await loadDashboardData();
+            btn.innerHTML = `<i class="fa-solid fa-rotate-right mr-1"></i> Refresh`;
         }
 
         // --- UNIFIED MULTI-FILTER REPORTS LOGIC ---
