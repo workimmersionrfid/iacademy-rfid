@@ -84,7 +84,14 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Task Category</label>
-                        <input type="text" id="reportTaskFilter" placeholder="e.g. Asset Collection" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm">
+                        <select id="reportTaskFilter" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                            <option value="All">All Tasks</option>
+                            <option value="Asset Collection">Asset Collection</option>
+                            <option value="Document Routing">Document Routing</option>
+                            <option value="Hardware Transport">Hardware Transport</option>
+                            <option value="Bank Transaction">Bank Transaction</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
@@ -242,13 +249,13 @@
             $('#reportDateRange').val('');
             document.getElementById('reportDeptFilter').value = 'All';
             document.getElementById('reportDriverFilter').value = 'All';
-            document.getElementById('reportTaskFilter').value = '';
+            document.getElementById('reportTaskFilter').value = 'All'; // Changed to 'All'
             activeReportStatus = 'All';
             renderReportBoard();
         };
 
         window.renderReportBoard = function() {
-            const fTask = document.getElementById('reportTaskFilter').value.toLowerCase();
+            const fTask = document.getElementById('reportTaskFilter').value; // Removed .toLowerCase()
             const fDept = document.getElementById('reportDeptFilter').value; 
             const fDriver = document.getElementById('reportDriverFilter').value; 
             
@@ -265,7 +272,7 @@
 
             // 1. Apply Base Filters (Date, Dept, Driver, Task)
             let baseFilteredLogs = allLogs.filter(log => {
-                if (fTask && (!log.task || !log.task.toLowerCase().includes(fTask))) return false;
+                if (fTask !== 'All' && log.task !== fTask) return false; // Updated logic to match exact dropdown values
                 if (fDept !== 'All' && log.department !== fDept) return false;
                 if (fDriver !== 'All' && log.driver_name !== fDriver) return false;
                 
