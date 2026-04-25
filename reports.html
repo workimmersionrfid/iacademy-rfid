@@ -346,13 +346,12 @@
                     let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
                     let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
 
-                   // NEW: Handles parsing the multiple image array!
+                    // NEW: Handles parsing the multiple image array!
                     let proofHTML = '';
                     if (log.document_attached && log.document_attached !== "None") {
                         try {
                             const images = JSON.parse(log.document_attached);
                             if (Array.isArray(images)) {
-                                // Maps over all images and displays them side by side
                                 proofHTML = `<div class="flex flex-wrap gap-1.5 mt-2">` + 
                                     images.map(img => `<img src="${img}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity">`).join('') + 
                                 `</div>`;
@@ -360,9 +359,19 @@
                                 proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
                             }
                         } catch(e) { 
-                            // Fallback for older single-image strings in the database
                             proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
                         }
+                    }
+
+                    // NEW: Creates a clickable Google Maps link if coordinates exist
+                    let gpsHTML = '';
+                    if (log.latitude && log.longitude && log.latitude !== "N/A" && log.longitude !== "N/A") {
+                        gpsHTML = `
+                        <div class="mt-2">
+                            <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                                <i class="fa-solid fa-location-crosshairs"></i> ${log.latitude}, ${log.longitude}
+                            </a>
+                        </div>`;
                     }
 
                     return `
@@ -380,7 +389,8 @@
                             <div class="text-[10px] text-gray-500 mt-1 font-bold uppercase tracking-wider">${log.task}</div>
                         </td>
                         <td class="p-4 font-medium text-gray-600 text-sm">
-                            ${log.location}
+                            <div class="line-clamp-2" title="${log.location}">${log.location}</div>
+                            ${gpsHTML}
                         </td>
                         <td class="p-4">
                             ${statusBadge}
@@ -397,7 +407,7 @@
             document.getElementById('statFailed').innerText = statFail;
             document.getElementById('statTransit').innerText = statTrans;
         }
-
+        
         function exportToExcel() {
             if (filteredLogs.length === 0) return alert("No data to export!");
             const exportData = filteredLogs.map(log => ({
@@ -409,6 +419,7 @@
                 "Action Type": log.action,
                 "Task": log.task,
                 "Destination": log.location,
+                "Coordinates": (log.latitude && log.latitude !== "N/A") ? `${log.latitude}, ${log.longitude}` : "N/A",
                 "Status": log.delivery_status,
                 "Result Type": log.completion_type || "N/A",
                 "Remarks/Reasons": log.incomplete_reasons !== "None" ? log.incomplete_reasons : "",
