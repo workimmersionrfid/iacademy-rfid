@@ -61,6 +61,13 @@
                         <option value="LIBRARY">LIBRARY</option>
                     </select>
                 </div>
+
+                <div class="w-full md:w-1/4">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Filter by Driver</label>
+                    <select id="filterDriver" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                        <option value="">All Drivers</option>
+                    </select>
+                </div>
                 
                 <div class="w-full md:w-1/4">
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Date Range</label>
@@ -154,8 +161,11 @@
     <script src="js/app.js"></script>
     
     <script>
+        const API_BASE = 'https://iacademy-rfid.onrender.com/api'; // Ensure this uses your backend proxy
         let allLogs = [];
         let filteredLogs = [];
+        let allDrivers = []; // Added to store driver list
+        
         const userRole = localStorage.getItem('userRole');
         const currentUser = localStorage.getItem('username');
 
@@ -222,12 +232,33 @@
 
         async function loadFuelLogs() {
             try {
-                allLogs = await getLogs();
+                // Fetch logs and drivers concurrently
+                const [logsRes, driversRes] = await Promise.all([
+                    fetch(`${API_BASE}/logs`),
+                    fetch(`${API_BASE}/drivers`)
+                ]);
+                
+                allLogs = await logsRes.json();
+                allDrivers = await driversRes.json();
+
+                // Populate the new Driver Filter Dropdown
+                const driverSelect = document.getElementById('filterDriver');
+                if(driverSelect) {
+                    allDrivers.forEach(d => {
+                        // Prevent duplicates if function runs twice
+                        if(![...driverSelect.options].some(opt => opt.value === d.username)) {
+                            driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
+                        }
+                    });
+                }
+
                 if (userRole !== 'admin') {
                     allLogs = allLogs.filter(log => log.driver === currentUser);
                 }
+                
                 applyFuelFilters();
             } catch (error) {
+                console.error("Error fetching data:", error);
                 document.getElementById('fuelLogsTable').innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-500 font-bold">Failed to load records.</td></tr>`;
             }
         }
@@ -235,6 +266,7 @@
         function applyFuelFilters(clear = false) {
             if (clear) {
                 document.getElementById('filterDept').value = "";
+                document.getElementById('filterDriver').value = ""; // Clear new filter
                 document.getElementById('filterDatePreset').value = "";
                 document.getElementById('filterStart').value = "";
                 document.getElementById('filterEnd').value = "";
@@ -242,6 +274,7 @@
             }
 
             const deptFilter = document.getElementById('filterDept') ? document.getElementById('filterDept').value : "";
+            const driverFilter = document.getElementById('filterDriver') ? document.getElementById('filterDriver').value : ""; // Get driver filter
             const presetFilter = document.getElementById('filterDatePreset') ? document.getElementById('filterDatePreset').value : "";
             
             const dateRange = getDateRange(presetFilter);
@@ -249,8 +282,13 @@
             filteredLogs = allLogs.filter(log => {
                 let match = true;
                 
+                // Department Match
                 if (deptFilter && !log.department.includes(deptFilter)) match = false;
                 
+                // NEW: Driver Match
+                if (driverFilter && log.driver !== driverFilter) match = false;
+
+                // Date Match
                 if (dateRange && dateRange.start && dateRange.end) {
                     const logDate = new Date(log.date + "T12:00:00"); // Approximate mid-day for pure date strings
                     if (logDate < dateRange.start || logDate > dateRange.end) match = false;
