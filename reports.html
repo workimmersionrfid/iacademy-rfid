@@ -379,11 +379,11 @@
                         </div>`;
                     }
 
-                    let gpsHTML = '';
+                   let gpsHTML = '';
                     if (log.latitude && log.longitude && log.latitude !== "N/A" && log.longitude !== "N/A") {
                         gpsHTML = `
                         <div class="mt-2">
-                            <a href="http://googleusercontent.com/maps.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                            <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors bg-blue-50 px-2 py-1 rounded border border-blue-100">
                                 <i class="fa-solid fa-location-crosshairs"></i> ${log.latitude}, ${log.longitude}
                             </a>
                         </div>`;
