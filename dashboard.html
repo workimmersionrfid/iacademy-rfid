@@ -899,29 +899,55 @@
             document.getElementById(`dexit-${id}`).disabled = false;
         }
 
-        window.calculateDispatchSegment = function(id) {
-            const entrySelect = document.getElementById(`dentry-${id}`);
-            const exitSelect = document.getElementById(`dexit-${id}`);
+        window.calculateDispatchSegment = async function(id) {
+            const expSelect = document.getElementById(`dexp-${id}`).value;
+            const entrySelect = document.getElementById(`dentry-${id}`).value;
+            const exitSelect = document.getElementById(`dexit-${id}`).value;
             const priceText = document.getElementById(`dprice-${id}`);
 
-            if (entrySelect.value && exitSelect.value && entrySelect.value !== "Entry" && exitSelect.value !== "Exit") {
-                const eIndex = entrySelect.options[entrySelect.selectedIndex].getAttribute('data-index');
-                const xIndex = exitSelect.options[exitSelect.selectedIndex].getAttribute('data-index');
+            if (entrySelect && exitSelect && entrySelect !== "Entry" && exitSelect !== "Exit") {
                 
-                // Simulated Math: Calculates realistic distance-based toll
-                let cost = (eIndex !== xIndex) ? Math.abs(xIndex - eIndex) * 39 + 46 : 0; 
-                
-                priceText.innerText = `₱${cost.toFixed(2)}`;
-                priceText.setAttribute('data-cost', cost);
+                priceText.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-gray-400"></i>`;
                 priceText.classList.remove('hidden');
-            }
-            updateDispatchToll();
-        }
 
-        function updateDispatchToll() {
-            let total = 0;
-            document.querySelectorAll('[id^="dprice-"]').forEach(span => total += parseFloat(span.getAttribute('data-cost') || 0));
-            return total;
+                try {
+                    const originAddress = `${entrySelect}, ${expSelect}, Philippines`;
+                    const destinationAddress = `${exitSelect}, ${expSelect}, Philippines`;
+
+                    // 1. Fetch from OUR SECURE BACKEND instead of TollGuru directly!
+                    // Notice there is no API key in this code block at all.
+                    const response = await fetch(`${API_BASE}/toll-estimate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            from: { address: originAddress },
+                            to: { address: destinationAddress },
+                            vehicle: { type: "2AxlesAuto" }
+                        })
+                    });
+
+                    if (!response.ok) throw new Error("Backend Proxy Failed");
+
+                    const data = await response.json();
+                    
+                    let liveCost = 0;
+                    if (data.routes && data.routes.length > 0 && data.routes[0].costs) {
+                        liveCost = data.routes[0].costs.tag || data.routes[0].costs.cash || 0;
+                    }
+                    
+                    priceText.innerText = `₱${liveCost.toFixed(2)}`;
+                    priceText.setAttribute('data-cost', liveCost);
+                    
+                } catch (error) {
+                    console.error("Toll API Error:", error);
+                    priceText.innerHTML = `<span class="text-red-500 text-[10px]">API Error</span>`;
+                    priceText.setAttribute('data-cost', 0);
+                }
+                
+                updateDispatchToll(); 
+            }
         }
 
         // --- MAP ROUTING & BUDGETING ---
