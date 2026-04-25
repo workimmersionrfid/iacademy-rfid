@@ -765,14 +765,14 @@
             });
         });
 
-        function renderDeptCards() {
+      function renderDeptCards() {
             const container = document.getElementById('deptCardsContainer');
             container.innerHTML = departmentsList.map(dept => `
                 <div onclick="openDispatchModal('${dept}')" class="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer hover:border-blue-400 hover:shadow-md hover:-translate-y-1 transition-all group flex flex-col items-center justify-center text-center">
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <i class="fa-solid fa-briefcase text-lg"></i>
+                        <i class="fa-solid ${deptIcons[dept]} text-xl"></i>
                     </div>
-                    <span class="font-bold text-blue-900 text-xs md:text-sm tracking-wide">${dept}</span>
+                    <span class="font-bold text-blue-900 text-xs tracking-wide">${dept}</span>
                 </div>
             `).join('');
         }
