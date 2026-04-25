@@ -62,22 +62,24 @@ function renderNavigation(activePageId) {
 
     navContainer.innerHTML = `
         <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
-            <div class="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
+            <div class="max-w-[1500px] mx-auto px-6 flex items-center justify-between gap-8">
                 
-                <div class="flex items-center gap-3 py-4">
+                <div class="flex items-center gap-3 py-4 shrink-0">
                     <i class="fa-solid fa-building-shield text-blue-800 text-3xl"></i>
                     <span class="font-black text-xl md:text-2xl tracking-tight text-gray-800 hidden sm:block">iACADEMY <span class="text-blue-800 font-light">RFID</span></span>
                 </div>
 
-                <nav class="hidden md:flex items-center gap-4 lg:gap-8 text-[13px] lg:text-[15px]">
+                <nav class="hidden lg:flex items-center justify-center flex-1 gap-4 xl:gap-8 text-[13px] xl:text-[14px] whitespace-nowrap">
                     ${linksHTML}
                 </nav>
 
-                <div class="flex items-center gap-2 lg:gap-4">
+                <div class="flex items-center gap-3 lg:gap-4 shrink-0">
                     ${role === 'admin' ? `
-                    <button onclick="triggerGlobalSearch()" class="text-xl text-gray-400 hover:text-blue-800 transition-colors mr-2" title="Search">
+                    <button onclick="triggerGlobalSearch()" class="text-xl text-gray-400 hover:text-blue-800 transition-colors" title="Search">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>` : ''}
+                    </button>
+                    <div class="w-px h-6 bg-gray-200 mx-1 hidden md:block"></div>
+                    ` : ''}
                     
                     ${userProfileHTML}
                     ${authButtonHTML}
