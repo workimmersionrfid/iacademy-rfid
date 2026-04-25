@@ -12,7 +12,7 @@
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
+                    colors: { brand: { blue: '#1e3a8a', bg: '#f8fafc' } }
                 }
             }
         }
@@ -42,7 +42,10 @@
                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Password</label>
                 <div class="relative">
                     <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" id="password" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
+                    <input type="password" id="password" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 pr-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
+                    <button type="button" onclick="togglePassword('password', 'loginToggleIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                        <i id="loginToggleIcon" class="fa-solid fa-eye"></i>
+                    </button>
                 </div>
             </div>
 
@@ -61,6 +64,19 @@
     </div>
 
     <script>
+        // Function to toggle password visibility
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
         const savedToken = localStorage.getItem('token');
         const savedRole = localStorage.getItem('userRole');
 
@@ -89,6 +105,14 @@
                 const data = await response.json();
 
               if (response.ok) {
+                    // Check if email verification is flagged by the backend
+                    if (data.isVerified === false) {
+                        alert("Please verify your email address before logging in.");
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userRole', data.role);
                     localStorage.setItem('username', username);

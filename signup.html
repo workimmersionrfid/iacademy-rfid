@@ -12,7 +12,7 @@
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
+                    colors: { brand: { blue: '#1e3a8a', bg: '#f8fafc' } }
                 }
             }
         }
@@ -29,9 +29,9 @@
             <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-2">iACADEMY Fleet Management</p>
         </div>
 
-        <form id="signupForm" class="p-8 space-y-6">
+        <form id="signupForm" class="p-8 space-y-5">
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Username</label>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Username</label>
                 <div class="relative">
                     <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input type="text" id="username" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
@@ -39,11 +39,23 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Password</label>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email Address</label>
+                <div class="relative">
+                    <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="email" id="email" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Password</label>
                 <div class="relative">
                     <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" id="password" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
+                    <input type="password" id="password" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 pr-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
+                    <button type="button" onclick="togglePassword('password', 'toggleIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                        <i id="toggleIcon" class="fa-solid fa-eye"></i>
+                    </button>
                 </div>
+                <p class="text-[9px] text-gray-400 mt-1.5 font-medium leading-tight px-1">Must contain at least 8 characters, including 1 uppercase letter, 1 lowercase letter, and 1 number.</p>
             </div>
 
             <button type="submit" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider">
@@ -57,10 +69,31 @@
     </div>
 
     <script>
+        // Function to toggle password visibility
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            
+            // Standard Password Validation Check
+            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passRegex.test(password)) {
+                alert("Password does not meet the standard format. Please check the requirements below the input box.");
+                return;
+            }
             
             const role = 'driver'; 
             const department = ['Pending Assignment'];
@@ -74,13 +107,13 @@
                 const response = await fetch('https://iacademy-rfid.onrender.com/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, role, department })
+                    body: JSON.stringify({ username, email, password, role, department })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Driver account created successfully! Please wait for Admin to assign your department.');
+                    alert('Account created! A verification link has been sent to ' + email + ' (Simulation). Please verify before logging in.');
                     window.location.href = 'login.html';
                 } else {
                     alert(data.message || 'Registration failed.');

@@ -22,10 +22,12 @@ mongoose.connect(process.env.MONGODB_URI)
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true }, // Added Email Field
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'driver'], default: 'driver' },
     department: { type: [String], default: ['Pending Assignment'] },
-    workDays: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] } 
+    workDays: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
+    isVerified: { type: Boolean, default: false } // Tracks if email is verified
 });
 
 const vehicleSchema = new mongoose.Schema({
@@ -106,13 +108,24 @@ const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 // --- AUTHENTICATION ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
     try {
-        const { username, password, role, department } = req.body;
+        // Now extracting email
+        const { username, email, password, role, department } = req.body;
+        
+        // Backend validation matching frontend standard
+        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passRegex.test(password)) {
+            return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, password: hashedPassword, role, department });
+        
+        // Creating user with email (isVerified defaults to false)
+        const newUser = new User({ username, email, password: hashedPassword, role, department });
         await newUser.save();
-        res.status(201).json({ message: 'Account created successfully!' });
+        
+        res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
-        if (err.code === 11000) return res.status(400).json({ message: 'Username already exists' });
+        if (err.code === 11000) return res.status(400).json({ message: 'Username or Email already exists' });
         res.status(500).json({ message: err.message });
     }
 });
@@ -126,8 +139,15 @@ app.post('/api/auth/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
+        // Passes the isVerified status back to the frontend for UI handling
         const token = jwt.sign({ id: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, { expiresIn: '1d' });
-        res.json({ message: 'Login successful', token, role: user.role, department: user.department });
+        res.json({ 
+            message: 'Login successful', 
+            token, 
+            role: user.role, 
+            department: user.department,
+            isVerified: user.isVerified 
+        });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
