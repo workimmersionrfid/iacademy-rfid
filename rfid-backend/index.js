@@ -42,7 +42,9 @@ const userSchema = new mongoose.Schema({
     department: { type: [String], default: ['Pending Assignment'] },
     workDays: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
     isVerified: { type: Boolean, default: false }, // Tracks if email is verified
-    verificationToken: { type: String } // NEW: Stores the unique email link token
+    verificationToken: { type: String }, // NEW: Stores the unique email link token
+    resetPasswordToken: { type: String }, // NEW: Stores temporary reset token
+    resetPasswordExpires: { type: Date }
 });
 
 const vehicleSchema = new mongoose.Schema({
@@ -218,6 +220,66 @@ app.post('/api/auth/login', async (req, res) => {
             department: user.department,
             isVerified: user.isVerified 
         });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// --- FORGOT PASSWORD ROUTE ---
+app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'No account with that email address exists.' });
+
+        // 1. Create a reset token valid for 1 hour
+        const token = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
+        await user.save();
+
+        // 2. Create the Reset Link
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
+        const resetLink = `${frontendUrl}/reset-password.html?token=${token}`;
+
+        // 3. Send the Email
+        const mailOptions = {
+            from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: 'Password Reset Request',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+                    <h2 style="color: #1e3a8a;">Password Reset Request</h2>
+                    <p>Hello <b>${user.username}</b>,</p>
+                    <p>You are receiving this because you (or someone else) have requested the reset of the password for your account. Please click on the button below to complete the process:</p>
+                    <a href="${resetLink}" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
+                    <p>This link will expire in 1 hour.</p>
+                    <p style="font-size: 12px; color: #64748b;">If you did not request this, please ignore this email and your password will remain unchanged.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.json({ message: 'An e-mail has been sent to ' + user.email + ' with further instructions.' });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// --- RESET PASSWORD ROUTE ---
+app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+        const user = await User.findOne({ 
+            resetPasswordToken: token, 
+            resetPasswordExpires: { $gt: Date.now() } 
+        });
+
+        if (!user) return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
+
+        // Update password and clear reset fields
+        user.password = await bcrypt.hash(password, 10);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Success! Your password has been changed.' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
