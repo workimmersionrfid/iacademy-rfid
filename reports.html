@@ -180,7 +180,12 @@
         </div>
 
     </main>
-
+<div id="imageModal" class="fixed inset-0 bg-gray-900/95 hidden items-center justify-center z-[100] p-4 cursor-zoom-out transition-opacity" onclick="closeImageModal()">
+        <img id="modalImage" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl border border-gray-700" src="" alt="Handover Proof">
+        <button class="absolute top-6 right-8 text-gray-300 hover:text-white text-3xl transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
     <script src="js/app.js"></script>
     
     <script>
@@ -188,6 +193,18 @@
         let allLogs = [];
         let filteredLogs = [];
         let allDrivers = [];
+
+        window.openImageModal = function(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.getElementById('imageModal').classList.add('flex');
+        }
+        
+        window.closeImageModal = function() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.getElementById('imageModal').classList.remove('flex');
+            document.getElementById('modalImage').src = '';
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof renderNavigation === 'function') renderNavigation('reports');
@@ -348,7 +365,7 @@
                     let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
                     let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
 
-                    // NEW: Handles parsing the multiple image array!
+                   // NEW: Handles parsing the multiple image array!
                     let proofHTML = '';
                     if (log.document_attached && log.document_attached !== "None") {
                         try {
@@ -356,14 +373,14 @@
                             if (Array.isArray(images)) {
                                 // Maps over all images and displays them side by side
                                 proofHTML = `<div class="flex flex-wrap gap-1.5 mt-2">` + 
-                                    images.map(img => `<a href="${img}" target="_blank" class="hover:opacity-75 transition-opacity"><img src="${img}" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-pointer"></a>`).join('') + 
+                                    images.map(img => `<img src="${img}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity">`).join('') + 
                                 `</div>`;
                             } else {
-                                proofHTML = `<div class="mt-2"><a href="${log.document_attached}" target="_blank"><img src="${log.document_attached}" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm"></a></div>`;
+                                proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
                             }
                         } catch(e) { 
                             // Fallback for older single-image strings in the database
-                            proofHTML = `<div class="mt-2"><a href="${log.document_attached}" target="_blank"><img src="${log.document_attached}" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm"></a></div>`;
+                            proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
                         }
                     }
 
