@@ -54,89 +54,70 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative p-8">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+        <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden mb-6 relative">
+            <div class="absolute top-6 bottom-6 left-0 w-1 bg-blue-600 rounded-r"></div>
             
-            <h2 class="font-bold text-xl text-blue-900 mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-filter text-blue-400"></i> Database Filters
-            </h2>
+            <div class="p-6">
+                <h3 class="text-blue-900 font-bold text-lg mb-5 flex items-center gap-2 pl-3">
+                    <i class="fa-solid fa-filter text-blue-500"></i> Database Filters
+                </h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-4">
-                
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Date Range</label>
-                    <div class="relative">
-                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"></i>
-                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 cursor-pointer" placeholder="Select date range...">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 pl-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Date Range</label>
+                        <div class="relative">
+                            <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 text-xs"></i>
+                            <input type="text" id="reportDateRange" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg py-2.5 pl-9 pr-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm" placeholder="All Time">
+                        </div>
                     </div>
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Department</label>
-                    <select id="filterDept" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
-                        <option value="">All Departments</option>
-                        <option value="ELPD">ELPD</option>
-                        <option value="OSAS">OSAS</option>
-                        <option value="IT">IT</option>
-                        <option value="REGISTRAR">REGISTRAR</option>
-                        <option value="FINANCE">FINANCE</option>
-                        <option value="ADMISSIONS">ADMISSIONS</option>
-                        <option value="ADCOM">ADCOM</option>
-                        <option value="CLINIC">CLINIC</option>
-                        <option value="PURCHASING">PURCHASING</option>
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="SHS">SHS</option>
-                        <option value="COLLEGE">COLLEGE</option>
-                        <option value="LIBRARY">LIBRARY</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Driver</label>
-                    <select id="filterDriver" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
-                        <option value="">All Drivers</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Task Category</label>
-                    <select id="filterTask" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white transition-colors cursor-pointer">
-                        <option value="">All Tasks</option>
-                        <option value="Asset Collection">Asset Collection</option>
-                        <option value="Document Routing">Document Routing</option>
-                        <option value="Hardware Transport">Hardware Transport</option>
-                        <option value="Bank Transaction">Bank Transaction</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="flex flex-col md:flex-row items-center justify-between pt-6 mt-6 border-t border-gray-100">
-                
-                <div class="flex gap-4 mb-4 md:mb-0" id="filterStats">
-                    <div class="text-center px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-lg">
-                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Completed</p>
-                        <p id="statCompleted" class="text-lg font-black text-emerald-800">0</p>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Department</label>
+                        <select id="reportDeptFilter" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                            <option value="All">All Departments</option>
+                        </select>
                     </div>
-                    <div class="text-center px-4 py-2 bg-red-50 border border-red-100 rounded-lg">
-                        <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Failed</p>
-                        <p id="statFailed" class="text-lg font-black text-red-800">0</p>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Driver</label>
+                        <select id="reportDriverFilter" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                            <option value="All">All Drivers</option>
+                        </select>
                     </div>
-                    <div class="text-center px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg">
-                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Transit Updates</p>
-                        <p id="statTransit" class="text-lg font-black text-blue-800">0</p>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Task Category</label>
+                        <input type="text" id="reportTaskFilter" placeholder="e.g. Asset Collection" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm">
                     </div>
                 </div>
 
-                <div class="flex gap-3">
-                    <button onclick="clearFilters()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 border border-gray-200 text-sm shadow-sm">
-                        <i class="fa-solid fa-eraser"></i> Clear
-                    </button>
-                    <button onclick="applyFilters()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
-                        <i class="fa-solid fa-magnifying-glass"></i> Search Database
-                    </button>
-                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
-                        <i class="fa-solid fa-file-excel text-lg"></i> Export
-                    </button>
+                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 border-t border-gray-100 pt-5 pl-3">
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <button id="btn-rep-completed" onclick="toggleReportStatus('Completed')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-28 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:bg-emerald-100 cursor-pointer">
+                            <span class="text-[9px] font-bold uppercase tracking-widest mb-0.5">Completed</span>
+                            <span class="text-xl font-black leading-none" id="repCountCompleted">0</span>
+                        </button>
+                        
+                        <button id="btn-rep-failed" onclick="toggleReportStatus('Failed')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-28 rounded-lg border border-red-100 bg-red-50 text-red-600 transition-all hover:bg-red-100 cursor-pointer">
+                            <span class="text-[9px] font-bold uppercase tracking-widest mb-0.5">Failed</span>
+                            <span class="text-xl font-black leading-none" id="repCountFailed">0</span>
+                        </button>
+                        
+                        <button id="btn-rep-transit" onclick="toggleReportStatus('Transit')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-32 rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition-all hover:bg-blue-100 cursor-pointer">
+                            <span class="text-[9px] font-bold uppercase tracking-widest mb-0.5 whitespace-nowrap">Transit Updates</span>
+                            <span class="text-xl font-black leading-none" id="repCountTransit">0</span>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="clearReportFilters()" class="px-5 py-2.5 bg-gray-50 text-gray-700 font-bold text-sm rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors shadow-sm">
+                            <i class="fa-solid fa-eraser mr-1 opacity-70"></i> Clear
+                        </button>
+                        <button onclick="renderReportBoard()" class="px-6 py-2.5 bg-blue-700 text-white font-bold text-sm rounded-lg hover:bg-blue-800 transition-colors shadow-sm">
+                            <i class="fa-solid fa-magnifying-glass mr-1 opacity-70"></i> Search Database
+                        </button>
+                        <button onclick="exportToExcel()" class="px-6 py-2.5 bg-emerald-600 text-white font-bold text-sm rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">
+                            <i class="fa-solid fa-file-excel mr-1 opacity-70"></i> Export
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -185,6 +166,7 @@
         let allLogs = [];
         let filteredLogs = [];
         let allDrivers = [];
+        let activeReportStatus = 'All'; // Tracking for Clickable Status Cards
 
         window.openImageModal = function(src) {
             document.getElementById('modalImage').src = src;
@@ -202,37 +184,25 @@
             if (typeof renderNavigation === 'function') renderNavigation('reports');
             fetchInitialData();
 
-            // INITIALIZE DATE RANGE PICKER
-            $('#dateRangePicker').daterangepicker({
+            $('#reportDateRange').daterangepicker({
                 opens: 'right',
                 autoUpdateInput: false,
-                locale: {
-                    format: 'MM/DD/YYYY',
-                    cancelLabel: 'Clear'
-                },
+                locale: { format: 'MM/DD/YYYY', cancelLabel: 'Clear' },
                 ranges: {
                     'Today': [moment(), moment()],
                     'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
                     'Month to date': [moment().startOf('month'), moment()],
-                    'Last week (start on Sun)': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
-                    'Last week (start on Mon)': [moment().subtract(1, 'week').startOf('isoWeek'), moment().subtract(1, 'week').endOf('isoWeek')],
-                    'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                    'Past 7 days': [moment().subtract(6, 'days'), moment()],
-                    'Past 30 days': [moment().subtract(29, 'days'), moment()],
-                    'Past 60 days': [moment().subtract(59, 'days'), moment()]
+                    'Last week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                    'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }
             });
 
-            // When user clicks "Apply" on the calendar
-            $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+            $('#reportDateRange').on('apply.daterangepicker', function(ev, picker) {
                 $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-                applyFilters(); 
             });
 
-            // When user clicks "Clear" on the calendar
-            $('#dateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
+            $('#reportDateRange').on('cancel.daterangepicker', function(ev, picker) {
                 $(this).val('');
-                applyFilters(); 
             });
         });
 
@@ -247,71 +217,105 @@
                 allLogs = await logsRes.json();
                 allDrivers = await driversRes.json();
 
-                // Populate Driver Filter Dropdown
-                const driverSelect = document.getElementById('filterDriver');
-                allDrivers.forEach(d => {
-                    driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
-                });
+                // Populate Dropdowns Dynamically
+                const driverSelect = document.getElementById('reportDriverFilter');
+                allDrivers.forEach(d => driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`);
 
-                filteredLogs = [...allLogs];
-                renderTable(filteredLogs);
+                const departments = ["SHS", "COLLEGE", "REGISTRAR", "ADMISSIONS", "OSAS", "LIBRARY", "CLINIC", "ADMIN", "FINANCE", "PURCHASING", "IT", "ELPD", "ADCOM", "GENERAL"];
+                const deptSelect = document.getElementById('reportDeptFilter');
+                departments.forEach(dept => deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`);
+
+                renderReportBoard(); // Initial render
             } catch (error) {
                 document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 font-bold">Failed to load database.</td></tr>`;
             }
         }
 
-        function applyFilters() {
-            const fTask = document.getElementById('filterTask').value.toLowerCase();
-            const fDept = document.getElementById('filterDept').value; 
-            const fDriver = document.getElementById('filterDriver').value; 
+        // --- NEW CLICKABLE STATUS LOGIC ---
+        window.toggleReportStatus = function(status) {
+            if (activeReportStatus === status) activeReportStatus = 'All';
+            else activeReportStatus = status;
+            renderReportBoard(); 
+        };
+
+        window.clearReportFilters = function() {
+            $('#reportDateRange').val('');
+            document.getElementById('reportDeptFilter').value = 'All';
+            document.getElementById('reportDriverFilter').value = 'All';
+            document.getElementById('reportTaskFilter').value = '';
+            activeReportStatus = 'All';
+            renderReportBoard();
+        };
+
+        window.renderReportBoard = function() {
+            const fTask = document.getElementById('reportTaskFilter').value.toLowerCase();
+            const fDept = document.getElementById('reportDeptFilter').value; 
+            const fDriver = document.getElementById('reportDriverFilter').value; 
             
-            // Get dates directly from the new picker
-            const isDateSelected = $('#dateRangePicker').val() !== '';
-            let startBoundary = null;
-            let endBoundary = null;
+            const isDateSelected = $('#reportDateRange').val() !== '';
+            let startBoundary = null, endBoundary = null;
 
             if (isDateSelected) {
-                const datePicker = $('#dateRangePicker').data('daterangepicker');
+                const datePicker = $('#reportDateRange').data('daterangepicker');
                 startBoundary = datePicker.startDate.toDate();
                 endBoundary = datePicker.endDate.toDate();
                 startBoundary.setHours(0, 0, 0, 0);
                 endBoundary.setHours(23, 59, 59, 999);
             }
 
-            filteredLogs = allLogs.filter(log => {
-                let match = true;
+            // 1. Apply Base Filters (Date, Dept, Driver, Task)
+            let baseFilteredLogs = allLogs.filter(log => {
+                if (fTask && (!log.task || !log.task.toLowerCase().includes(fTask))) return false;
+                if (fDept !== 'All' && log.department !== fDept) return false;
+                if (fDriver !== 'All' && log.driver_name !== fDriver) return false;
                 
                 if (startBoundary && endBoundary) {
                     const logDate = new Date(log.timestamp);
-                    if (logDate < startBoundary || logDate > endBoundary) match = false;
+                    if (logDate < startBoundary || logDate > endBoundary) return false;
                 }
-                
-                if (fTask && !log.task.toLowerCase().includes(fTask)) match = false;
-                if (fDept && log.department !== fDept) match = false;
-                if (fDriver && log.driver_name !== fDriver) match = false;
-                
-                return match;
+                return true;
             });
-            
-            renderTable(filteredLogs);
+
+            // 2. Compute Numbers for the Clickable Cards
+            let statComp = 0, statFail = 0, statTrans = 0;
+            baseFilteredLogs.forEach(log => {
+                if(log.action === "Final Task Handover") {
+                    if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") statComp++;
+                    else if(log.completion_type === "Failed") statFail++;
+                } else if(log.action === "Travel Update") {
+                    statTrans++;
+                }
+            });
+
+            document.getElementById('repCountCompleted').innerText = statComp;
+            document.getElementById('repCountFailed').innerText = statFail;
+            document.getElementById('repCountTransit').innerText = statTrans;
+
+            // 3. Handle Active Button Styling
+            document.querySelectorAll('.rep-status-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'scale-105', 'shadow-md'));
+            if (activeReportStatus !== 'All') {
+                const activeBtn = document.getElementById(`btn-rep-${activeReportStatus.toLowerCase()}`);
+                if (activeBtn) activeBtn.classList.add('ring-2', 'ring-offset-2', 'scale-105', 'shadow-md');
+            }
+
+            // 4. Apply Final Status Filter Array Reduction
+            filteredLogs = baseFilteredLogs;
+            if (activeReportStatus !== 'All') {
+                filteredLogs = baseFilteredLogs.filter(log => {
+                    if (activeReportStatus === 'Completed') return log.action === "Final Task Handover" && (log.completion_type === "Completed" || log.completion_type === "Completed_Remarks");
+                    if (activeReportStatus === 'Failed') return log.action === "Final Task Handover" && log.completion_type === "Failed";
+                    if (activeReportStatus === 'Transit') return log.action === "Travel Update";
+                    return true;
+                });
+            }
+
+            // 5. Paint the Table
+            renderTableHTML(filteredLogs);
         }
 
-        function clearFilters() {
-            $('#dateRangePicker').val(''); // Clear the picker input
-            document.getElementById('filterTask').value = '';
-            document.getElementById('filterDept').value = '';
-            document.getElementById('filterDriver').value = '';
-            
-            filteredLogs = [...allLogs];
-            renderTable(filteredLogs);
-        }
-
-        function renderTable(logs) {
+        function renderTableHTML(logs) {
             const tableBody = document.getElementById('resultsTable');
             document.getElementById('resultCount').innerText = `${logs.length} logs found`;
-
-            // Calculate Dynamic Status Stats
-            let statComp = 0, statFail = 0, statTrans = 0;
 
             if (logs.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-400 text-sm italic">No logs match your search criteria.</td></tr>`;
@@ -323,18 +327,14 @@
 
                     let statusBadge = `<span class="text-gray-500">${log.delivery_status}</span>`;
                     
-                    // Categorize for stats and badges
                     if(log.action === "Final Task Handover") {
                         if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") {
                             statusBadge = `<span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
-                            statComp++;
                         } else if(log.completion_type === "Failed") {
                             statusBadge = `<span class="text-red-700 bg-red-50 px-2 py-1 rounded border border-red-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
-                            statFail++;
                         }
                     } else if(log.action === "Travel Update") {
                         statusBadge = `<span class="text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
-                        statTrans++;
                     } else if(log.action === "Started Navigation") {
                         statusBadge = `<span class="text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
                     } else if(log.action === "Driver Shift Clock-In") {
@@ -346,7 +346,6 @@
                     let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
                     let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
 
-                    // NEW: Handles parsing the multiple image array!
                     let proofHTML = '';
                     if (log.document_attached && log.document_attached !== "None") {
                         try {
@@ -363,12 +362,11 @@
                         }
                     }
 
-                    // NEW: Creates a clickable Google Maps link if coordinates exist
                     let gpsHTML = '';
                     if (log.latitude && log.longitude && log.latitude !== "N/A" && log.longitude !== "N/A") {
                         gpsHTML = `
                         <div class="mt-2">
-                            <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                            <a href="http://googleusercontent.com/maps.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors bg-blue-50 px-2 py-1 rounded border border-blue-100">
                                 <i class="fa-solid fa-location-crosshairs"></i> ${log.latitude}, ${log.longitude}
                             </a>
                         </div>`;
@@ -401,14 +399,9 @@
                     </tr>`;
                 }).join('');
             }
-
-            // Update UI Stats
-            document.getElementById('statCompleted').innerText = statComp;
-            document.getElementById('statFailed').innerText = statFail;
-            document.getElementById('statTransit').innerText = statTrans;
         }
         
-        function exportToExcel() {
+        window.exportToExcel = function() {
             if (filteredLogs.length === 0) return alert("No data to export!");
             const exportData = filteredLogs.map(log => ({
                 "Date": new Date(log.timestamp).toLocaleDateString(),
