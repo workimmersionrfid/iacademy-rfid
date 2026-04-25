@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const nodemailer = require('nodemailer'); // NEW: For sending emails
-const crypto = require('crypto'); // NEW: For generating secure verification tokens
+const nodemailer = require('nodemailer'); // For sending emails
+const crypto = require('crypto'); // For generating secure verification tokens
 require('dotenv').config();
 
 const app = express();
@@ -36,14 +36,14 @@ const transporter = nodemailer.createTransport({
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true }, // Added Email Field
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'driver'], default: 'driver' },
     department: { type: [String], default: ['Pending Assignment'] },
     workDays: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
-    isVerified: { type: Boolean, default: false }, // Tracks if email is verified
-    verificationToken: { type: String }, // NEW: Stores the unique email link token
-    resetPasswordToken: { type: String }, // NEW: Stores temporary reset token
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date }
 });
 
@@ -117,6 +117,24 @@ const Task = mongoose.model('Task', taskSchema);
 const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 
 // ==========================================
+// --- GOOGLE SHEETS LIVE SYNC HELPER ---
+// ==========================================
+const pushToGoogleSheet = async (data) => {
+    const webhookUrl = process.env.GOOGLE_SHEET_WEBHOOK;
+    if (!webhookUrl) return; 
+
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } catch (error) {
+        console.error("Google Sheets Sync Failed:", error);
+    }
+};
+
+// ==========================================
 // --- API ROUTES ---
 // ==========================================
 
@@ -125,28 +143,22 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, email, password, role, department } = req.body;
         
-        // Backend validation matching frontend standard
         const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!passRegex.test(password)) {
             return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // 1. Generate a secure, random token
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
-        // 2. Create user with email, unverified status, and the token
         const newUser = new User({ 
             username, email, password: hashedPassword, role, department, verificationToken 
         });
         await newUser.save();
         
-        // 3. Create the verification link
         const backendUrl = `${req.protocol}://${req.get('host')}`;
         const verifyLink = `${backendUrl}/api/auth/verify/${verificationToken}`;
 
-        // 4. Send the Email
         const mailOptions = {
             from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -163,7 +175,6 @@ app.post('/api/auth/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        
         res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ message: 'Username or Email already exists' });
@@ -171,27 +182,21 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// NEW: Verification Link Clicked Route
 app.get('/api/auth/verify/:token', async (req, res) => {
     try {
         const { token } = req.params;
-        
-        // Find the user with this exact token
         const user = await User.findOne({ verificationToken: token });
         
         if (!user) {
             return res.status(400).send("Invalid or expired verification link. Please contact your administrator.");
         }
 
-        // Verify the user and delete the token so it can't be used again
         user.isVerified = true;
         user.verificationToken = undefined;
         await user.save();
 
-        // Redirect them back to your Frontend Login page with a success flag
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
         res.redirect(`${frontendUrl}/login.html?verified=success`);
-
     } catch (err) {
         res.status(500).send("Server Error during verification.");
     }
@@ -206,12 +211,10 @@ app.post('/api/auth/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
-        // Enforce verification block
         if (!user.isVerified) {
             return res.status(403).json({ message: 'Email not verified. Please check your inbox.', isVerified: false });
         }
 
-        // Passes the isVerified status back to the frontend for UI handling
         const token = jwt.sign({ id: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ 
             message: 'Login successful', 
@@ -230,17 +233,14 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'No account with that email address exists.' });
 
-        // 1. Create a reset token valid for 1 hour
         const token = crypto.randomBytes(20).toString('hex');
         user.resetPasswordToken = token;
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
         await user.save();
 
-        // 2. Create the Reset Link
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
         const resetLink = `${frontendUrl}/reset-password.html?token=${token}`;
 
-        // 3. Send the Email
         const mailOptions = {
             from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
             to: user.email,
@@ -273,7 +273,6 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
         if (!user) return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
 
-        // Update password and clear reset fields
         user.password = await bcrypt.hash(password, 10);
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
@@ -340,6 +339,18 @@ app.post('/api/logs', async (req, res) => {
     try {
         const newLog = new FuelLog(req.body);
         await newLog.save();
+
+        // Push Real-Time Data to Google Sheets
+        pushToGoogleSheet({
+            date: new Date().toLocaleString(),
+            driver: newLog.driver,
+            department: newLog.department,
+            vehicle: newLog.vehicle,
+            type: "Fuel Expense",
+            details: `${newLog.liters}L ${newLog.fuelType} @ ${newLog.station}`,
+            cost: newLog.total
+        });
+
         res.status(201).json(newLog);
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
@@ -356,6 +367,18 @@ app.post('/api/tolls', async (req, res) => {
     try {
         const newToll = new TollLog(req.body);
         await newToll.save();
+
+        // Push Real-Time Data to Google Sheets
+        pushToGoogleSheet({
+            date: new Date().toLocaleString(),
+            driver: newToll.driver,
+            department: newToll.department,
+            vehicle: newToll.vehicle,
+            type: "Toll Expense",
+            details: `Route: ${newToll.expressway}`,
+            cost: newToll.amount
+        });
+
         res.status(201).json(newToll);
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
@@ -363,12 +386,11 @@ app.post('/api/tolls', async (req, res) => {
 // --- SECURE TOLL ESTIMATION PROXY ---
 app.post('/api/toll-estimate', async (req, res) => {
     try {
-        // We make the fetch call from the SERVER, so the API key never touches the browser!
         const response = await fetch('https://apis.tollguru.com/toll/v2/origin-destination-waypoints', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': process.env.TOLLGURU_API_KEY // Safely pulled from .env
+                'x-api-key': process.env.TOLLGURU_API_KEY
             },
             body: JSON.stringify(req.body)
         });
@@ -419,6 +441,27 @@ app.post('/api/action-logs', async (req, res) => {
     try {
         const newLog = new ActionLog(req.body);
         await newLog.save();
+
+        // --- Push Real-Time Data to Google Sheets ---
+        let detailedNotes = `Status: ${newLog.delivery_status}`;
+        
+        if (newLog.incomplete_reasons && newLog.incomplete_reasons !== "None") {
+            detailedNotes += ` | Reasons: ${newLog.incomplete_reasons}`;
+        }
+        if (newLog.comments && newLog.comments !== "None") {
+            detailedNotes += ` | Notes: ${newLog.comments}`;
+        }
+
+        pushToGoogleSheet({
+            date: new Date().toLocaleString(),
+            driver: newLog.driver_name || "N/A",
+            department: newLog.department || "N/A",
+            vehicle: newLog.plate_number || "N/A",
+            type: newLog.action,
+            details: detailedNotes,
+            cost: 0 
+        });
+
         res.status(201).json({ message: 'Log saved successfully!', log: newLog });
     } catch (err) { 
         res.status(400).json({ error: err.message }); 
