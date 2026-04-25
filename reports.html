@@ -348,6 +348,25 @@
                     let comments = log.comments !== "None" ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
                     let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
 
+                    // NEW: Handles parsing the multiple image array!
+                    let proofHTML = '';
+                    if (log.document_attached && log.document_attached !== "None") {
+                        try {
+                            const images = JSON.parse(log.document_attached);
+                            if (Array.isArray(images)) {
+                                // Maps over all images and displays them side by side
+                                proofHTML = `<div class="flex flex-wrap gap-1.5 mt-2">` + 
+                                    images.map(img => `<a href="${img}" target="_blank" class="hover:opacity-75 transition-opacity"><img src="${img}" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-pointer"></a>`).join('') + 
+                                `</div>`;
+                            } else {
+                                proofHTML = `<div class="mt-2"><a href="${log.document_attached}" target="_blank"><img src="${log.document_attached}" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm"></a></div>`;
+                            }
+                        } catch(e) { 
+                            // Fallback for older single-image strings in the database
+                            proofHTML = `<div class="mt-2"><a href="${log.document_attached}" target="_blank"><img src="${log.document_attached}" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm"></a></div>`;
+                        }
+                    }
+
                     return `
                     <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="p-4">
@@ -369,6 +388,7 @@
                             ${statusBadge}
                             ${incompleteReasons}
                             ${comments}
+                            ${proofHTML}
                         </td>
                     </tr>`;
                 }).join('');
