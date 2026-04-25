@@ -1,5 +1,3 @@
-// js/app.js
-
 function renderNavigation(activePageId) {
     const navContainer = document.getElementById('shared-nav');
     if (!navContainer) return;
@@ -31,8 +29,8 @@ function renderNavigation(activePageId) {
     const linksHTML = navItems.map(item => {
         const isActive = item.id === activePageId;
         const activeClasses = isActive 
-            ? "text-[#3674FF] border-[#3674FF]" 
-            : "text-[#666666] hover:text-[#3674FF] border-transparent";
+            ? "text-blue-800 border-blue-800" 
+            : "text-gray-500 hover:text-blue-800 border-transparent";
 
         return `
             <a href="${item.href}" class="py-7 relative font-medium transition-colors border-b-2 ${activeClasses}">
@@ -43,41 +41,41 @@ function renderNavigation(activePageId) {
 
     // 2. DYNAMIC PROFILE & AUTH BUTTONS
     const authButtonHTML = token 
-        ? `<button onclick="globalLogout()" class="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
+        ? `<button onclick="globalLogout()" class="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors">
                 <i class="fa-solid fa-right-from-bracket text-lg"></i>
                 <span class="hidden md:inline">Log Out</span>
            </button>`
-        : `<button onclick="window.location.href='login.html'" class="flex items-center gap-2 text-sm font-bold text-[#3674FF] hover:text-[#1349CC] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+        : `<button onclick="window.location.href='login.html'" class="flex items-center gap-2 text-sm font-bold text-blue-800 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors">
                 <i class="fa-solid fa-right-to-bracket text-lg"></i>
                 <span class="hidden md:inline">Log In</span>
            </button>`;
 
     const userProfileHTML = token 
-        ? `<div class="flex items-center gap-2 text-sm font-bold text-gray-700 mr-2" title="Logged in as ${username}">
-                <i class="fa-regular fa-user text-xl"></i>
+        ? `<div class="flex items-center gap-2 text-sm font-bold text-gray-800 mr-2" title="Logged in as ${username}">
+                <i class="fa-regular fa-circle-user text-xl text-blue-800"></i>
                 <span class="hidden lg:inline">${username}</span>
-                <span class="hidden lg:inline text-xs font-normal text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded ml-1">${role}</span>
+                <span class="hidden lg:inline text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 border border-blue-100 px-2 py-0.5 rounded ml-1">${role}</span>
            </div>`
-        : `<button onclick="window.location.href='login.html'" class="text-xl hover:text-[#3674FF] transition-colors mr-2" title="Sign In">
-                <i class="fa-regular fa-user"></i>
+        : `<button onclick="window.location.href='login.html'" class="text-xl text-gray-400 hover:text-blue-800 transition-colors mr-2" title="Sign In">
+                <i class="fa-regular fa-circle-user"></i>
            </button>`;
 
     navContainer.innerHTML = `
-        <header class="bg-white border-b border-[#e5e7eb] shadow-sm">
+        <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
             <div class="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
                 
                 <div class="flex items-center gap-3 py-4">
-                    <i class="fa-solid fa-building text-[#3674FF] text-3xl"></i>
-                    <span class="font-bold text-xl md:text-2xl tracking-tight text-[#333333] hidden sm:block">iACADEMY RFID</span>
+                    <i class="fa-solid fa-building-shield text-blue-800 text-3xl"></i>
+                    <span class="font-black text-xl md:text-2xl tracking-tight text-gray-800 hidden sm:block">iACADEMY <span class="text-blue-800 font-light">RFID</span></span>
                 </div>
 
                 <nav class="hidden md:flex items-center gap-4 lg:gap-8 text-[13px] lg:text-[15px]">
                     ${linksHTML}
                 </nav>
 
-                <div class="flex items-center gap-2 lg:gap-4 text-[#666666]">
+                <div class="flex items-center gap-2 lg:gap-4">
                     ${role === 'admin' ? `
-                    <button onclick="triggerGlobalSearch()" class="text-xl hover:text-[#3674FF] transition-colors" title="Search">
+                    <button onclick="triggerGlobalSearch()" class="text-xl text-gray-400 hover:text-blue-800 transition-colors mr-2" title="Search">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>` : ''}
                     

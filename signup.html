@@ -6,45 +6,52 @@
     <title>Driver Registration - iACADEMY RFID</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
-                extend: { colors: { brand: { blue: '#3674FF', blueHover: '#1349CC', bg: '#f4f5f7' } } }
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
+                }
             }
         }
     </script>
 </head>
-<body class="bg-brand-bg font-sans min-h-screen flex items-center justify-center p-6">
+<body class="bg-brand-bg font-sans min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
 
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-        <div class="p-8 text-center bg-brand-blue text-white">
-            <h1 class="text-2xl font-bold">Driver Registration</h1>
-            <p class="text-blue-100 text-sm mt-1">iACADEMY Vehicle Management</p>
+    <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 z-0"></div>
+
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100 relative z-10">
+        <div class="p-8 text-center bg-white border-b border-gray-100">
+            <i class="fa-solid fa-address-card text-blue-800 text-5xl mb-4"></i>
+            <h1 class="text-2xl font-black text-gray-800 tracking-tight">Driver Registration</h1>
+            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-2">iACADEMY Fleet Management</p>
         </div>
 
-        <form id="signupForm" class="p-8 space-y-5">
+        <form id="signupForm" class="p-8 space-y-6">
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Username</label>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Username</label>
                 <div class="relative">
-                    <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="username" required class="w-full border border-gray-200 rounded-lg pl-10 p-3 outline-none focus:border-brand-blue transition-colors">
+                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="username" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Password</label>
                 <div class="relative">
-                    <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" id="password" required class="w-full border border-gray-200 rounded-lg pl-10 p-3 outline-none focus:border-brand-blue transition-colors">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="password" id="password" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-brand-blue hover:bg-brand-blueHover text-white font-bold py-3 rounded-lg shadow-lg transition-all mt-4">
-                Register as Driver
+            <button type="submit" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider">
+                Create Driver Account
             </button>
             
-            <p class="text-center text-xs text-gray-400 mt-4">
-                Already have an account? <a href="login.html" class="text-brand-blue font-bold">Log In</a>
+            <p class="text-center text-xs text-gray-500 mt-6 font-medium">
+                Already have an account? <a href="login.html" class="text-blue-700 font-bold hover:underline">Sign In</a>
             </p>
         </form>
     </div>
@@ -55,13 +62,12 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Auto-assign role and default department status
             const role = 'driver'; 
-           const department = ['Pending Assignment'];
+            const department = ['Pending Assignment'];
 
             const submitBtn = document.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Registering...`;
             submitBtn.disabled = true;
 
             try {
@@ -83,7 +89,7 @@
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                alert('Server error. Make sure your Node.js backend is running!');
+                alert('Server error. Make sure your backend is running!');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
