@@ -208,6 +208,28 @@ app.post('/api/tolls', async (req, res) => {
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
+// --- SECURE TOLL ESTIMATION PROXY ---
+app.post('/api/toll-estimate', async (req, res) => {
+    try {
+        // We make the fetch call from the SERVER, so the API key never touches the browser!
+        const response = await fetch('https://apis.tollguru.com/toll/v2/origin-destination-waypoints', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.TOLLGURU_API_KEY // Safely pulled from .env
+            },
+            body: JSON.stringify(req.body)
+        });
+
+        if (!response.ok) throw new Error("Toll API Failed");
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- TASK & DISPATCH ROUTES ---
 app.get('/api/tasks', async (req, res) => {
     try {
