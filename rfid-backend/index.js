@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const nodemailer = require('nodemailer'); // NEW: For sending emails
+const crypto = require('crypto'); // NEW: For generating secure verification tokens
 require('dotenv').config();
 
 const app = express();
@@ -17,6 +19,18 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ==========================================
+// --- NODEMAILER TRANSPORTER SETUP ---
+// ==========================================
+// This uses the App Password generated from your Gmail account
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+// ==========================================
 // --- DATABASE MODELS (SCHEMAS) ---
 // ==========================================
 
@@ -27,7 +41,8 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['admin', 'driver'], default: 'driver' },
     department: { type: [String], default: ['Pending Assignment'] },
     workDays: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
-    isVerified: { type: Boolean, default: false } // Tracks if email is verified
+    isVerified: { type: Boolean, default: false }, // Tracks if email is verified
+    verificationToken: { type: String } // NEW: Stores the unique email link token
 });
 
 const vehicleSchema = new mongoose.Schema({
@@ -38,7 +53,6 @@ const vehicleSchema = new mongoose.Schema({
     fuelType: String
 });
 
-// Original Fuel Log Schema
 const logSchema = new mongoose.Schema({
     vehicle: String,
     driver: String,
@@ -53,7 +67,6 @@ const logSchema = new mongoose.Schema({
     notes: String
 });
 
-// NEW: Toll Log Schema
 const tollSchema = new mongoose.Schema({
     vehicle: String,
     driver: String,
@@ -97,7 +110,7 @@ const actionLogSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 const FuelLog = mongoose.model('FuelLog', logSchema);
-const TollLog = mongoose.model('TollLog', tollSchema); // <-- NEW MODEL REGISTERED
+const TollLog = mongoose.model('TollLog', tollSchema); 
 const Task = mongoose.model('Task', taskSchema);
 const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 
@@ -105,10 +118,9 @@ const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 // --- API ROUTES ---
 // ==========================================
 
-// --- AUTHENTICATION ROUTES ---
+// --- AUTHENTICATION & EMAIL ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
     try {
-        // Now extracting email
         const { username, email, password, role, department } = req.body;
         
         // Backend validation matching frontend standard
@@ -119,14 +131,67 @@ app.post('/api/auth/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Creating user with email (isVerified defaults to false)
-        const newUser = new User({ username, email, password: hashedPassword, role, department });
+        // 1. Generate a secure, random token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        
+        // 2. Create user with email, unverified status, and the token
+        const newUser = new User({ 
+            username, email, password: hashedPassword, role, department, verificationToken 
+        });
         await newUser.save();
+        
+        // 3. Create the verification link
+        const backendUrl = `${req.protocol}://${req.get('host')}`;
+        const verifyLink = `${backendUrl}/api/auth/verify/${verificationToken}`;
+
+        // 4. Send the Email
+        const mailOptions = {
+            from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Verify Your Driver Account',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+                    <h2 style="color: #1e3a8a;">Welcome to iACADEMY Fleet Management!</h2>
+                    <p>Hello <b>${username}</b>,</p>
+                    <p>Your driver account has been successfully registered. To activate your account and allow administrators to assign your department, please verify your email address by clicking the button below:</p>
+                    <a href="${verifyLink}" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 15px; margin-bottom: 15px;">Verify Email Address</a>
+                    <p style="font-size: 12px; color: #64748b;">If the button doesn't work, copy and paste this link into your browser:<br>${verifyLink}</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
         
         res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ message: 'Username or Email already exists' });
         res.status(500).json({ message: err.message });
+    }
+});
+
+// NEW: Verification Link Clicked Route
+app.get('/api/auth/verify/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+        
+        // Find the user with this exact token
+        const user = await User.findOne({ verificationToken: token });
+        
+        if (!user) {
+            return res.status(400).send("Invalid or expired verification link. Please contact your administrator.");
+        }
+
+        // Verify the user and delete the token so it can't be used again
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        await user.save();
+
+        // Redirect them back to your Frontend Login page with a success flag
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
+        res.redirect(`${frontendUrl}/login.html?verified=success`);
+
+    } catch (err) {
+        res.status(500).send("Server Error during verification.");
     }
 });
 
@@ -138,6 +203,11 @@ app.post('/api/auth/login', async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
+
+        // Enforce verification block
+        if (!user.isVerified) {
+            return res.status(403).json({ message: 'Email not verified. Please check your inbox.', isVerified: false });
+        }
 
         // Passes the isVerified status back to the frontend for UI handling
         const token = jwt.sign({ id: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -212,7 +282,7 @@ app.post('/api/logs', async (req, res) => {
     } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
-// --- NEW: TOLL LOG ROUTES ---
+// --- TOLL LOG ROUTES ---
 app.get('/api/tolls', async (req, res) => {
     try {
         const tolls = await TollLog.find().sort({ _id: -1 });

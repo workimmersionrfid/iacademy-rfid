@@ -64,6 +64,16 @@
     </div>
 
     <script>
+        // Check the URL for the verification success flag and display a banner if present
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('verified') === 'success') {
+            const formContainer = document.getElementById('loginForm');
+            const successBanner = document.createElement('div');
+            successBanner.className = "bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-xl mb-6 text-center";
+            successBanner.innerHTML = "<i class='fa-solid fa-check-circle mr-1'></i> Email successfully verified! You may now log in.";
+            formContainer.prepend(successBanner);
+        }
+
         // Function to toggle password visibility
         function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
