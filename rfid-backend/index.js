@@ -37,6 +37,9 @@ const transporter = nodemailer.createTransport({
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    middleName: { type: String, default: "" },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'driver'], default: 'driver' },
@@ -142,19 +145,28 @@ const pushToGoogleSheet = async (data) => {
 // --- AUTHENTICATION & EMAIL ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
     try {
-        const { username, email, password, role, department } = req.body;
+        const { username, firstName, lastName, middleName, email, password, role, department } = req.body;
         
         const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!passRegex.test(password)) {
             return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+       const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
         const newUser = new User({ 
-            username, email, password: hashedPassword, role, department, verificationToken 
+            username, 
+            firstName, 
+            lastName, 
+            middleName, 
+            email, 
+            password: hashedPassword, 
+            role, 
+            department, 
+            verificationToken 
         });
+        
         await newUser.save();
         
         const backendUrl = `${req.protocol}://${req.get('host')}`;
