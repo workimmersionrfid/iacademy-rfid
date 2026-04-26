@@ -98,6 +98,10 @@
 
             // 1. Capture all form values
             const username = document.getElementById('username').value;
+        if (/\s/.test(username)) {
+        alert("Username cannot contain spaces. Please use letters, numbers, underscores (_), or dots (.).");
+        return;
+    }
             const firstName = document.getElementById('firstName').value;
             const lastName = document.getElementById('lastName').value;
             const middleName = document.getElementById('middleName').value; // Optional
