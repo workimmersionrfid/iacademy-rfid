@@ -82,11 +82,11 @@ function renderNavigation(activePageId) {
         <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
             <div class="max-w-[1500px] mx-auto px-6 flex items-center justify-between gap-8 h-20 lg:h-auto">
                 
-                <div class="flex items-center gap-3 shrink-0">
-                    <div class="w-10 h-10 bg-blue-800 rounded-xl flex items-center justify-center text-white shadow-md">
-                        <i class="fa-solid fa-building-shield text-xl"></i>
-                    </div>
-                    <span class="font-black text-xl md:text-2xl tracking-tight text-gray-800 hidden sm:block">iACADEMY <span class="text-blue-800 font-light">RFID</span></span>
+                <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="window.location.href='${role === 'admin' ? 'dashboard.html' : 'driver-dashboard.html'}'">
+                    
+                    <img src="logo.png" alt="iACADEMY RFID Logo" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-md transition-transform hover:scale-105">
+                    
+                    <span class="font-black text-xl md:text-2xl tracking-tight text-gray-800 hidden sm:block ml-1">iACADEMY <span class="text-blue-800 font-light">RFID</span></span>
                 </div>
 
                 <nav class="hidden lg:flex items-center justify-center flex-1 gap-4 xl:gap-8 text-[13px] xl:text-[14px] whitespace-nowrap">
