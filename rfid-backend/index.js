@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const nodemailer = require('nodemailer'); // For sending emails
 const crypto = require('crypto'); // For generating secure verification tokens
+const Tesseract = require('tesseract.js');
 require('dotenv').config();
 
 const app = express();
@@ -471,6 +472,49 @@ app.post('/api/action-logs', async (req, res) => {
 // --- CONFIG ROUTE ---
 app.get('/api/config/maps', (req, res) => {
     res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
+});
+
+// --- OCR RECEIPT SCANNER ROUTE ---
+app.post('/api/scan-receipt', async (req, res) => {
+    try {
+        const { image } = req.body; // The base64 string sent from the frontend
+
+        if (!image) {
+            return res.status(400).json({ error: "No image provided" });
+        }
+
+        // Run the OCR engine on the image
+        const { data: { text } } = await Tesseract.recognize(image, 'eng');
+        
+        let detectedAmount = null;
+        let detectedExpressway = null;
+
+        // 1. Extract Amount (Looks for a number with a decimal, e.g., 175.00)
+        const amountMatch = text.match(/\d+\.\d{2}/);
+        if (amountMatch) {
+            detectedAmount = parseFloat(amountMatch[0]);
+        }
+
+        // 2. Extract Expressway (Looks for common toll keywords)
+        const upperText = text.toUpperCase();
+        if (upperText.includes('NLEX')) detectedExpressway = 'NLEX';
+        else if (upperText.includes('SLEX')) detectedExpressway = 'SLEX';
+        else if (upperText.includes('CAVITEX')) detectedExpressway = 'CAVITEX';
+        else if (upperText.includes('SCTEX')) detectedExpressway = 'SCTEX';
+        else if (upperText.includes('SKYWAY')) detectedExpressway = 'Skyway';
+        else if (upperText.includes('MCX')) detectedExpressway = 'MCX';
+        else if (upperText.includes('CALAX')) detectedExpressway = 'CALAX';
+
+        // Send the extracted data back to the frontend
+        res.json({
+            amount: detectedAmount,
+            expressway: detectedExpressway
+        });
+
+    } catch (error) {
+        console.error("OCR Processing Error:", error);
+        res.status(500).json({ error: "Failed to scan receipt" });
+    }
 });
 
 // ==========================================
