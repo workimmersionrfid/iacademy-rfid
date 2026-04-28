@@ -62,44 +62,44 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <button id="btn-clock-in" class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4 transition-colors group-hover:bg-blue-100">
-                    <i class="fa-solid fa-clock text-blue-500 text-xl"></i>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button id="btn-clock-in" class="relative bg-white rounded-xl shadow-md p-4 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
+                <div class="absolute top-0 right-0 w-12 h-12 bg-blue-50 dpd-card-accent flex items-start justify-end p-2 transition-colors group-hover:bg-blue-100">
+                    <i class="fa-solid fa-clock text-blue-600 text-base"></i>
                 </div>
-                <div class="mt-4">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Shift Action</p>
-                    <h3 class="text-3xl font-black text-blue-900">Clock In</h3>
-                </div>
-            </button>
-
-            <button id="btn-clock-out" class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-gray-50 dpd-card-accent flex items-start justify-end p-4 transition-colors group-hover:bg-gray-100">
-                    <i class="fa-solid fa-stopwatch text-gray-400 text-xl"></i>
-                </div>
-                <div class="mt-4">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Shift Action</p>
-                    <h3 class="text-3xl font-black text-gray-500">Clock Out</h3>
+                <div class="mt-2">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Shift Action</p>
+                    <h3 class="text-xl font-black text-blue-900">Clock In</h3>
                 </div>
             </button>
 
-            <button onclick="openFuelModal()" class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4 transition-colors group-hover:bg-blue-100">
-                    <i class="fa-solid fa-gas-pump text-blue-500 text-xl"></i>
+            <button id="btn-clock-out" class="relative bg-white rounded-xl shadow-md p-4 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
+                <div class="absolute top-0 right-0 w-12 h-12 bg-gray-50 dpd-card-accent flex items-start justify-end p-2 transition-colors group-hover:bg-gray-100">
+                    <i class="fa-solid fa-stopwatch text-gray-600 text-base"></i>
                 </div>
-                <div class="mt-4">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Record Data</p>
-                    <h3 class="text-3xl font-black text-blue-900">Log Fuel</h3>
+                <div class="mt-2">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Shift Action</p>
+                    <h3 class="text-xl font-black text-gray-600">Clock Out</h3>
                 </div>
             </button>
 
-            <button onclick="openTollModal()" class="relative bg-white rounded-2xl shadow-md p-6 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
-                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50 dpd-card-accent flex items-start justify-end p-4 transition-colors group-hover:bg-blue-100">
-                    <i class="fa-solid fa-ticket text-blue-500 text-xl"></i>
+            <button onclick="openFuelModal()" class="relative bg-white rounded-xl shadow-md p-4 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
+                <div class="absolute top-0 right-0 w-12 h-12 bg-blue-50 dpd-card-accent flex items-start justify-end p-2 transition-colors group-hover:bg-blue-100">
+                    <i class="fa-solid fa-gas-pump text-blue-600 text-base"></i>
                 </div>
-                <div class="mt-4">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Record Data</p>
-                    <h3 class="text-3xl font-black text-blue-900">Log Toll</h3>
+                <div class="mt-2">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Record Data</p>
+                    <h3 class="text-xl font-black text-blue-900">Log Fuel</h3>
+                </div>
+            </button>
+
+            <button onclick="openTollModal()" class="relative bg-white rounded-xl shadow-md p-4 overflow-hidden flex flex-col items-start border border-blue-50 hover:shadow-lg transition-all text-left w-full group">
+                <div class="absolute top-0 right-0 w-12 h-12 bg-blue-50 dpd-card-accent flex items-start justify-end p-2 transition-colors group-hover:bg-blue-100">
+                    <i class="fa-solid fa-ticket text-blue-600 text-base"></i>
+                </div>
+                <div class="mt-2">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Record Data</p>
+                    <h3 class="text-xl font-black text-blue-900">Log Toll</h3>
                 </div>
             </button>
         </div>
@@ -107,9 +107,14 @@
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden flex flex-col relative xl:col-span-1 h-fit">
                 <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
-                <div class="p-6 border-b border-gray-100">
+                
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <h2 class="font-bold text-xl text-blue-900">Assigned Dispatches</h2>
+                    <button onclick="initDriverData()" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm transition-colors">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+                    </button>
                 </div>
+                
                 <div class="p-6 overflow-y-auto max-h-[600px] custom-scrollbar">
                     <div id="taskList" class="space-y-4">
                         <div class="text-center p-8 bg-white rounded-2xl shadow-sm border border-blue-50 text-blue-400 text-sm"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Loading tasks...</div>
@@ -123,25 +128,25 @@
                     <h2 class="text-xl font-bold text-blue-900 tracking-tight">Execution & Handover</h2>
                 </div>
                 <div class="p-8">
-                    <p id="status-text" class="text-xs font-bold text-gray-400 mb-6 tracking-widest uppercase">Status: Waiting for shift start...</p>
+                    <p id="status-text" class="text-xs font-bold text-gray-500 mb-6 tracking-widest uppercase">Status: Waiting for shift start...</p>
 
                     <div id="active-task-info" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 shadow-inner">
                         <div class="flex justify-between items-start mb-2">
-                            <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Active Dispatch Details</p>
+                            <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Active Dispatch Details</p>
                             <span id="display-task-vehicle" class="bg-white text-blue-800 border border-blue-200 px-2 py-1 rounded-md text-[10px] font-bold tracking-widest shadow-sm">VEHICLE</span>
                         </div>
                         <h3 id="display-task-desc" class="text-xl font-bold text-blue-900 leading-tight">No task selected</h3>
                         
                         <div class="mt-4 space-y-2">
                             <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-location-dot text-blue-400 mt-0.5"></i>
+                                <i class="fa-solid fa-location-dot text-blue-500 mt-0.5"></i>
                                 <div>
                                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Destination</p>
                                     <p id="display-task-dest" class="text-sm text-gray-800 font-medium">N/A</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-tag text-blue-400 mt-0.5"></i>
+                                <i class="fa-solid fa-tag text-blue-500 mt-0.5"></i>
                                 <div>
                                     <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Task Category</p>
                                     <p id="display-task-type" class="text-sm text-gray-800 font-medium">N/A</p>
@@ -152,10 +157,10 @@
 
                     <hr class="border-gray-100 my-6">
 
-                    <div id="no-task-placeholder" class="text-center py-12 px-6 text-gray-400 font-medium border-2 border-dashed border-gray-200 rounded-xl mb-6 flex flex-col items-center">
-                        <i class="fa-solid fa-lock text-3xl mb-3 text-gray-300"></i>
+                    <div id="no-task-placeholder" class="text-center py-12 px-6 text-gray-500 font-medium border-2 border-dashed border-gray-200 rounded-xl mb-6 flex flex-col items-center">
+                        <i class="fa-solid fa-lock text-3xl mb-3 text-gray-400"></i>
                         <p>Execution Controls Locked</p>
-                        <p class="text-xs mt-1">Please select "Start Execution" on an assigned dispatch to unlock Travel Updates and Handover.</p>
+                        <p class="text-xs mt-1">Please tap an assigned dispatch on the left to unlock Travel Updates and Handover.</p>
                     </div>
 
                     <div id="task-action-controls" class="hidden">
@@ -207,7 +212,7 @@
                                 <div>
                                     <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">Required Proof:</p>
                                     <label for="file-upload" class="block w-full text-center bg-white border border-gray-200 text-blue-700 p-3.5 rounded-xl font-bold cursor-pointer transition-colors shadow-sm hover:bg-blue-50">
-                                        <i class="fa-solid fa-images mr-2"></i> <span id="file-name">Attach Photo(s)</span>
+                                        <i class="fa-solid fa-images text-blue-600 mr-2"></i> <span id="file-name">Attach Photo(s)</span>
                                     </label>
                                     <input type="file" id="file-upload" class="hidden" accept="image/*" multiple>
                                     
@@ -216,7 +221,7 @@
                                 <div>
                                     <p class="text-blue-900 font-bold text-xs uppercase tracking-wider mb-3">E-Signature (Required):</p>
                                     <canvas id="signature-pad" class="w-full bg-white border border-gray-200 rounded-xl touch-none shadow-sm" height="150"></canvas>
-                                    <button id="clear-signature" class="mt-3 text-[11px] uppercase tracking-wider font-bold bg-white text-gray-500 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-100">Clear Signature</button>
+                                    <button id="clear-signature" class="mt-3 text-[11px] uppercase tracking-wider font-bold bg-white text-gray-600 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-100">Clear Signature</button>
                                 </div>
                             </div>
                         </div>
@@ -247,6 +252,7 @@
                     </div> 
                 </div>
             </div>
+        </div>
     </main>
 
     <div id="fuelModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
@@ -336,7 +342,7 @@
                 <button type="button" id="tab-ocr-btn" onclick="switchTollTab('ocr')" class="w-1/2 py-3 text-[11px] uppercase tracking-widest font-black text-blue-800 border-b-2 border-blue-800 transition-colors">
                     <i class="fa-solid fa-camera mr-1"></i> Scan Receipt
                 </button>
-                <button type="button" id="tab-manual-btn" onclick="switchTollTab('manual')" class="w-1/2 py-3 text-[11px] uppercase tracking-widest font-bold text-gray-400 border-b-2 border-transparent transition-colors">
+                <button type="button" id="tab-manual-btn" onclick="switchTollTab('manual')" class="w-1/2 py-3 text-[11px] uppercase tracking-widest font-bold text-gray-500 border-b-2 border-transparent transition-colors">
                     <i class="fa-solid fa-keyboard mr-1"></i> Manual Entry
                 </button>
             </div>
@@ -344,7 +350,7 @@
             <div class="p-6">
                 <div id="toll-ocr-section" class="space-y-4 animate-fade-in">
                     <div class="text-center mb-4">
-                        <p class="text-xs text-gray-500 font-medium">Snap a clear photo of the toll receipt. Our system will auto-detect the expressway and amount.</p>
+                        <p class="text-xs text-gray-600 font-medium">Snap a clear photo of the toll receipt. Our system will auto-detect the expressway and amount.</p>
                     </div>
                     
                     <div>
@@ -452,26 +458,22 @@
 
         window.openFuelModal = function() {
             const m = document.getElementById('fuelModal');
-            m.classList.remove('hidden');
-            m.classList.add('flex');
+            m.classList.remove('hidden'); m.classList.add('flex');
             updateModalVehicleDropdown('fuel'); 
         };
         window.closeFuelModal = function() {
             const m = document.getElementById('fuelModal');
-            m.classList.remove('flex');
-            m.classList.add('hidden');
+            m.classList.remove('flex'); m.classList.add('hidden');
         };
 
         window.openTollModal = function() {
             const m = document.getElementById('tollModal');
-            m.classList.remove('hidden');
-            m.classList.add('flex');
+            m.classList.remove('hidden'); m.classList.add('flex');
             updateModalVehicleDropdown('toll'); 
         };
         window.closeTollModal = function() {
             const m = document.getElementById('tollModal');
-            m.classList.remove('flex');
-            m.classList.add('hidden');
+            m.classList.remove('flex'); m.classList.add('hidden');
         };
 
         async function initDriverData() {
@@ -491,9 +493,7 @@
                 updateModalVehicleDropdown('fuel');
                 updateModalVehicleDropdown('toll');
 
-            } catch (err) {
-                console.error("Error loading data:", err);
-            }
+            } catch (err) { console.error("Error loading data:", err); }
         }
 
         window.updateModalVehicleDropdown = function(type) {
@@ -572,13 +572,25 @@
             }
         };
 
+        // REVISION: Improved Task Rendering (Buttons, Sort, Hide Future)
         function renderMyTasks() {
             const myName = localStorage.getItem('username');
-            const myTasks = allTasks.filter(t => t.driver === myName);
+            const todayStr = new Date().toISOString().split('T')[0]; 
+            
+            // Hide future bookings, only show today or past pending
+            let myTasks = allTasks.filter(t => t.driver === myName && t.date <= todayStr);
+            
+            // Sort: Pending tasks on top
+            myTasks.sort((a, b) => {
+                if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+                if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+                return 0;
+            });
+
             const list = document.getElementById('taskList');
             
             if(myTasks.length === 0) {
-                list.innerHTML = `<div class="text-center p-8 bg-white rounded-2xl shadow-sm border border-blue-50 text-gray-400 text-sm font-medium">No tasks assigned to you yet.</div>`;
+                list.innerHTML = `<div class="text-center p-8 bg-white rounded-xl shadow-sm border border-blue-50 text-gray-500 text-sm font-medium">No tasks assigned for today.</div>`;
                 return;
             }
 
@@ -586,32 +598,25 @@
                 const isDone = t.status === 'Completed';
                 const isRebook = t.status === 'Rebook';
                 
-                const bgClass = isDone ? 'bg-gray-50 opacity-75' : 'bg-white';
-                const statusBadge = isDone ? '<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-md tracking-widest border border-blue-200">DONE</span>' : 
-                                    (isRebook ? '<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-3 py-1 rounded-md tracking-widest border border-gray-300">REBOOK</span>' : '');
+                const bgClass = isDone ? 'bg-gray-50 opacity-60' : 'bg-white hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md';
+                const statusBadge = isDone ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded tracking-widest border border-emerald-200">DONE</span>' : 
+                                    (isRebook ? '<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded tracking-widest border border-gray-300">REBOOK</span>' : '');
                 
+                const clickAction = (!isDone && !isRebook) ? `onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}', '${t.department || 'GENERAL'}')"` : '';
+
                 return `
-                <div class="${bgClass} p-6 rounded-2xl shadow-sm border border-blue-50 transition-all relative overflow-hidden">
-                    ${!isDone && !isRebook ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>' : ''}
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex gap-2 flex-wrap">
-                            <span class="text-[10px] font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-md border border-gray-200 tracking-widest">${t.date}</span>
-                            <span class="text-[10px] font-bold bg-blue-50 text-blue-800 px-3 py-1 rounded-md border border-blue-100 tracking-widest">${t.vehicle}</span>
-                            <span class="text-[10px] font-bold bg-purple-50 text-purple-800 px-3 py-1 rounded-md border border-purple-100 tracking-widest">${t.department || 'GENERAL'}</span>
+                <button type="button" ${clickAction} class="${bgClass} w-full text-left p-5 rounded-xl border border-blue-100 transition-all relative overflow-hidden flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                    ${!isDone && !isRebook ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>' : ''}
+                    <div class="flex justify-between items-start mb-2 w-full">
+                        <div class="flex gap-1.5 flex-wrap">
+                            <span class="text-[9px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200 tracking-widest">${t.vehicle}</span>
+                            <span class="text-[9px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 tracking-widest">${t.date}</span>
                         </div>
                         ${statusBadge}
                     </div>
-                    <h3 class="font-bold text-blue-900 text-xl leading-tight mb-1">${t.description}</h3>
-                    <p class="text-sm text-gray-500 font-medium">${t.destination}</p>
-                    
-                    ${(!isDone && !isRebook) ? `
-                    <div class="mt-6 pt-5 border-t border-gray-100">
-                        <button onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}', '${t.department || 'GENERAL'}')" class="w-full bg-white border-2 border-blue-100 text-blue-800 text-sm font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
-                            Start Execution
-                        </button>
-                    </div>
-                    ` : ''}
-                </div>
+                    <h3 class="font-bold text-blue-900 text-lg leading-tight mb-1 w-full truncate">${t.description}</h3>
+                    <p class="text-xs text-gray-500 font-medium w-full truncate"><i class="fa-solid fa-location-dot text-blue-400 mr-1"></i> ${t.destination}</p>
+                </button>
                 `;
             }).join('');
         }
@@ -627,6 +632,7 @@
         document.getElementById('fPrice').addEventListener('input', calculateTotalFuelCost);
         document.getElementById('fLiters').addEventListener('input', calculateTotalFuelCost);
 
+        // REVISION: Include GPS coords in log
         async function submitFuel(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -637,8 +643,9 @@
             const vehiclePlate = document.getElementById('fVehicle').value;
             const vObj = allVehicles.find(v => v.plateNumber === vehiclePlate);
             const actualFuelType = vObj ? vObj.fuelType : "Unknown";
-            
             const specificDept = document.getElementById('fLogDept').value; 
+
+            const coords = await getLiveLocation(); // Fetch GPS
 
             const logData = {
                 vehicle: vehiclePlate,
@@ -651,7 +658,9 @@
                 total: parseFloat(document.getElementById('fLiters').value) * parseFloat(document.getElementById('fPrice').value),
                 odo: document.getElementById('fOdo').value ? parseFloat(document.getElementById('fOdo').value) : null,
                 station: document.getElementById('fStation').value || 'N/A',
-                notes: document.getElementById('fNotes').value || ''
+                notes: document.getElementById('fNotes').value || '',
+                latitude: coords.lat,
+                longitude: coords.lon
             };
 
             try {
@@ -679,27 +688,21 @@
             const secManual = document.getElementById('tollForm');
 
             if (tabName === 'ocr') {
-                btnOcr.classList.replace('text-gray-400', 'text-blue-800');
+                btnOcr.classList.replace('text-gray-500', 'text-blue-800');
                 btnOcr.classList.replace('border-transparent', 'border-blue-800');
                 btnOcr.classList.replace('font-bold', 'font-black');
-                
-                btnManual.classList.replace('text-blue-800', 'text-gray-400');
+                btnManual.classList.replace('text-blue-800', 'text-gray-500');
                 btnManual.classList.replace('border-blue-800', 'border-transparent');
                 btnManual.classList.replace('font-black', 'font-bold');
-
-                secOcr.classList.remove('hidden');
-                secManual.classList.add('hidden');
+                secOcr.classList.remove('hidden'); secManual.classList.add('hidden');
             } else {
-                btnManual.classList.replace('text-gray-400', 'text-blue-800');
+                btnManual.classList.replace('text-gray-500', 'text-blue-800');
                 btnManual.classList.replace('border-transparent', 'border-blue-800');
                 btnManual.classList.replace('font-bold', 'font-black');
-                
-                btnOcr.classList.replace('text-blue-800', 'text-gray-400');
+                btnOcr.classList.replace('text-blue-800', 'text-gray-500');
                 btnOcr.classList.replace('border-blue-800', 'border-transparent');
                 btnOcr.classList.replace('font-black', 'font-bold');
-
-                secManual.classList.remove('hidden');
-                secOcr.classList.add('hidden');
+                secManual.classList.remove('hidden'); secOcr.classList.add('hidden');
             }
         };
 
@@ -720,53 +723,38 @@
             }
         });
 
-        // REAL API Connection to OCR Backend
         window.processTollOCR = async function() {
             const btn = document.getElementById('btn-run-ocr');
             const originalHTML = btn.innerHTML;
-            
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Scanning Receipt...`;
             btn.disabled = true;
 
             try {
-                // Send the Base64 image to your Node.js backend
                 const response = await fetch(`${API_BASE}/scan-receipt`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: currentOcrImage })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: currentOcrImage })
                 });
-
                 if (!response.ok) throw new Error("Backend failed to process image.");
-
                 const extractedData = await response.json();
 
-                // If the backend successfully found an amount, auto-fill it!
                 if (extractedData.amount) {
                     document.getElementById('tollAmount').value = extractedData.amount;
-                    
-                    // Auto-fill expressway if detected
                     if (extractedData.expressway) {
                         const expDropdown = document.getElementById('tollExpressway');
                         const optionExists = Array.from(expDropdown.options).some(opt => opt.value === extractedData.expressway);
                         if (optionExists) expDropdown.value = extractedData.expressway;
                     }
-                    
                     document.getElementById('ocr-success-banner').classList.remove('hidden');
-                } else {
-                    alert("Could not clearly read the amount. Please enter it manually.");
-                }
-
+                } else { alert("Could not clearly read the amount. Please enter it manually."); }
             } catch (error) {
                 console.error("OCR API Error:", error);
                 alert("OCR Scanner failed or is offline. Please enter the details manually.");
             } finally {
-                // Switch to manual tab so driver can verify the numbers
                 switchTollTab('manual');
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
+                btn.innerHTML = originalHTML; btn.disabled = false;
             }
         };
 
+        // REVISION: Include GPS coords in log
         async function submitToll(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -776,6 +764,8 @@
 
             const vehiclePlate = document.getElementById('tollVehicle').value;
             const specificDept = document.getElementById('tollLogDept').value; 
+            
+            const coords = await getLiveLocation(); // Fetch GPS
 
             const tollData = {
                 vehicle: vehiclePlate,
@@ -784,47 +774,36 @@
                 date: document.getElementById('tollDate').value,
                 expressway: document.getElementById('tollExpressway').value,
                 amount: parseFloat(document.getElementById('tollAmount').value),
-                notes: document.getElementById('tollNotes').value || ''
+                notes: document.getElementById('tollNotes').value || '',
+                latitude: coords.lat,
+                longitude: coords.lon
             };
 
             try {
                 const res = await fetch(`${API_BASE}/tolls`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(tollData)
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tollData)
                 });
                 
                 if (res.ok) {
                     alert('Toll log saved successfully!');
                     closeTollModal();
                     e.target.reset();
-                    // Reset OCR UI
                     document.getElementById('ocr-preview-container').classList.add('hidden');
                     document.getElementById('ocr-file-name').innerText = "Tap to Open Camera";
                     document.getElementById('ocr-success-banner').classList.add('hidden');
                     switchTollTab('ocr');
                     currentOcrImage = null;
-                    
                     document.getElementById('tollDate').valueAsDate = new Date();
                     updateModalVehicleDropdown('toll'); 
-                } else {
-                    alert('Failed to save toll log.');
-                }
-            } catch (err) { 
-                alert('Server error saving toll log.'); 
-            } finally { 
-                btn.innerHTML = originalText; 
-                btn.disabled = false; 
-            }
+                } else { alert('Failed to save toll log.'); }
+            } catch (err) { alert('Server error saving toll log.'); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
         // --- EXECUTION LOGIC ---
         window.startAssignedTask = function(taskId, taskType, taskDesc, destName, assignedVehicle, taskDept) {
-            currentActiveTaskId = taskId;
-            currentActiveVehicle = assignedVehicle || "N/A";
-            currentActiveTaskName = `${taskType}: ${taskDesc}`;
-            currentActiveTaskDest = destName;
-            currentActiveTaskDept = taskDept || "GENERAL"; 
+            currentActiveTaskId = taskId; currentActiveVehicle = assignedVehicle || "N/A";
+            currentActiveTaskName = `${taskType}: ${taskDesc}`; currentActiveTaskDest = destName; currentActiveTaskDept = taskDept || "GENERAL"; 
             
             document.getElementById('display-task-desc').innerText = taskDesc;
             document.getElementById('display-task-dest').innerText = destName;
@@ -832,18 +811,15 @@
             document.getElementById('display-task-vehicle').innerText = currentActiveVehicle;
             
             document.getElementById('active-task-info').classList.remove('hidden');
-
             document.getElementById('no-task-placeholder').classList.add('hidden');
             document.getElementById('task-action-controls').classList.remove('hidden');
 
             statusText.textContent = `STATUS: READY FOR TRANSIT`;
-            statusText.classList.replace('text-gray-400', 'text-blue-600');
+            statusText.classList.replace('text-gray-500', 'text-blue-600');
             document.getElementById('execution-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
-        function getFinalTaskAndLocation() {
-            return { finalTask: currentActiveTaskName, finalLoc: currentActiveTaskDest };
-        }
+        function getFinalTaskAndLocation() { return { finalTask: currentActiveTaskName, finalLoc: currentActiveTaskDest }; }
 
         function getLiveLocation() {    
             return new Promise((resolve) => {        
@@ -863,16 +839,14 @@
         document.getElementById('file-upload').addEventListener('change', async (e) => {    
             if (e.target.files.length > 0) {        
                 fileNameDisplay.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...`;        
-                uploadedImagesData = []; 
-                previewContainer.innerHTML = ''; 
+                uploadedImagesData = []; previewContainer.innerHTML = ''; 
                 
                 for (let i = 0; i < e.target.files.length; i++) {
                     const compressed = await compressImage(e.target.files[i]);
                     uploadedImagesData.push(compressed);
                     
                     const img = document.createElement('img');
-                    img.src = compressed;
-                    img.className = 'w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm';
+                    img.src = compressed; img.className = 'w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm';
                     previewContainer.appendChild(img);
                 }
                 fileNameDisplay.innerHTML = `<i class="fa-solid fa-check text-emerald-500 mr-2"></i> ${uploadedImagesData.length} Photo(s) Attached`;        
@@ -881,11 +855,9 @@
 
         async function compressImage(file) {
             return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
+                const reader = new FileReader(); reader.readAsDataURL(file);
                 reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
+                    const img = new Image(); img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         let width = img.width, height = img.height;
@@ -903,7 +875,7 @@
         async function sendActionLog(payload, successMsg) {    
             statusText.textContent = "STATUS: SAVING...";
             statusText.classList.replace('text-blue-600', 'text-gray-500');
-            statusText.classList.replace('text-gray-400', 'text-gray-500');
+            statusText.classList.replace('text-gray-600', 'text-gray-500');
             
             try {        
                 const response = await fetch(`${API_BASE}/action-logs`, { 
@@ -923,19 +895,15 @@
 
         document.getElementById('btn-clock-in').addEventListener('click', async () => {    
             const coords = await getLiveLocation();
-            
             let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
             try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
-
             sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
         });
 
         document.getElementById('btn-clock-out').addEventListener('click', async () => {    
             const coords = await getLiveLocation();    
-            
             let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
             try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
-
             sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
         });
 
@@ -947,17 +915,14 @@
             uiTransit.classList.add('hidden');
             if (e.target.value === "Delayed") uiTransit.classList.remove('hidden');
             btnLogTravel.innerHTML = 'Log Travel Update';    
-            btnLogTravel.classList.replace('bg-blue-800', 'bg-blue-100');
-            btnLogTravel.classList.replace('text-white', 'text-blue-800');
+            btnLogTravel.classList.replace('bg-blue-800', 'bg-blue-100'); btnLogTravel.classList.replace('text-white', 'text-blue-800');
         });
 
         btnLogTravel.addEventListener('click', async () => {    
             if(!transitStatus.value) { alert("Please select a travel status first."); return; }        
             let travelStatus = transitStatus.options[transitStatus.selectedIndex].text;
             let selectedReasons = [];    
-            document.querySelectorAll('.transit-reason:checked').forEach(cb => {        
-                if (!cb.closest('div').classList.contains('hidden')) selectedReasons.push(cb.value); 
-            });
+            document.querySelectorAll('.transit-reason:checked').forEach(cb => { if (!cb.closest('div').classList.contains('hidden')) selectedReasons.push(cb.value); });
             if (selectedReasons.length > 0) travelStatus += " (" + selectedReasons.join(", ") + ")";    
             
             const coords = await getLiveLocation();
@@ -965,8 +930,7 @@
             
             const payload = {        
                 driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Travel Update",        
-                department: currentActiveTaskDept, 
-                task: finalTask, location: finalLoc, delivery_status: travelStatus,        
+                department: currentActiveTaskDept, task: finalTask, location: finalLoc, delivery_status: travelStatus,        
                 comments: document.getElementById('comments').value || "None",        
                 document_attached: "None", latitude: coords.lat, longitude: coords.lon    
             };
@@ -974,8 +938,7 @@
             const success = await sendActionLog(payload, "Update Logged");    
             if(success) {         
                 btnLogTravel.innerHTML = 'Logged Successfully';        
-                btnLogTravel.classList.replace('bg-blue-100', 'bg-blue-800');
-                btnLogTravel.classList.replace('text-blue-800', 'text-white');
+                btnLogTravel.classList.replace('bg-blue-100', 'bg-blue-800'); btnLogTravel.classList.replace('text-blue-800', 'text-white');
             }
         });
 
@@ -985,18 +948,9 @@
         const btnSubmitHandover = document.getElementById('btn-submit-handover');
 
         completionStatus.addEventListener('change', (e) => {    
-            uiSuccessful.classList.add('hidden');
-            uiFailed.classList.add('hidden');
-            btnSubmitHandover.classList.add('hidden');        
-            
-            if (e.target.value === "Successful") { 
-                uiSuccessful.classList.remove('hidden'); 
-                btnSubmitHandover.classList.remove('hidden'); 
-            } 
-            else if (e.target.value === "Failed") { 
-                uiFailed.classList.remove('hidden'); 
-                btnSubmitHandover.classList.remove('hidden'); 
-            }
+            uiSuccessful.classList.add('hidden'); uiFailed.classList.add('hidden'); btnSubmitHandover.classList.add('hidden');        
+            if (e.target.value === "Successful") { uiSuccessful.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); } 
+            else if (e.target.value === "Failed") { uiFailed.classList.remove('hidden'); btnSubmitHandover.classList.remove('hidden'); }
         });
 
         const canvas = document.getElementById('signature-pad');
@@ -1015,15 +969,13 @@
 
         canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); 
         canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
-        canvas.addEventListener('touchstart', startDrawing, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); 
-        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); canvas.addEventListener('touchend', stopDrawing);
         document.getElementById('clear-signature').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true; });
 
         btnSubmitHandover.addEventListener('click', async () => {    
             const compType = completionStatus.value;    
             let failReasonsStr = "None", sigData = "None";    
             let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
-            
             let dbCompletionType = "Failed"; 
             
             if (compType === "Successful") {        
@@ -1035,19 +987,14 @@
                 if (remarks.length > 0) {
                     failReasonsStr = Array.from(remarks).map(cb => cb.value).join(" | ");         
                     dbCompletionType = "Completed_Remarks";
-                } else {
-                    dbCompletionType = "Completed";
-                }
+                } else { dbCompletionType = "Completed"; }
             }   
             if (compType === "Failed") {        
                 const checkboxes = document.querySelectorAll('.fail-reason:checked');
                 if (checkboxes.length === 0) return alert("Please select a failure reason."); 
-                
                 const nextStep = document.querySelector('.fail-next-step:checked');
                 if (!nextStep) return alert("Please select a Next Step.");
-
                 failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(" | ") + " | Next Step: " + nextStep.value;  
-                dbCompletionType = "Failed";
             }    
             
             const coords = await getLiveLocation();
@@ -1055,13 +1002,11 @@
 
             const payload = {        
                 driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Final Task Handover",        
-                department: currentActiveTaskDept, 
-                task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
+                department: currentActiveTaskDept, task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
                 comments: document.getElementById('comments').value || "None",        
                 document_attached: uploadedImagesData.length > 0 ? JSON.stringify(uploadedImagesData) : "None", 
                 latitude: coords.lat, longitude: coords.lon,        
-                completion_type: dbCompletionType, 
-                incomplete_reasons: failReasonsStr, signature: sigData    
+                completion_type: dbCompletionType, incomplete_reasons: failReasonsStr, signature: sigData    
             };
             
             const success = await sendActionLog(payload, "Handover Complete");    
@@ -1070,21 +1015,16 @@
                 if (currentActiveTaskId) {
                     const isNeedsRebook = (compType === "Failed" && document.getElementById('check-reschedule').checked);
                     const shouldKeepTaskPending = (compType === "Failed" && document.getElementById('check-later').checked);
-                    
                     const updateStatus = isNeedsRebook ? 'Rebook' : (shouldKeepTaskPending ? 'Pending' : 'Completed');
                     
                     if (updateStatus !== 'Pending') {
                         await fetch(`${API_BASE}/tasks/${currentActiveTaskId}`, {
-                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ status: updateStatus })
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: updateStatus })
                         });
                         alert(updateStatus === 'Rebook' ? "Task flagged for Rebooking by Admin." : "Task completed and removed from pending list!");
-                    } else {
-                        alert("Task attempt logged. It remains on your pending list for later.");
-                    }
-                    currentActiveTaskId = null;
-                    currentActiveVehicle = "N/A";
-                    currentActiveTaskDept = "GENERAL"; 
+                    } else { alert("Task attempt logged. It remains on your pending list for later."); }
+                    
+                    currentActiveTaskId = null; currentActiveVehicle = "N/A"; currentActiveTaskDept = "GENERAL"; 
                 }
 
                 transitStatus.value = ""; btnLogTravel.innerHTML = 'Log Travel Update';        
@@ -1098,11 +1038,8 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
                 document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);        
                 
-                uploadedImagesData = []; 
-                fileNameDisplay.innerHTML = `<i class="fa-solid fa-images mr-2"></i> Attach Photo(s)`;
-                previewContainer.innerHTML = ''; 
-                
-                document.getElementById('comments').value = "";
+                uploadedImagesData = []; fileNameDisplay.innerHTML = `<i class="fa-solid fa-images text-blue-600 mr-2"></i> Attach Photo(s)`;
+                previewContainer.innerHTML = ''; document.getElementById('comments').value = "";
                 
                 document.getElementById('active-task-info').classList.add('hidden');
                 document.getElementById('display-task-desc').innerText = "No task selected";

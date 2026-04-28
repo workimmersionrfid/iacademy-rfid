@@ -70,7 +70,9 @@ const logSchema = new mongoose.Schema({
     total: Number,
     odo: Number,
     station: String,
-    notes: String
+    notes: String,
+    latitude: String,  // NEW: GPS Tracking for Fuel Log
+    longitude: String  // NEW: GPS Tracking for Fuel Log
 });
 
 const tollSchema = new mongoose.Schema({
@@ -80,7 +82,9 @@ const tollSchema = new mongoose.Schema({
     date: String,
     expressway: String,
     amount: Number,
-    notes: String
+    notes: String,
+    latitude: String,  // NEW: GPS Tracking for Toll Log
+    longitude: String  // NEW: GPS Tracking for Toll Log
 });
 
 const taskSchema = new mongoose.Schema({
@@ -152,7 +156,13 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
         }
 
-       const hashedPassword = await bcrypt.hash(password, 10);
+        // NEW: Strict Double-Account Email/Username Check
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        if (existingUser) {
+            return res.status(400).json({ message: "An account with this Username or Email already exists." });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
         const newUser = new User({ 
