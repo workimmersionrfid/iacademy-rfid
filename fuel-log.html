@@ -58,13 +58,13 @@
 
     </script>
 </head>
-<body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
+<body class="bg-brand-bg dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen text-gray-800 dark:text-gray-200 antialiased">
 
     <div id="shared-nav"></div>
 
     <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between">
+        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors duration-300">
             <div class="relative z-10">
                 <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide uppercase">Fleet Financials</p>
                 <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Mileage & Toll Records</h1>
@@ -75,11 +75,11 @@
             </div>
         </div>
 
-        <div id="adminFilters" class="hidden bg-white rounded-2xl shadow-md border border-blue-50 p-6 flex flex-col gap-4">
+        <div id="adminFilters" class="hidden bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 p-6 flex flex-col gap-4 transition-colors duration-300">
             <div class="flex flex-col md:flex-row gap-4 items-end">
                 <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Filter by Department</label>
-                    <select id="filterDept" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Filter by Department</label>
+                    <select id="filterDept" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors">
                         <option value="">All Departments</option>
                         <option value="ELPD">ELPD</option>
                         <option value="OSAS">OSAS</option>
@@ -98,23 +98,23 @@
                 </div>
 
                 <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Filter by Driver</label>
-                    <select id="filterDriver" onchange="applyFuelFilters()" class="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Filter by Driver</label>
+                    <select id="filterDriver" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors">
                         <option value="">All Drivers</option>
                     </select>
                 </div>
                 
                 <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Date Range</label>
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Date Range</label>
                     <div class="relative">
-                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"></i>
-                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 bg-white font-medium text-blue-900 cursor-pointer" placeholder="Select date range...">
+                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400"></i>
+                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 font-medium text-blue-900 dark:text-white cursor-pointer transition-colors" placeholder="Select date range...">
                     </div>
                 </div>
 
                 <div class="w-full md:w-1/4 flex gap-2">
-                    <button onclick="applyFuelFilters(true)" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-3 rounded-xl transition-colors text-sm">Clear Filters</button>
-                    <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
+                    <button onclick="applyFuelFilters(true)" class="flex-1 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-800 dark:text-blue-400 font-bold py-3 rounded-xl transition-colors text-sm">Clear Filters</button>
+                    <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-excel"></i> Export
                     </button>
                 </div>
@@ -122,22 +122,22 @@
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <div class="bg-white rounded-2xl shadow-md p-5 border border-blue-50">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Today's Cost</p>
-                <h3 id="statToday" class="text-2xl md:text-3xl font-black text-blue-900">₱0.00</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 border border-blue-50 dark:border-gray-700 transition-colors duration-300">
+                <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Today's Cost</p>
+                <h3 id="statToday" class="text-2xl md:text-3xl font-black text-blue-900 dark:text-white">₱0.00</h3>
                 <p class="text-[10px] text-gray-400 mt-1">Fuel & Tolls</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-md p-5 border border-blue-50">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">This Week</p>
-                <h3 id="statWeek" class="text-2xl md:text-3xl font-black text-blue-900">₱0.00</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 border border-blue-50 dark:border-gray-700 transition-colors duration-300">
+                <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">This Week</p>
+                <h3 id="statWeek" class="text-2xl md:text-3xl font-black text-blue-900 dark:text-white">₱0.00</h3>
                 <p class="text-[10px] text-gray-400 mt-1">Mon-Sun Total</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-md p-5 border border-blue-50">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">This Month</p>
-                <h3 id="statMonth" class="text-2xl md:text-3xl font-black text-blue-900">₱0.00</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 border border-blue-50 dark:border-gray-700 transition-colors duration-300">
+                <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">This Month</p>
+                <h3 id="statMonth" class="text-2xl md:text-3xl font-black text-blue-900 dark:text-white">₱0.00</h3>
                 <p class="text-[10px] text-gray-400 mt-1">Current Month Total</p>
             </div>
-            <div class="bg-blue-800 rounded-2xl shadow-md p-5 border border-blue-900 relative overflow-hidden">
+            <div class="bg-blue-800 dark:bg-blue-900 rounded-2xl shadow-md p-5 border border-blue-900 dark:border-blue-950 relative overflow-hidden transition-colors duration-300">
                 <div class="absolute -right-4 -bottom-4 opacity-10 text-white text-6xl"><i class="fa-solid fa-chart-line"></i></div>
                 <p class="text-[10px] font-bold text-blue-200 uppercase tracking-wider mb-1 relative z-10">Filtered View Total</p>
                 <h3 id="statTotalCost" class="text-2xl md:text-3xl font-black text-white relative z-10">₱0.00</h3>
@@ -145,25 +145,25 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-800"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 overflow-hidden relative transition-colors duration-300">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-800 dark:bg-blue-600"></div>
             
-            <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="font-bold text-xl text-blue-900">Detailed Financial Logs</h2>
-                <button onclick="loadFuelLogs()" class="text-sm font-bold text-blue-600 hover:text-blue-800"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh Data</button>
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
+                <h2 class="font-bold text-xl text-blue-900 dark:text-white">Detailed Financial Logs</h2>
+                <button onclick="loadFuelLogs()" class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh Data</button>
             </div>
 
             <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar p-2">
                 <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                        <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                    <thead class="sticky top-0 bg-white dark:bg-gray-800 z-10 shadow-sm transition-colors">
+                        <tr class="border-b border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors">
                             <th class="p-4 font-bold">Date</th>
                             <th class="p-4 font-bold">Type & Driver</th>
                             <th class="p-4 font-bold">Expense Details</th>
                             <th class="p-4 font-bold text-right">Cost</th>
                         </tr>
                     </thead>
-                    <tbody id="fuelLogsTable" class="text-sm divide-y divide-gray-50">
+                    <tbody id="fuelLogsTable" class="text-sm divide-y divide-gray-50 dark:divide-gray-800 transition-colors">
                         <tr><td colspan="4" class="p-12 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-3xl mb-4"></i><br>Loading records...</td></tr>
                     </tbody>
                 </table>
@@ -329,41 +329,41 @@
                 
                 if (isFuel) totalLiters += (parseFloat(l.liters) || 0);
 
-                const icon = isFuel ? '<i class="fa-solid fa-gas-pump text-blue-500"></i>' : '<i class="fa-solid fa-ticket text-orange-500"></i>';
-                const badgeClass = isFuel ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-orange-50 text-orange-700 border-orange-200';
+                const icon = isFuel ? '<i class="fa-solid fa-gas-pump text-blue-500 dark:text-blue-400"></i>' : '<i class="fa-solid fa-ticket text-orange-500 dark:text-orange-400"></i>';
+                const badgeClass = isFuel ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800';
                 const typeLabel = isFuel ? 'FUEL' : 'TOLL';
 
                 let detailHTML = '';
                 if (isFuel) {
                     const odoText = l.odo ? `ODO: ${l.odo.toLocaleString()} km` : 'ODO: N/A';
                     detailHTML = `
-                        <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${l.notes ? `<i class="fa-solid fa-message text-blue-400 ml-2" title="${l.notes}"></i>` : ''}</div>
-                        <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
-                            <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700">${l.liters}L ${l.fuelType || ''}</span>
+                        <div class="text-gray-800 dark:text-gray-200 font-bold flex items-center">${l.vehicle} ${l.notes ? `<i class="fa-solid fa-message text-blue-400 ml-2" title="${l.notes}"></i>` : ''}</div>
+                        <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider font-semibold">
+                            <i class="fa-solid fa-gauge-high mr-1 text-gray-400"></i> ${odoText} &bull; <span class="text-blue-700 dark:text-blue-400">${l.liters}L ${l.fuelType || ''}</span>
                         </div>
                     `;
                 } else {
                     detailHTML = `
-                        <div class="text-gray-800 font-bold flex items-center">${l.vehicle} ${l.notes ? `<i class="fa-solid fa-message text-orange-400 ml-2" title="${l.notes}"></i>` : ''}</div>
-                        <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                        <div class="text-gray-800 dark:text-gray-200 font-bold flex items-center">${l.vehicle} ${l.notes ? `<i class="fa-solid fa-message text-orange-400 ml-2" title="${l.notes}"></i>` : ''}</div>
+                        <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider font-semibold">
                             <i class="fa-solid fa-road mr-1 text-gray-400"></i> Route: ${l.expressway || 'Toll Road'}
                         </div>
                     `;
                 }
 
                 return `
-                <tr class="hover:bg-blue-50/30 transition-colors">
-                    <td class="p-4"><span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-md border border-gray-200 tracking-widest text-[10px] uppercase">${l.date}</span></td>
+                <tr class="hover:bg-blue-50/30 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="p-4"><span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold px-3 py-1 rounded-md border border-gray-200 dark:border-gray-600 tracking-widest text-[10px] uppercase">${l.date}</span></td>
                     <td class="p-4">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border ${badgeClass}">${icon} ${typeLabel}</span>
                         </div>
-                        <span class="text-xs font-bold text-gray-800">${l.driver} <span class="text-gray-400 font-normal ml-1">(${l.department})</span></span>
+                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200">${l.driver} <span class="text-gray-400 dark:text-gray-500 font-normal ml-1">(${l.department})</span></span>
                     </td>
                     <td class="p-4">
                         ${detailHTML}
                     </td>
-                    <td class="p-4 text-right font-black text-white bg-blue-900 border-l border-white/20 text-base">₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="p-4 text-right font-black text-white bg-blue-900 dark:bg-gray-900 border-l border-white/20 dark:border-gray-700 text-base">₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 </tr>`;
             }).join('');
 

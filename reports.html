@@ -59,13 +59,13 @@
 
     </script>
 </head>
-<body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">
+<body class="bg-brand-bg dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen text-gray-800 dark:text-gray-200 antialiased">
 
     <div id="shared-nav"></div>
 
     <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between">
+        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 transition-colors duration-300 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between">
             <div class="relative z-10">
                 <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide uppercase">Administrator Portal</p>
                 <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Reports & Analytics</h1>
@@ -76,37 +76,37 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden mb-6 relative">
-            <div class="absolute top-6 bottom-6 left-0 w-1 bg-blue-600 rounded-r"></div>
+        <div class="bg-white dark:bg-gray-800 transition-colors duration-300 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden mb-6 relative">
+            <div class="absolute top-6 bottom-6 left-0 w-1 bg-blue-600 dark:bg-blue-500 rounded-r"></div>
             
             <div class="p-6">
-                <h3 class="text-blue-900 font-bold text-lg mb-5 flex items-center gap-2 pl-3">
-                    <i class="fa-solid fa-filter text-blue-500"></i> Database Filters
+                <h3 class="text-blue-900 dark:text-white font-bold text-lg mb-5 flex items-center gap-2 pl-3">
+                    <i class="fa-solid fa-filter text-blue-500 dark:text-blue-400"></i> Database Filters
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 pl-3">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Date Range</label>
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 tracking-widest">Date Range</label>
                         <div class="relative">
-                            <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 text-xs"></i>
-                            <input type="text" id="reportDateRange" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg py-2.5 pl-9 pr-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm" placeholder="All Time">
+                            <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400 text-xs"></i>
+                            <input type="text" id="reportDateRange" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-blue-900 dark:text-white text-sm font-bold rounded-lg py-2.5 pl-9 pr-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all cursor-pointer shadow-sm" placeholder="All Time">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Department</label>
-                        <select id="reportDeptFilter" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 tracking-widest">Department</label>
+                        <select id="reportDeptFilter" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-blue-900 dark:text-white text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all cursor-pointer shadow-sm">
                             <option value="All">All Departments</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Driver</label>
-                        <select id="reportDriverFilter" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 tracking-widest">Driver</label>
+                        <select id="reportDriverFilter" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-blue-900 dark:text-white text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all cursor-pointer shadow-sm">
                             <option value="All">All Drivers</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Task Category</label>
-                        <select id="reportTaskFilter" class="w-full bg-white border border-gray-200 text-blue-900 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 tracking-widest">Task Category</label>
+                        <select id="reportTaskFilter" class="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-blue-900 dark:text-white text-sm font-bold rounded-lg p-2.5 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all cursor-pointer shadow-sm">
                             <option value="All">All Tasks</option>
                             <option value="Asset Collection">Asset Collection</option>
                             <option value="Document Routing">Document Routing</option>
@@ -117,33 +117,33 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 border-t border-gray-100 pt-5 pl-3">
+                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 border-t border-gray-100 dark:border-gray-700 transition-colors duration-300 pt-5 pl-3">
                     
                     <div class="flex flex-wrap gap-3">
-                        <button id="btn-rep-completed" onclick="toggleReportStatus('Completed')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-28 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:bg-emerald-100 cursor-pointer">
+                        <button id="btn-rep-completed" onclick="toggleReportStatus('Completed')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-28 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/50 cursor-pointer">
                             <span class="text-[9px] font-bold uppercase tracking-widest mb-0.5">Completed</span>
                             <span class="text-xl font-black leading-none" id="repCountCompleted">0</span>
                         </button>
                         
-                        <button id="btn-rep-failed" onclick="toggleReportStatus('Failed')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-28 rounded-lg border border-red-100 bg-red-50 text-red-600 transition-all hover:bg-red-100 cursor-pointer">
+                        <button id="btn-rep-failed" onclick="toggleReportStatus('Failed')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-28 rounded-lg border border-red-100 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition-all hover:bg-red-100 dark:hover:bg-red-900/40 cursor-pointer">
                             <span class="text-[9px] font-bold uppercase tracking-widest mb-0.5">Failed</span>
                             <span class="text-xl font-black leading-none" id="repCountFailed">0</span>
                         </button>
                         
-                        <button id="btn-rep-transit" onclick="toggleReportStatus('Transit')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-32 rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition-all hover:bg-blue-100 cursor-pointer">
+                        <button id="btn-rep-transit" onclick="toggleReportStatus('Transit')" class="rep-status-btn flex flex-col items-center justify-center px-4 py-2 w-32 rounded-lg border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition-all hover:bg-blue-100 dark:hover:bg-blue-900/50 cursor-pointer">
                             <span class="text-[9px] font-bold uppercase tracking-widest mb-0.5 whitespace-nowrap">Transit Updates</span>
                             <span class="text-xl font-black leading-none" id="repCountTransit">0</span>
                         </button>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="clearReportFilters()" class="px-5 py-2.5 bg-gray-50 text-gray-700 font-bold text-sm rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors shadow-sm">
+                        <button onclick="clearReportFilters()" class="px-5 py-2.5 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-sm rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm">
                             <i class="fa-solid fa-eraser mr-1 opacity-70"></i> Clear
                         </button>
-                        <button onclick="renderReportBoard()" class="px-6 py-2.5 bg-blue-700 text-white font-bold text-sm rounded-lg hover:bg-blue-800 transition-colors shadow-sm">
+                        <button onclick="renderReportBoard()" class="px-6 py-2.5 bg-blue-700 dark:bg-blue-600 text-white font-bold text-sm rounded-lg hover:bg-blue-800 dark:hover:bg-blue-700 transition-colors shadow-sm">
                             <i class="fa-solid fa-magnifying-glass mr-1 opacity-70"></i> Search Database
                         </button>
-                        <button onclick="exportToExcel()" class="px-6 py-2.5 bg-emerald-600 text-white font-bold text-sm rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">
+                        <button onclick="exportToExcel()" class="px-6 py-2.5 bg-emerald-600 dark:bg-emerald-500 text-white font-bold text-sm rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors shadow-sm">
                             <i class="fa-solid fa-file-excel mr-1 opacity-70"></i> Export
                         </button>
                     </div>
@@ -151,20 +151,20 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-md border border-blue-50 overflow-hidden relative">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+        <div class="bg-white dark:bg-gray-800 transition-colors duration-300 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 overflow-hidden relative">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-400 dark:bg-blue-500"></div>
             
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-bold text-xl text-blue-900 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-blue-400"></i> Action Logs
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700 transition-colors flex justify-between items-center">
+                <h2 class="font-bold text-xl text-blue-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-400 dark:text-blue-500"></i> Action Logs
                 </h2>
-                <span id="resultCount" class="bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-md text-xs border border-blue-100">0 logs found</span>
+                <span id="resultCount" class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold px-3 py-1 rounded-md text-xs border border-blue-100 dark:border-blue-800">0 logs found</span>
             </div>
 
             <div class="overflow-x-auto max-h-[800px] overflow-y-auto custom-scrollbar p-2">
                 <table class="w-full text-left border-collapse min-w-[1000px]">
-                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                        <tr class="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-widest">
+                    <thead class="sticky top-0 bg-white dark:bg-gray-800 z-10 shadow-sm transition-colors">
+                        <tr class="border-b border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors">
                             <th class="p-4 font-bold">Timestamp</th>
                             <th class="p-4 font-bold">Driver / Dept</th>
                             <th class="p-4 font-bold">Action & Task</th>
@@ -172,7 +172,7 @@
                             <th class="p-4 font-bold">Status & Remarks</th>
                         </tr>
                     </thead>
-                    <tbody id="resultsTable" class="text-sm divide-y divide-gray-50">
+                    <tbody id="resultsTable" class="text-sm divide-y divide-gray-50 dark:divide-gray-800 transition-colors">
                         <tr><td colspan="5" class="p-12 text-center text-blue-400"><i class="fa-solid fa-spinner fa-spin text-3xl mb-4"></i><br>Loading database...</td></tr>
                     </tbody>
                 </table>
@@ -256,7 +256,7 @@
 
                 renderReportBoard(); // Initial render
             } catch (error) {
-                document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 font-bold">Failed to load database.</td></tr>`;
+                document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 dark:text-red-400 font-bold">Failed to load database.</td></tr>`;
             }
         }
 
@@ -321,10 +321,10 @@
             document.getElementById('repCountTransit').innerText = statTrans;
 
             // 3. Handle Active Button Styling
-            document.querySelectorAll('.rep-status-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'scale-105', 'shadow-md'));
+            document.querySelectorAll('.rep-status-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'dark:ring-offset-gray-900', 'scale-105', 'shadow-md'));
             if (activeReportStatus !== 'All') {
                 const activeBtn = document.getElementById(`btn-rep-${activeReportStatus.toLowerCase()}`);
-                if (activeBtn) activeBtn.classList.add('ring-2', 'ring-offset-2', 'scale-105', 'shadow-md');
+                if (activeBtn) activeBtn.classList.add('ring-2', 'ring-offset-2', 'dark:ring-offset-gray-900', 'scale-105', 'shadow-md');
             }
 
             // 4. Apply Final Status Filter Array Reduction
@@ -347,33 +347,33 @@
             document.getElementById('resultCount').innerText = `${logs.length} logs found`;
 
             if (logs.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-400 text-sm italic">No logs match your search criteria.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-400 dark:text-gray-500 text-sm italic">No logs match your search criteria.</td></tr>`;
             } else {
                 tableBody.innerHTML = logs.map(log => {
                     const dateObj = new Date(log.timestamp);
                     const dateFormatted = dateObj.toISOString().split('T')[0];
                     const timeFormatted = dateObj.toTimeString().split(' ')[0];
 
-                    let statusBadge = `<span class="text-gray-500">${log.delivery_status}</span>`;
+                    let statusBadge = `<span class="text-gray-500 dark:text-gray-400">${log.delivery_status}</span>`;
                     
                     if(log.action === "Final Task Handover") {
                         if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") {
-                            statusBadge = `<span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
+                            statusBadge = `<span class="text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
                         } else if(log.completion_type === "Failed") {
-                            statusBadge = `<span class="text-red-700 bg-red-50 px-2 py-1 rounded border border-red-200 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
+                            statusBadge = `<span class="text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded border border-red-200 dark:border-red-900/50 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
                         }
                     } else if(log.action === "Travel Update") {
-                        statusBadge = `<span class="text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
+                        statusBadge = `<span class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded border border-blue-200 dark:border-blue-800 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
                     } else if(log.action === "Started Navigation") {
-                        statusBadge = `<span class="text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
+                        statusBadge = `<span class="text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded border border-purple-200 dark:border-purple-800 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
                     } else if(log.action === "Driver Shift Clock-In") {
-                        statusBadge = `<span class="text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200 font-bold text-[10px] uppercase"><i class="fa-solid fa-clock mr-1"></i> Shift Start</span>`;
+                        statusBadge = `<span class="text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded border border-green-200 dark:border-green-800 font-bold text-[10px] uppercase"><i class="fa-solid fa-clock mr-1"></i> Shift Start</span>`;
                     } else if(log.action === "Driver Shift Clock-Out") {
-                        statusBadge = `<span class="text-gray-700 bg-gray-200 px-2 py-1 rounded border border-gray-300 font-bold text-[10px] uppercase"><i class="fa-solid fa-stopwatch mr-1"></i> Shift End</span>`;
+                        statusBadge = `<span class="text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 font-bold text-[10px] uppercase"><i class="fa-solid fa-stopwatch mr-1"></i> Shift End</span>`;
                     }
 
-                    let comments = (log.comments && log.comments !== "None" && log.comments !== "undefined") ? `<div class="text-[10px] text-gray-400 mt-1 italic">"${log.comments}"</div>` : '';
-                    let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
+                    let comments = (log.comments && log.comments !== "None" && log.comments !== "undefined") ? `<div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 italic">"${log.comments}"</div>` : '';
+                    let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 dark:text-red-400 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
 
                     let proofHTML = '';
                     if (log.document_attached && log.document_attached !== "None") {
@@ -381,13 +381,13 @@
                             const images = JSON.parse(log.document_attached);
                             if (Array.isArray(images)) {
                                 proofHTML = `<div class="flex flex-wrap gap-1.5 mt-2">` + 
-                                    images.map(img => `<img src="${img}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity">`).join('') + 
+                                    images.map(img => `<img src="${img}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 dark:border-gray-600 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity">`).join('') + 
                                 `</div>`;
                             } else {
-                                proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
+                                proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 dark:border-gray-600 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
                             }
                         } catch(e) { 
-                            proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
+                            proofHTML = `<div class="mt-2"><img src="${log.document_attached}" onclick="openImageModal(this.src)" class="w-9 h-9 rounded border border-gray-300 dark:border-gray-600 object-cover shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity"></div>`;
                         }
                     }
 
@@ -395,9 +395,9 @@
                     let signatureHTML = '';
                     if (log.signature && log.signature !== "None") {
                         signatureHTML = `
-                        <div class="mt-3 pt-3 border-t border-gray-100 w-full">
-                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Recipient E-Signature</p>
-                            <img src="${log.signature}" onclick="openImageModal(this.src)" class="h-10 bg-white rounded border border-gray-200 object-contain shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity px-2">
+                        <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 w-full transition-colors">
+                            <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Recipient E-Signature</p>
+                            <img src="${log.signature}" onclick="openImageModal(this.src)" class="h-10 bg-white dark:bg-gray-200 rounded border border-gray-200 dark:border-gray-600 object-contain shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity px-2">
                         </div>`;
                     }
 
@@ -405,27 +405,27 @@
                     if (log.latitude && log.longitude && log.latitude !== "N/A" && log.longitude !== "N/A") {
                         gpsHTML = `
                         <div class="mt-2">
-                            <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                            <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded border border-blue-100 dark:border-blue-800">
                                 <i class="fa-solid fa-location-crosshairs"></i> ${log.latitude}, ${log.longitude}
                             </a>
                         </div>`;
                     }
 
                     return `
-                    <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-50">
+                    <tr class="hover:bg-blue-50/30 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-800">
                         <td class="p-4">
-                            <div class="font-bold text-gray-800">${dateFormatted}</div>
-                            <div class="text-xs text-gray-500 mt-0.5"><i class="fa-regular fa-clock mr-1"></i> ${timeFormatted}</div>
+                            <div class="font-bold text-gray-800 dark:text-gray-200">${dateFormatted}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i> ${timeFormatted}</div>
                         </td>
                         <td class="p-4">
-                            <div class="font-bold text-gray-800"><i class="fa-regular fa-user text-blue-400 mr-1"></i> ${log.driver_name}</div>
-                            <div class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">${log.department || 'GENERAL'}</div>
+                            <div class="font-bold text-gray-800 dark:text-gray-200"><i class="fa-regular fa-user text-blue-400 mr-1"></i> ${log.driver_name}</div>
+                            <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-1">${log.department || 'GENERAL'}</div>
                         </td>
                         <td class="p-4">
-                            <div class="font-bold text-blue-900">${log.action}</div>
-                            <div class="text-[10px] text-gray-500 mt-1 font-bold uppercase tracking-wider">${log.task}</div>
+                            <div class="font-bold text-blue-900 dark:text-blue-300">${log.action}</div>
+                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 font-bold uppercase tracking-wider">${log.task}</div>
                         </td>
-                        <td class="p-4 font-medium text-gray-600 text-sm">
+                        <td class="p-4 font-medium text-gray-600 dark:text-gray-300 text-sm">
                             <div class="line-clamp-2" title="${log.location}">${log.location}</div>
                             ${gpsHTML}
                         </td>
