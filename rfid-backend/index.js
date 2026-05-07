@@ -116,13 +116,14 @@ const actionLogSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
-// NEW: Chat Message Schema!
+// Chat Message Schema with SOFT DELETE capability
 const messageSchema = new mongoose.Schema({
-    sender: String, // Username of driver, or 'Admin'
-    receiver: String, // Username of driver, or 'Admin'
+    sender: String, 
+    receiver: String, 
     text: String,
     timestamp: { type: Date, default: Date.now },
-    isRead: { type: Boolean, default: false }
+    isRead: { type: Boolean, default: false },
+    hiddenBy: { type: [String], default: [] } // NEW: Tracks who "deleted" the message from their screen
 });
 
 const User = mongoose.model('User', userSchema);
@@ -131,7 +132,7 @@ const FuelLog = mongoose.model('FuelLog', logSchema);
 const TollLog = mongoose.model('TollLog', tollSchema); 
 const Task = mongoose.model('Task', taskSchema);
 const ActionLog = mongoose.model('ActionLog', actionLogSchema);
-const Message = mongoose.model('Message', messageSchema); // NEW!
+const Message = mongoose.model('Message', messageSchema);
 
 // ==========================================
 // --- GOOGLE SHEETS LIVE SYNC HELPER ---
@@ -160,7 +161,6 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, firstName, lastName, middleName, email, password, role, department } = req.body;
         
-        // Normalize strings for saving (Fixes the duplicate bug!)
         const normalizedEmail = email.toLowerCase().trim();
         const normalizedUsername = username.toLowerCase().trim();
 
@@ -169,7 +169,6 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
         }
 
-        // Strict Case-Insensitive Check against the database
         const existingUser = await User.findOne({ 
             $or: [
                 { email: { $regex: new RegExp('^' + normalizedEmail + '$', 'i') } }, 
@@ -251,7 +250,6 @@ app.get('/api/auth/verify/:token', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        // Search case-insensitively just in case
         const normalizedUsername = username.toLowerCase().trim();
         const user = await User.findOne({ username: { $regex: new RegExp('^' + normalizedUsername + '$', 'i') } });
         
@@ -513,28 +511,28 @@ app.post('/api/action-logs', async (req, res) => {
 });
 
 // ==========================================
-// --- NEW: MESSAGING / CHAT ROUTES ---
+// --- MESSAGING / CHAT ROUTES ---
 // ==========================================
 
-// Get messages for a specific user
+// Get messages for a specific user (filters out soft-deleted ones!)
 app.get('/api/messages/:username', async (req, res) => {
     try {
         const username = req.params.username;
-        // If the requester is 'Admin', return all messages so the Control Center can view them
         if (username === 'Admin') {
-            const messages = await Message.find().sort({ timestamp: 1 });
+            // Send to Admin only if Admin hasn't hidden it
+            const messages = await Message.find({ hiddenBy: { $ne: 'Admin' } }).sort({ timestamp: 1 });
             res.json(messages);
         } else {
-            // If the requester is a Driver, only return messages sent TO or FROM them
+            // Send to Driver only if Driver hasn't hidden it
             const messages = await Message.find({
-                $or: [{ sender: username }, { receiver: username }]
+                $or: [{ sender: username }, { receiver: username }],
+                hiddenBy: { $ne: username }
             }).sort({ timestamp: 1 });
             res.json(messages);
         }
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Send a new message
 app.post('/api/messages', async (req, res) => {
     try {
         const newMsg = new Message(req.body);
@@ -543,17 +541,34 @@ app.post('/api/messages', async (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Mark messages as read
 app.put('/api/messages/mark-read', async (req, res) => {
     try {
         const { username, role } = req.body;
         if (role === 'admin') {
-            // Admin is reading messages sent by a specific driver
             await Message.updateMany({ sender: username, receiver: 'Admin', isRead: false }, { isRead: true });
         } else {
-            // Driver is reading messages sent by Admin
             await Message.updateMany({ sender: 'Admin', receiver: username, isRead: false }, { isRead: true });
         }
+        res.json({ success: true });
+    } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// NEW: Clear/Soft-Delete Chat Messages Route
+app.put('/api/messages/clear', async (req, res) => {
+    try {
+        const { driverUsername, clearedBy } = req.body; 
+        
+        // Find all messages between Admin and this specific driver, 
+        // and add the person clicking the "Clear" button to the hiddenBy list
+        await Message.updateMany(
+            {
+                $or: [
+                    { sender: 'Admin', receiver: driverUsername },
+                    { sender: driverUsername, receiver: 'Admin' }
+                ]
+            },
+            { $addToSet: { hiddenBy: clearedBy } }
+        );
         res.json({ success: true });
     } catch(err) { res.status(500).json({ error: err.message }); }
 });
