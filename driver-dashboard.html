@@ -579,36 +579,55 @@
             const myName = localStorage.getItem('username');
             const todayStr = new Date().toISOString().split('T')[0]; 
             
-            // Hide future bookings, only show today or past pending
-            let myTasks = allTasks.filter(t => t.driver === myName && t.date <= todayStr);
+            // Get ALL tasks for this driver (including future ones)
+            let myTasks = allTasks.filter(t => t.driver === myName);
             
-            // Sort: Pending tasks on top
+            // Sort: Pending tasks on top, sorted by date
             myTasks.sort((a, b) => {
                 if (a.status === 'Pending' && b.status !== 'Pending') return -1;
                 if (a.status !== 'Pending' && b.status === 'Pending') return 1;
-                return 0;
+                return new Date(a.date) - new Date(b.date);
             });
 
             const list = document.getElementById('taskList');
             
             if(myTasks.length === 0) {
-                list.innerHTML = `<div class="text-center p-8 bg-white rounded-xl shadow-sm border border-blue-50 text-gray-500 text-sm font-medium">No tasks assigned for today.</div>`;
+                list.innerHTML = `<div class="text-center p-8 bg-white rounded-xl shadow-sm border border-blue-50 text-gray-500 text-sm font-medium">No tasks assigned.</div>`;
                 return;
             }
 
             list.innerHTML = myTasks.map(t => {
                 const isDone = t.status === 'Completed';
                 const isRebook = t.status === 'Rebook';
+                // Check if the task date is strictly in the future
+                const isFuture = t.date > todayStr && !isDone && !isRebook;
                 
-                const bgClass = isDone ? 'bg-gray-50 opacity-60' : 'bg-white hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md';
-                const statusBadge = isDone ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded tracking-widest border border-emerald-200">DONE</span>' : 
-                                    (isRebook ? '<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded tracking-widest border border-gray-300">REBOOK</span>' : '');
-                
-                const clickAction = (!isDone && !isRebook) ? `onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}', '${t.department || 'GENERAL'}')"` : '';
+                let bgClass, statusBadge, clickAction;
+
+                if (isDone) {
+                    bgClass = 'bg-gray-50 opacity-60 border-gray-200';
+                    statusBadge = '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded tracking-widest border border-emerald-200">DONE</span>';
+                    clickAction = '';
+                } else if (isRebook) {
+                    bgClass = 'bg-red-50/30 opacity-70 border-red-100';
+                    statusBadge = '<span class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded tracking-widest border border-red-200">REBOOK</span>';
+                    clickAction = '';
+                } else if (isFuture) {
+                    // Future task styling - Locked
+                    bgClass = 'bg-gray-50 border-gray-200 opacity-80 hover:bg-gray-100 cursor-not-allowed';
+                    statusBadge = '<span class="text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded tracking-widest border border-orange-200"><i class="fa-solid fa-lock mr-1"></i> FUTURE</span>';
+                    // Trigger alert to ask admin
+                    clickAction = `onclick="alert('🔒 Locked: Future Dispatch\\n\\nThis task is scheduled for ${t.date}. If it is feasible to complete it today, please contact your Administrator to request early access (they can change the dispatch date to today).')"`;
+                } else {
+                    // Today or Past Pending
+                    bgClass = 'bg-white hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md border-blue-100';
+                    statusBadge = '<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded tracking-widest border border-blue-200">PENDING</span>';
+                    clickAction = `onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}', '${t.department || 'GENERAL'}')"`;
+                }
 
                 return `
-                <button type="button" ${clickAction} class="${bgClass} w-full text-left p-5 rounded-xl border border-blue-100 transition-all relative overflow-hidden flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
-                    ${!isDone && !isRebook ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>' : ''}
+                <button type="button" ${clickAction} class="${bgClass} w-full text-left p-5 rounded-xl border transition-all relative overflow-hidden flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                    ${(!isDone && !isRebook && !isFuture) ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>' : ''}
                     <div class="flex justify-between items-start mb-2 w-full">
                         <div class="flex gap-1.5 flex-wrap">
                             <span class="text-[9px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200 tracking-widest">${t.vehicle}</span>
