@@ -10,8 +10,11 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
     <script>
+        // 1. Tell Tailwind to use 'class' for dark mode
         tailwind.config = {
+            darkMode: 'class', 
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -19,65 +22,86 @@
                 }
             }
         }
+
+        // 2. Check local storage for theme preference
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Theme Toggle Function for the Login Page
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
     </script>
 </head>
-<body class="bg-brand-bg font-sans min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+<body class="bg-brand-bg dark:bg-gray-900 font-sans min-h-screen flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
     
-    <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 z-0"></div>
+    <button onclick="toggleTheme()" class="absolute top-6 right-6 z-20 text-white/70 hover:text-white dark:text-gray-400 dark:hover:text-yellow-400 text-2xl transition-colors drop-shadow-md">
+        <i class="fa-solid fa-moon dark:hidden"></i>
+        <i class="fa-solid fa-sun hidden dark:inline text-yellow-400"></i>
+    </button>
 
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100 relative z-10">
-        <div class="p-8 text-center bg-white border-b border-gray-100">
-            <i class="fa-solid fa-building-shield text-blue-800 text-5xl mb-4"></i>
-            <h1 class="text-2xl font-black text-gray-800 tracking-tight">iACADEMY <span class="text-blue-800 font-light">RFID</span></h1>
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-2">Vehicle Management System</p>
+    <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 z-0 transition-colors duration-300"></div>
+
+    <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 relative z-10 transition-colors duration-300">
+        <div class="p-8 text-center bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 transition-colors duration-300">
+            <i class="fa-solid fa-building-shield text-blue-800 dark:text-blue-400 text-5xl mb-4 transition-colors"></i>
+            <h1 class="text-2xl font-black text-gray-800 dark:text-white tracking-tight transition-colors">iACADEMY <span class="text-blue-800 dark:text-blue-400 font-light">RFID</span></h1>
+            <p class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mt-2 transition-colors">Vehicle Management System</p>
         </div>
 
         <form id="loginForm" class="p-8 space-y-6">
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Username</label>
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">Username</label>
                 <div class="relative">
-                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="username" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
+                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
+                    <input type="text" id="username" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-900 transition-all text-blue-900 dark:text-white">
                 </div>
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Password</label>
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">Password</label>
                 <div class="relative">
-                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" id="password" required class="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 pr-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all text-blue-900">
-                    <button type="button" onclick="togglePassword('password', 'loginToggleIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
+                    <input type="password" id="password" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 pr-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-900 transition-all text-blue-900 dark:text-white">
+                    <button type="button" onclick="togglePassword('password', 'loginToggleIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none transition-colors">
                         <i id="loginToggleIcon" class="fa-solid fa-eye"></i>
                     </button>
                 </div>
             </div>
 
             <div class="flex items-center justify-between">
-                <a href="forgot-password.html" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Forgot password?</a>
+                <a href="forgot-password.html" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">Forgot password?</a>
             </div>
 
-            <button type="submit" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider">
+            <button type="submit" class="w-full bg-blue-800 dark:bg-blue-600 hover:bg-blue-900 dark:hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider">
                 Sign In to Portal
             </button>
             
-            <p class="text-center text-xs text-gray-500 mt-6 font-medium">
-                Don't have a driver account? <a href="signup.html" class="text-blue-700 font-bold hover:underline">Register Here</a>
+            <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-6 font-medium">
+                Don't have a driver account? <a href="signup.html" class="text-blue-700 dark:text-blue-400 font-bold hover:underline transition-colors">Register Here</a>
             </p>
         </form>
     </div>
 
     <script>
-        // Check the URL for the verification success flag and display a banner if present
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('verified') === 'success') {
             const formContainer = document.getElementById('loginForm');
             const successBanner = document.createElement('div');
-            successBanner.className = "bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-xl mb-6 text-center";
+            successBanner.className = "bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400 text-xs font-bold p-3 rounded-xl mb-6 text-center transition-colors";
             successBanner.innerHTML = "<i class='fa-solid fa-check-circle mr-1'></i> Email successfully verified! You may now log in.";
             formContainer.prepend(successBanner);
         }
 
-        // Function to toggle password visibility
         function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
@@ -118,7 +142,6 @@
                 const data = await response.json();
 
               if (response.ok) {
-                    // Check if email verification is flagged by the backend
                     if (data.isVerified === false) {
                         alert("Please verify your email address before logging in.");
                         submitBtn.innerHTML = originalText;
