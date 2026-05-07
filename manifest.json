@@ -1,20 +1,20 @@
 {
-  "name": "iACADEMY Fleet Management",
-  "short_name": "Fleet RFID",
-  "description": "Driver Dashboard and Logistics Tracker",
+  "name": "iACADEMY RFID Vehicle Management",
+  "short_name": "iACADEMY Fleet",
+  "description": "Vehicle Management and Dispatch System for iACADEMY",
   "start_url": "/login.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "logo.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

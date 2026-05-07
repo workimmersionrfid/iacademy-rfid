@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const nodemailer = require('nodemailer'); // For sending emails
-const crypto = require('crypto'); // For generating secure verification tokens
+const nodemailer = require('nodemailer'); 
+const crypto = require('crypto'); 
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
 
@@ -22,7 +22,6 @@ mongoose.connect(process.env.MONGODB_URI)
 // ==========================================
 // --- NODEMAILER TRANSPORTER SETUP ---
 // ==========================================
-// This uses the App Password generated from your Gmail account
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -71,8 +70,8 @@ const logSchema = new mongoose.Schema({
     odo: Number,
     station: String,
     notes: String,
-    latitude: String,  // NEW: GPS Tracking for Fuel Log
-    longitude: String  // NEW: GPS Tracking for Fuel Log
+    latitude: String,  
+    longitude: String  
 });
 
 const tollSchema = new mongoose.Schema({
@@ -83,8 +82,8 @@ const tollSchema = new mongoose.Schema({
     expressway: String,
     amount: Number,
     notes: String,
-    latitude: String,  // NEW: GPS Tracking for Toll Log
-    longitude: String  // NEW: GPS Tracking for Toll Log
+    latitude: String,  
+    longitude: String  
 });
 
 const taskSchema = new mongoose.Schema({
@@ -117,12 +116,22 @@ const actionLogSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+// NEW: Chat Message Schema!
+const messageSchema = new mongoose.Schema({
+    sender: String, // Username of driver, or 'Admin'
+    receiver: String, // Username of driver, or 'Admin'
+    text: String,
+    timestamp: { type: Date, default: Date.now },
+    isRead: { type: Boolean, default: false }
+});
+
 const User = mongoose.model('User', userSchema);
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 const FuelLog = mongoose.model('FuelLog', logSchema);
 const TollLog = mongoose.model('TollLog', tollSchema); 
 const Task = mongoose.model('Task', taskSchema);
 const ActionLog = mongoose.model('ActionLog', actionLogSchema);
+const Message = mongoose.model('Message', messageSchema); // NEW!
 
 // ==========================================
 // --- GOOGLE SHEETS LIVE SYNC HELPER ---
@@ -151,28 +160,34 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, firstName, lastName, middleName, email, password, role, department } = req.body;
         
-        // 1. Normalize the email and username to lowercase
-        const normalizedEmail = email.toLowerCase();
-        const normalizedUsername = username.toLowerCase();
+        // Normalize strings for saving (Fixes the duplicate bug!)
+        const normalizedEmail = email.toLowerCase().trim();
+        const normalizedUsername = username.toLowerCase().trim();
 
         const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!passRegex.test(password)) {
             return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
         }
 
-        // 2. Check using the normalized strings
+        // Strict Case-Insensitive Check against the database
         const existingUser = await User.findOne({ 
-            $or: [{ email: normalizedEmail }, { username: normalizedUsername }] 
+            $or: [
+                { email: { $regex: new RegExp('^' + normalizedEmail + '$', 'i') } }, 
+                { username: { $regex: new RegExp('^' + normalizedUsername + '$', 'i') } }
+            ] 
         });
         
         if (existingUser) {
-            return res.status(400).json({ message: "An account with this Username or Email already exists." });
+            if (existingUser.email.toLowerCase() === normalizedEmail) {
+                return res.status(400).json({ message: "An account with this Email Address already exists." });
+            } else {
+                return res.status(400).json({ message: "This Username is already taken." });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
-        // 3. Save the normalized strings to the database
         const newUser = new User({ 
             username: normalizedUsername, 
             firstName, 
@@ -187,13 +202,12 @@ app.post('/api/auth/register', async (req, res) => {
         
         await newUser.save();
 
-        
         const backendUrl = `${req.protocol}://${req.get('host')}`;
         const verifyLink = `${backendUrl}/api/auth/verify/${verificationToken}`;
 
         const mailOptions = {
             from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
-            to: email,
+            to: normalizedEmail,
             subject: 'Verify Your Driver Account',
             html: `
                 <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
@@ -209,7 +223,7 @@ app.post('/api/auth/register', async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
-        if (err.code === 11000) return res.status(400).json({ message: 'Username or Email already exists' });
+        if (err.code === 11000) return res.status(400).json({ message: 'Database constraint: Username or Email already exists' });
         res.status(500).json({ message: err.message });
     }
 });
@@ -237,7 +251,10 @@ app.get('/api/auth/verify/:token', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await User.findOne({ username });
+        // Search case-insensitively just in case
+        const normalizedUsername = username.toLowerCase().trim();
+        const user = await User.findOne({ username: { $regex: new RegExp('^' + normalizedUsername + '$', 'i') } });
+        
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -258,7 +275,6 @@ app.post('/api/auth/login', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- FORGOT PASSWORD ROUTE ---
 app.post('/api/auth/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
@@ -267,7 +283,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
         const token = crypto.randomBytes(20).toString('hex');
         user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
+        user.resetPasswordExpires = Date.now() + 3600000; 
         await user.save();
 
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
@@ -294,7 +310,6 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- RESET PASSWORD ROUTE ---
 app.post('/api/auth/reset-password', async (req, res) => {
     try {
         const { token, password } = req.body;
@@ -372,7 +387,6 @@ app.post('/api/logs', async (req, res) => {
         const newLog = new FuelLog(req.body);
         await newLog.save();
 
-        // Push Real-Time Data to Google Sheets
         pushToGoogleSheet({
             date: new Date().toLocaleString(),
             driver: newLog.driver,
@@ -400,7 +414,6 @@ app.post('/api/tolls', async (req, res) => {
         const newToll = new TollLog(req.body);
         await newToll.save();
 
-        // Push Real-Time Data to Google Sheets
         pushToGoogleSheet({
             date: new Date().toLocaleString(),
             driver: newToll.driver,
@@ -474,7 +487,6 @@ app.post('/api/action-logs', async (req, res) => {
         const newLog = new ActionLog(req.body);
         await newLog.save();
 
-        // --- Push Real-Time Data to Google Sheets ---
         let detailedNotes = `Status: ${newLog.delivery_status}`;
         
         if (newLog.incomplete_reasons && newLog.incomplete_reasons !== "None") {
@@ -500,6 +512,52 @@ app.post('/api/action-logs', async (req, res) => {
     }
 });
 
+// ==========================================
+// --- NEW: MESSAGING / CHAT ROUTES ---
+// ==========================================
+
+// Get messages for a specific user
+app.get('/api/messages/:username', async (req, res) => {
+    try {
+        const username = req.params.username;
+        // If the requester is 'Admin', return all messages so the Control Center can view them
+        if (username === 'Admin') {
+            const messages = await Message.find().sort({ timestamp: 1 });
+            res.json(messages);
+        } else {
+            // If the requester is a Driver, only return messages sent TO or FROM them
+            const messages = await Message.find({
+                $or: [{ sender: username }, { receiver: username }]
+            }).sort({ timestamp: 1 });
+            res.json(messages);
+        }
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Send a new message
+app.post('/api/messages', async (req, res) => {
+    try {
+        const newMsg = new Message(req.body);
+        await newMsg.save();
+        res.status(201).json(newMsg);
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+// Mark messages as read
+app.put('/api/messages/mark-read', async (req, res) => {
+    try {
+        const { username, role } = req.body;
+        if (role === 'admin') {
+            // Admin is reading messages sent by a specific driver
+            await Message.updateMany({ sender: username, receiver: 'Admin', isRead: false }, { isRead: true });
+        } else {
+            // Driver is reading messages sent by Admin
+            await Message.updateMany({ sender: 'Admin', receiver: username, isRead: false }, { isRead: true });
+        }
+        res.json({ success: true });
+    } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 // --- CONFIG ROUTE ---
 app.get('/api/config/maps', (req, res) => {
     res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
@@ -508,25 +566,22 @@ app.get('/api/config/maps', (req, res) => {
 // --- OCR RECEIPT SCANNER ROUTE ---
 app.post('/api/scan-receipt', async (req, res) => {
     try {
-        const { image } = req.body; // The base64 string sent from the frontend
+        const { image } = req.body; 
 
         if (!image) {
             return res.status(400).json({ error: "No image provided" });
         }
 
-        // Run the OCR engine on the image
         const { data: { text } } = await Tesseract.recognize(image, 'eng');
         
         let detectedAmount = null;
         let detectedExpressway = null;
 
-        // 1. Extract Amount (Looks for a number with a decimal, e.g., 175.00)
         const amountMatch = text.match(/\d+\.\d{2}/);
         if (amountMatch) {
             detectedAmount = parseFloat(amountMatch[0]);
         }
 
-        // 2. Extract Expressway (Looks for common toll keywords)
         const upperText = text.toUpperCase();
         if (upperText.includes('NLEX')) detectedExpressway = 'NLEX';
         else if (upperText.includes('SLEX')) detectedExpressway = 'SLEX';
@@ -536,7 +591,6 @@ app.post('/api/scan-receipt', async (req, res) => {
         else if (upperText.includes('MCX')) detectedExpressway = 'MCX';
         else if (upperText.includes('CALAX')) detectedExpressway = 'CALAX';
 
-        // Send the extracted data back to the frontend
         res.json({
             amount: detectedAmount,
             expressway: detectedExpressway
