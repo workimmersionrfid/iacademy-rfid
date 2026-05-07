@@ -287,20 +287,7 @@ function initAdminChatLogic() {
     let allChatMessages = [];
     let allDriversCache = [];
 
-    if (adminChatOpen) {
-        document.getElementById('adminChatBox').classList.remove('hidden');
-        document.getElementById('adminChatBox').classList.add('flex');
-        document.getElementById('adminChatBadge').classList.add('hidden');
-        if (currentChatDriver) window.openDriverChat(currentChatDriver);
-        else window.showChatList();
-        
-        loadAdminMessages();
-        adminChatInterval = setInterval(loadAdminMessages, 5000);
-    } else {
-        setTimeout(loadAdminMessages, 2000); 
-        setInterval(() => { if(!adminChatOpen) loadAdminMessages(); }, 10000);
-    }
-
+    // --- DEFINE FUNCTIONS FIRST ---
     window.toggleAdminChat = function() {
         adminChatOpen = !adminChatOpen;
         localStorage.setItem('adminChatOpen', adminChatOpen); 
@@ -374,7 +361,6 @@ function initAdminChatLogic() {
 
     async function loadAdminMessages() {
         try {
-            // Robust fetch for drivers
             if(allDriversCache.length === 0) {
                 const driverRes = await fetch(`${API_BASE_CHAT}/drivers`);
                 if(driverRes.ok) {
@@ -384,7 +370,6 @@ function initAdminChatLogic() {
                 }
             }
 
-            // Robust fetch for messages
             const res = await fetch(`${API_BASE_CHAT}/messages/Admin`);
             if (!res.ok) throw new Error("Could not fetch chat messages");
             
@@ -401,7 +386,6 @@ function initAdminChatLogic() {
             
         } catch (err) { 
             console.error("Chat Error:", err); 
-            // Graceful UI Error State so it never spins forever
             if (adminChatOpen && !currentChatDriver) {
                 const listContainer = document.getElementById('chatContactList');
                 if (listContainer) {
@@ -510,6 +494,21 @@ function initAdminChatLogic() {
             loadAdminMessages(); 
         } catch(err) { alert('Failed to send message'); }
     });
+
+    // --- CHECK FOR OPEN CHAT ON LOAD ---
+    if (adminChatOpen) {
+        document.getElementById('adminChatBox').classList.remove('hidden');
+        document.getElementById('adminChatBox').classList.add('flex');
+        document.getElementById('adminChatBadge').classList.add('hidden');
+        if (currentChatDriver) window.openDriverChat(currentChatDriver);
+        else window.showChatList();
+        
+        loadAdminMessages();
+        adminChatInterval = setInterval(loadAdminMessages, 5000);
+    } else {
+        setTimeout(loadAdminMessages, 2000); 
+        setInterval(() => { if(!adminChatOpen) loadAdminMessages(); }, 10000);
+    }
 }
 
 // ----------------------------------------------------
@@ -519,17 +518,7 @@ function initDriverChatLogic() {
     let driverChatOpen = localStorage.getItem('driverChatOpen') === 'true';
     let chatInterval;
 
-    if (driverChatOpen) {
-        document.getElementById('chatBox').classList.remove('hidden');
-        document.getElementById('chatBox').classList.add('flex');
-        document.getElementById('chatBadge').classList.add('hidden');
-        loadMessages();
-        chatInterval = setInterval(loadMessages, 5000);
-    } else {
-        setTimeout(loadMessages, 2000); 
-        setInterval(() => { if(!driverChatOpen) loadMessages(); }, 10000);
-    }
-
+    // --- DEFINE FUNCTIONS FIRST ---
     window.toggleChat = function() {
         driverChatOpen = !driverChatOpen;
         localStorage.setItem('driverChatOpen', driverChatOpen); 
@@ -638,4 +627,16 @@ function initDriverChatLogic() {
             loadMessages(); 
         } catch(err) { alert('Failed to send message'); }
     });
+
+    // --- CHECK FOR OPEN CHAT ON LOAD ---
+    if (driverChatOpen) {
+        document.getElementById('chatBox').classList.remove('hidden');
+        document.getElementById('chatBox').classList.add('flex');
+        document.getElementById('chatBadge').classList.add('hidden');
+        loadMessages();
+        chatInterval = setInterval(loadMessages, 5000);
+    } else {
+        setTimeout(loadMessages, 2000); 
+        setInterval(() => { if(!driverChatOpen) loadMessages(); }, 10000);
+    }
 }
