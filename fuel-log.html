@@ -21,65 +21,63 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
     <script>
-
-        // 1. Tell Tailwind to use 'class' for dark mode
-
         tailwind.config = {
-
             darkMode: 'class', 
-
             theme: {
-
                 extend: { 
-
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-
                     colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
-
                 }
-
             }
-
         }
-
-
-
-        // 2. Check local storage for theme preference BEFORE the page renders
 
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-
             document.documentElement.classList.add('dark');
-
         } else {
-
             document.documentElement.classList.remove('dark');
-
         }
-
     </script>
 </head>
-<body class="bg-brand-bg dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen text-gray-800 dark:text-gray-200 antialiased">
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen text-gray-800 dark:text-gray-200 antialiased">
 
     <div id="shared-nav"></div>
 
     <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-        <div class="bg-gradient-to-r from-blue-800 via-blue-400 to-blue-50 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors duration-300">
+        <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors duration-300 shrink-0">
             <div class="relative z-10">
                 <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide uppercase">Fleet Financials</p>
                 <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Mileage & Toll Records</h1>
                 <p class="text-blue-50 mt-2 max-w-lg text-sm">Monitor combined fuel consumption, toll expenses, and total fleet expenditure.</p>
             </div>
-            <div class="hidden md:block relative z-10 text-white/20">
+            <div class="hidden md:block relative z-10 text-white/10">
                 <i class="fa-solid fa-money-check-dollar text-9xl"></i>
             </div>
         </div>
 
-        <div id="adminFilters" class="hidden bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 p-6 flex flex-col gap-4 transition-colors duration-300">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Filter by Department</label>
-                    <select id="filterDept" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors">
+        <div id="filtersSection" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 p-6 flex flex-col gap-4 transition-colors duration-300">
+            <div class="flex flex-col md:flex-row gap-4 items-end flex-wrap">
+                
+                <div class="w-full md:flex-1 min-w-[150px]">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Date Range</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400"></i>
+                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 font-medium text-blue-900 dark:text-white cursor-pointer transition-colors" placeholder="Select date range...">
+                    </div>
+                </div>
+
+                <div class="w-full md:flex-1 min-w-[150px]">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Expense Type</label>
+                    <select id="filterType" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors cursor-pointer font-medium">
+                        <option value="">All Types</option>
+                        <option value="Fuel">Fuel Only</option>
+                        <option value="Toll">Toll Only</option>
+                    </select>
+                </div>
+
+                <div class="w-full md:flex-1 min-w-[150px]">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Department</label>
+                    <select id="filterDept" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors cursor-pointer font-medium">
                         <option value="">All Departments</option>
                         <option value="ELPD">ELPD</option>
                         <option value="OSAS">OSAS</option>
@@ -97,25 +95,24 @@
                     </select>
                 </div>
 
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Filter by Driver</label>
-                    <select id="filterDriver" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors">
+                <div class="w-full md:flex-1 min-w-[150px]">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Assigned Vehicle</label>
+                    <select id="filterVehicle" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors cursor-pointer font-medium">
+                        <option value="">All Vehicles</option>
+                    </select>
+                </div>
+
+                <div id="driverFilterWrapper" class="hidden w-full md:flex-1 min-w-[150px]">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Driver</label>
+                    <select id="filterDriver" onchange="applyFuelFilters()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors cursor-pointer font-medium">
                         <option value="">All Drivers</option>
                     </select>
                 </div>
                 
-                <div class="w-full md:w-1/4">
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Date Range</label>
-                    <div class="relative">
-                        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 dark:text-blue-400"></i>
-                        <input type="text" id="dateRangePicker" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl py-3 pl-10 pr-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 font-medium text-blue-900 dark:text-white cursor-pointer transition-colors" placeholder="Select date range...">
-                    </div>
-                </div>
-
-                <div class="w-full md:w-1/4 flex gap-2">
-                    <button onclick="applyFuelFilters(true)" class="flex-1 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-800 dark:text-blue-400 font-bold py-3 rounded-xl transition-colors text-sm">Clear Filters</button>
-                    <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-file-excel"></i> Export
+                <div class="w-full md:w-auto flex gap-2">
+                    <button onclick="applyFuelFilters(true)" class="flex-1 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-800 dark:text-blue-400 font-bold py-3 px-4 rounded-xl transition-colors text-sm"><i class="fa-solid fa-rotate-left md:hidden"></i><span class="hidden md:inline">Clear Filters</span></button>
+                    <button onclick="exportFuelToExcel()" class="flex-1 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl transition-colors text-sm shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i> <span class="hidden md:inline">Export</span>
                     </button>
                 </div>
             </div>
@@ -125,17 +122,17 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 border border-blue-50 dark:border-gray-700 transition-colors duration-300">
                 <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Today's Cost</p>
                 <h3 id="statToday" class="text-2xl md:text-3xl font-black text-blue-900 dark:text-white">₱0.00</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Fuel & Tolls</p>
+                <p class="text-[10px] text-gray-400 mt-1">Filtered Fuel & Tolls</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 border border-blue-50 dark:border-gray-700 transition-colors duration-300">
                 <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">This Week</p>
                 <h3 id="statWeek" class="text-2xl md:text-3xl font-black text-blue-900 dark:text-white">₱0.00</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Mon-Sun Total</p>
+                <p class="text-[10px] text-gray-400 mt-1">Filtered Mon-Sun</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 border border-blue-50 dark:border-gray-700 transition-colors duration-300">
                 <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">This Month</p>
                 <h3 id="statMonth" class="text-2xl md:text-3xl font-black text-blue-900 dark:text-white">₱0.00</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Current Month Total</p>
+                <p class="text-[10px] text-gray-400 mt-1">Filtered Month Total</p>
             </div>
             <div class="bg-blue-800 dark:bg-blue-900 rounded-2xl shadow-md p-5 border border-blue-900 dark:border-blue-950 relative overflow-hidden transition-colors duration-300">
                 <div class="absolute -right-4 -bottom-4 opacity-10 text-white text-6xl"><i class="fa-solid fa-chart-line"></i></div>
@@ -186,7 +183,11 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             if (typeof renderNavigation === 'function') renderNavigation('fuel-log');
-            if (userRole === 'admin') document.getElementById('adminFilters').classList.remove('hidden');
+            
+            // Show driver filter ONLY if admin
+            if (userRole === 'admin') {
+                document.getElementById('driverFilterWrapper').classList.remove('hidden');
+            }
             
             $('#dateRangePicker').daterangepicker({
                 opens: 'left', autoUpdateInput: false,
@@ -213,7 +214,6 @@
             loadFuelLogs();
         });
 
-        // REVISION: Load Both Fuel and Tolls
         async function loadFuelLogs() {
             try {
                 const [logsRes, tollsRes, driversRes] = await Promise.all([
@@ -232,8 +232,14 @@
                 // Combine and sort by date
                 allLogs = [...formattedFuel, ...formattedToll].sort((a, b) => new Date(b.date) - new Date(a.date));
 
+                // If user is a driver, hard-filter their logs immediately
+                if (userRole !== 'admin') {
+                    allLogs = allLogs.filter(log => log.driver === currentUser);
+                }
+
+                // Populate Admin Driver Filter
                 const driverSelect = document.getElementById('filterDriver');
-                if(driverSelect) {
+                if(driverSelect && userRole === 'admin') {
                     allDrivers.forEach(d => {
                         if(![...driverSelect.options].some(opt => opt.value === d.username)) {
                             driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
@@ -241,9 +247,13 @@
                     });
                 }
 
-                if (userRole !== 'admin') {
-                    allLogs = allLogs.filter(log => log.driver === currentUser);
-                }
+                // Dynamically populate Vehicle Filter
+                const vehicleSelect = document.getElementById('filterVehicle');
+                const uniqueVehicles = [...new Set(allLogs.map(l => l.vehicle))].filter(Boolean);
+                vehicleSelect.innerHTML = '<option value="">All Vehicles</option>';
+                uniqueVehicles.forEach(v => {
+                    vehicleSelect.innerHTML += `<option value="${v}">${v}</option>`;
+                });
                 
                 applyFuelFilters();
             } catch (error) {
@@ -256,11 +266,15 @@
             if (clear) {
                 document.getElementById('filterDept').value = "";
                 document.getElementById('filterDriver').value = ""; 
+                document.getElementById('filterType').value = ""; 
+                document.getElementById('filterVehicle').value = ""; 
                 $('#dateRangePicker').val('');
             }
 
             const deptFilter = document.getElementById('filterDept') ? document.getElementById('filterDept').value : "";
             const driverFilter = document.getElementById('filterDriver') ? document.getElementById('filterDriver').value : ""; 
+            const typeFilter = document.getElementById('filterType') ? document.getElementById('filterType').value : ""; 
+            const vehicleFilter = document.getElementById('filterVehicle') ? document.getElementById('filterVehicle').value : ""; 
             
             const isDateSelected = $('#dateRangePicker').val() !== '';
             let startBoundary = null;
@@ -279,6 +293,8 @@
                 
                 if (deptFilter && !log.department.includes(deptFilter)) match = false;
                 if (driverFilter && log.driver !== driverFilter) match = false;
+                if (typeFilter && log.logType !== typeFilter) match = false;
+                if (vehicleFilter && log.vehicle !== vehicleFilter) match = false;
 
                 if (startBoundary && endBoundary) {
                     const logDate = new Date(log.date + "T12:00:00"); 
@@ -301,10 +317,14 @@
             const startOfWeek = moment().startOf('isoWeek');
             const startOfMonth = moment().startOf('month');
 
-            // Calculate global totals for the summary cards
-            allLogs.forEach(l => {
-                const logCost = l.logType === 'Fuel' ? (parseFloat(l.total) || 0) : (parseFloat(l.amount) || 0);
+            // NEW: Calculate Summary Cards directly from FILTERED logs
+            logsToDisplay.forEach(l => {
+                const isFuel = l.logType === 'Fuel';
+                const logCost = isFuel ? (parseFloat(l.total) || 0) : (parseFloat(l.amount) || 0);
                 const logDate = moment(l.date);
+
+                totalCost += logCost;
+                if (isFuel) totalLiters += (parseFloat(l.liters) || 0);
 
                 if (logDate.isSameOrAfter(today)) todayCost += logCost;
                 if (logDate.isSameOrAfter(startOfWeek)) weekCost += logCost;
@@ -314,20 +334,18 @@
             document.getElementById('statToday').innerText = `₱${todayCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             document.getElementById('statWeek').innerText = `₱${weekCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             document.getElementById('statMonth').innerText = `₱${monthCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            
+            document.getElementById('statTotalLiters').innerText = `${totalLiters.toFixed(2)} L Pumped`;
+            document.getElementById('statTotalCost').innerText = `₱${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             if (logsToDisplay.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-gray-400 text-sm font-medium">No logs match your search.</td></tr>`;
-                document.getElementById('statTotalLiters').innerText = "0 L Pumped";
-                document.getElementById('statTotalCost').innerText = "₱0.00";
                 return;
             }
 
             tableBody.innerHTML = logsToDisplay.map(l => {
                 const isFuel = l.logType === 'Fuel';
                 const cost = isFuel ? (parseFloat(l.total) || 0) : (parseFloat(l.amount) || 0);
-                totalCost += cost;
-                
-                if (isFuel) totalLiters += (parseFloat(l.liters) || 0);
 
                 const icon = isFuel ? '<i class="fa-solid fa-gas-pump text-blue-500 dark:text-blue-400"></i>' : '<i class="fa-solid fa-ticket text-orange-500 dark:text-orange-400"></i>';
                 const badgeClass = isFuel ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800';
@@ -366,16 +384,11 @@
                     <td class="p-4 text-right font-black text-white bg-blue-900 dark:bg-gray-900 border-l border-white/20 dark:border-gray-700 text-base">₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 </tr>`;
             }).join('');
-
-            document.getElementById('statTotalLiters').innerText = `${totalLiters.toFixed(2)} L Pumped`;
-            document.getElementById('statTotalCost').innerText = `₱${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         }
 
-        // REVISION: Advanced Export for Finance
         function exportFuelToExcel() {
             if (filteredLogs.length === 0) return alert("No data to export!");
             
-            // 1. Prepare raw data
             const exportData = filteredLogs.map(log => {
                 const isFuel = log.logType === 'Fuel';
                 return {
@@ -391,7 +404,6 @@
                 };
             });
 
-            // 2. Prepare summary data
             let totalFuelCost = 0;
             let totalTollCost = 0;
             filteredLogs.forEach(log => {
@@ -407,15 +419,11 @@
                 { "Metric": "GRAND TOTAL (PHP)", "Value": totalFuelCost + totalTollCost }
             ];
 
-            // 3. Create Workbook with 2 Sheets
             const workbook = XLSX.utils.book_new();
-            
             const summarySheet = XLSX.utils.json_to_sheet(summaryData);
             XLSX.utils.book_append_sheet(workbook, summarySheet, "Financial Summary");
-
             const rawDataSheet = XLSX.utils.json_to_sheet(exportData);
             XLSX.utils.book_append_sheet(workbook, rawDataSheet, "Detailed Logs");
-            
             XLSX.writeFile(workbook, `Fleet_Financials_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
     </script>
