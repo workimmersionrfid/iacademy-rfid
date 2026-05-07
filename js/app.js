@@ -162,7 +162,7 @@ function renderNavigation(activePageId) {
     }
 }
 
-// --- THEME & LOGOUT FUNCTIONS ---
+// --- GLOBAL FUNCTIONS ---
 window.toggleTheme = function() {
     if (document.documentElement.classList.contains('dark')) {
         document.documentElement.classList.remove('dark');
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem('token');
     
     if (token && role) {
-        // Remove hardcoded widgets from previous files to prevent duplicates
+        // Clean up any rogue widgets
         const oldAdminWidget = document.getElementById('adminChatWidget');
         if (oldAdminWidget) oldAdminWidget.remove();
         
@@ -351,7 +351,7 @@ function initAdminChatLogic() {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: driverUsername, role: 'admin' })
-        });
+        }).catch(err => console.log("Mark read failed silently"));
         
         renderActiveChat();
     };
@@ -374,13 +374,20 @@ function initAdminChatLogic() {
 
     async function loadAdminMessages() {
         try {
+            // Robust fetch for drivers
             if(allDriversCache.length === 0) {
                 const driverRes = await fetch(`${API_BASE_CHAT}/drivers`);
-                if(driverRes.ok) allDriversCache = await driverRes.json();
+                if(driverRes.ok) {
+                    allDriversCache = await driverRes.json();
+                } else {
+                    throw new Error("Could not fetch drivers list");
+                }
             }
 
+            // Robust fetch for messages
             const res = await fetch(`${API_BASE_CHAT}/messages/Admin`);
-            if (!res.ok) return;
+            if (!res.ok) throw new Error("Could not fetch chat messages");
+            
             allChatMessages = await res.json();
             
             if (!adminChatOpen) {
@@ -392,11 +399,22 @@ function initAdminChatLogic() {
             if (currentChatDriver) renderActiveChat();
             else renderContactList();
             
-        } catch (err) { console.error("Chat load error", err); }
+        } catch (err) { 
+            console.error("Chat Error:", err); 
+            // Graceful UI Error State so it never spins forever
+            if (adminChatOpen && !currentChatDriver) {
+                const listContainer = document.getElementById('chatContactList');
+                if (listContainer) {
+                    listContainer.innerHTML = '<div class="p-4 text-center text-red-500 text-xs font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Waiting for backend server...</div>';
+                }
+            }
+        }
     }
 
     function renderContactList() {
         const container = document.getElementById('chatContactList');
+        if (!container) return;
+
         const driversMap = {};
         allDriversCache.forEach(d => { driversMap[d.username] = { latest: null, unread: 0, messages: [] }; });
 
@@ -442,6 +460,8 @@ function initAdminChatLogic() {
     function renderActiveChat() {
         if (!currentChatDriver) return;
         const container = document.getElementById('adminChatMessages');
+        if (!container) return;
+
         const driverMessages = allChatMessages.filter(m => m.sender === currentChatDriver || m.receiver === currentChatDriver);
         const currentMsgCount = container.querySelectorAll('.msg-bubble').length;
         if (driverMessages.length === currentMsgCount && currentMsgCount !== 0) return;
@@ -526,7 +546,7 @@ function initDriverChatLogic() {
             fetch(`${API_BASE_CHAT}/messages/mark-read`, {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: localStorage.getItem('username'), role: 'driver' })
-            });
+            }).catch(e => console.log("Mark read failed silently"));
         } else {
             box.classList.add('hidden');
             box.classList.remove('flex');
@@ -544,7 +564,8 @@ function initDriverChatLogic() {
                     body: JSON.stringify({ driverUsername: myName, clearedBy: myName })
                 });
                 if (res.ok) {
-                    document.getElementById('chatMessages').innerHTML = '<div class="text-center text-xs text-gray-400 dark:text-gray-500 my-2">Send a message to the Admin. Request early access for future tasks here.</div>';
+                    const container = document.getElementById('chatMessages');
+                    if(container) container.innerHTML = '<div class="text-center text-xs text-gray-400 dark:text-gray-500 my-2">Send a message to the Admin. Request early access for future tasks here.</div>';
                 }
             } catch (err) {}
         }
@@ -556,7 +577,7 @@ function initDriverChatLogic() {
         
         try {
             const res = await fetch(`${API_BASE_CHAT}/messages/${myName}`);
-            if (!res.ok) return;
+            if (!res.ok) throw new Error("Could not fetch messages");
             const messages = await res.json();
             
             if (!driverChatOpen) {
@@ -566,6 +587,8 @@ function initDriverChatLogic() {
             }
 
             const container = document.getElementById('chatMessages');
+            if (!container) return;
+
             const currentMsgCount = container.querySelectorAll('.msg-bubble').length;
             if (messages.length === currentMsgCount && currentMsgCount !== 0) return;
 
@@ -599,6 +622,8 @@ function initDriverChatLogic() {
         
         const msg = { sender: localStorage.getItem('username'), receiver: 'Admin', text: text };
         const container = document.getElementById('chatMessages');
+        if (!container) return;
+
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         container.innerHTML += `<div class="msg-bubble self-end bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm opacity-70">
                                     <p class="whitespace-pre-wrap leading-snug">${text}</p>
