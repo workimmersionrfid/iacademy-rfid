@@ -380,7 +380,10 @@
                     <button id="btnBackChat" onclick="showChatList()" class="hidden hover:text-blue-200 transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
                     <h3 id="chatHeaderTitle" class="font-bold flex items-center gap-2"><i class="fa-solid fa-inbox"></i> Driver Messages</h3>
                 </div>
-                <button onclick="toggleAdminChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <div class="flex items-center gap-3">
+                    <button id="btnClearChat" onclick="clearAdminChat()" class="hidden text-red-300 hover:text-red-400 transition-colors" title="Clear Conversation"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="toggleAdminChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
             </div>
 
             <div id="chatContactList" class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 custom-scrollbar p-2 space-y-1 transition-colors">
@@ -1670,6 +1673,7 @@
             document.getElementById('activeChatView').classList.add('hidden');
             document.getElementById('chatContactList').classList.remove('hidden');
             document.getElementById('btnBackChat').classList.add('hidden');
+            document.getElementById('btnClearChat').classList.add('hidden'); // Hide trash can
             document.getElementById('chatHeaderTitle').innerHTML = `<i class="fa-solid fa-inbox"></i> Driver Messages`;
             renderContactList();
         };
@@ -1680,6 +1684,7 @@
             document.getElementById('activeChatView').classList.remove('hidden');
             document.getElementById('activeChatView').classList.add('flex');
             document.getElementById('btnBackChat').classList.remove('hidden');
+            document.getElementById('btnClearChat').classList.remove('hidden'); // Show trash can
             document.getElementById('chatHeaderTitle').innerHTML = `<i class="fa-solid fa-user"></i> ${driverUsername}`;
             
             fetch(`${API_BASE_CHAT}/messages/mark-read`, {
@@ -1689,6 +1694,35 @@
             });
             
             renderActiveChat();
+        };
+
+        // NEW: Function to Soft-Delete the conversation
+        window.clearAdminChat = async function() {
+            if (!currentChatDriver) return;
+            
+            if (confirm(`Are you sure you want to clear your conversation with ${currentChatDriver}? This will hide the messages from your screen, but keep them in the database.`)) {
+                try {
+                    const res = await fetch(`${API_BASE_CHAT}/messages/clear`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            driverUsername: currentChatDriver, 
+                            clearedBy: 'Admin' 
+                        })
+                    });
+                    
+                    if (res.ok) {
+                        // Optimistically clear the array in the frontend so it instantly vanishes
+                        allChatMessages = allChatMessages.filter(m => !(m.sender === currentChatDriver || m.receiver === currentChatDriver));
+                        renderActiveChat();
+                    } else {
+                        alert("Failed to clear conversation.");
+                    }
+                } catch (err) {
+                    console.error("Error clearing chat:", err);
+                    alert("Network error. Could not clear chat.");
+                }
+            }
         };
 
         async function loadAdminMessages() {
