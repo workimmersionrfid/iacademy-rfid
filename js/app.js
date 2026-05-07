@@ -77,9 +77,9 @@ function renderNavigation(activePageId) {
                 <i class="fa-regular fa-circle-user"></i>
            </button>`;
 
-    // THEME TOGGLE BUTTON (The Moon/Sun Icon)
+    // THEME TOGGLE BUTTON
     const themeToggleHTML = `
-        <button onclick="toggleTheme()" class="text-xl text-gray-400 dark:text-gray-300 hover:text-blue-800 dark:hover:text-yellow-400 transition-colors p-2 rounded-lg mr-2" title="Toggle Dark Mode">
+        <button onclick="toggleTheme()" class="text-xl text-gray-400 dark:text-gray-300 hover:text-blue-800 dark:hover:text-yellow-400 transition-colors p-2 rounded-lg" title="Toggle Dark Mode">
             <i class="fa-solid fa-moon dark:hidden"></i>
             <i class="fa-solid fa-sun hidden dark:inline text-yellow-400"></i>
         </button>
@@ -88,7 +88,7 @@ function renderNavigation(activePageId) {
 
     // 3. RENDER FULL NAVIGATION
     navContainer.innerHTML = `
-        <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50 transition-colors">
+        <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300">
             <div class="max-w-[1500px] mx-auto px-6 flex items-center justify-between gap-8 h-20 lg:h-auto">
                 
                 <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="window.location.href='${role === 'admin' ? 'dashboard.html' : 'driver-dashboard.html'}'">
@@ -113,7 +113,7 @@ function renderNavigation(activePageId) {
                     ${authButtonHTML}
                 </div>
 
-                <div class="flex lg:hidden items-center gap-2 shrink-0">
+                <div class="flex lg:hidden items-center gap-3 shrink-0">
                     ${themeToggleHTML}
                     ${userProfileHTML}
                     <button id="mobile-menu-btn" class="text-blue-900 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 focus:outline-none p-2.5 bg-blue-50 dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-gray-700 transition-colors">
@@ -122,7 +122,7 @@ function renderNavigation(activePageId) {
                 </div>
             </div>
 
-            <div id="mobile-menu" class="hidden lg:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 absolute w-full shadow-2xl transition-colors">
+            <div id="mobile-menu" class="hidden lg:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 absolute w-full shadow-2xl transition-colors duration-300">
                 <div class="px-4 py-4 flex flex-col space-y-1">
                     ${mobileLinksHTML}
                     
@@ -153,19 +153,10 @@ function renderNavigation(activePageId) {
             mobileMenu.classList.toggle('hidden');
             const icon = mobileBtn.querySelector('i');
             
-            // Swap icon between Hamburger and X
             if (mobileMenu.classList.contains('hidden')) {
                 icon.classList.replace('fa-xmark', 'fa-bars');
-                mobileBtn.classList.replace('bg-blue-800', 'bg-blue-50');
-                mobileBtn.classList.replace('text-white', 'text-blue-900');
-                mobileBtn.classList.replace('dark:bg-blue-600', 'dark:bg-gray-800');
-                mobileBtn.classList.replace('dark:text-white', 'dark:text-blue-400');
             } else {
                 icon.classList.replace('fa-bars', 'fa-xmark');
-                mobileBtn.classList.replace('bg-blue-50', 'bg-blue-800');
-                mobileBtn.classList.replace('text-blue-900', 'text-white');
-                mobileBtn.classList.replace('dark:bg-gray-800', 'dark:bg-blue-600');
-                mobileBtn.classList.replace('dark:text-blue-400', 'dark:text-white');
             }
         });
     }
@@ -173,7 +164,7 @@ function renderNavigation(activePageId) {
 
 // --- GLOBAL FUNCTIONS ---
 
-// Theme Toggle Function for All Pages
+// NEW: Theme Toggle Logic!
 window.toggleTheme = function() {
     if (document.documentElement.classList.contains('dark')) {
         document.documentElement.classList.remove('dark');
