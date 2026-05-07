@@ -592,65 +592,76 @@
             const myName = localStorage.getItem('username');
             const todayStr = new Date().toISOString().split('T')[0]; 
             
-            // Get ALL tasks for this driver (including future ones)
+            // Get ALL tasks for this driver
             let myTasks = allTasks.filter(t => t.driver === myName);
             
-            // Sort: Pending tasks on top, sorted by date
+            // Sort chronologically to create a true timeline
             myTasks.sort((a, b) => {
+                const dateDiff = new Date(a.date) - new Date(b.date);
+                if (dateDiff !== 0) return dateDiff;
+                // If same date, put pending tasks first
                 if (a.status === 'Pending' && b.status !== 'Pending') return -1;
                 if (a.status !== 'Pending' && b.status === 'Pending') return 1;
-                return new Date(a.date) - new Date(b.date);
+                return 0;
             });
 
             const list = document.getElementById('taskList');
             
             if(myTasks.length === 0) {
-                list.innerHTML = `<div class="text-center p-8 bg-white rounded-xl shadow-sm border border-blue-50 text-gray-500 text-sm font-medium">No tasks assigned.</div>`;
+                // If no tasks, remove timeline styling and show empty state
+                list.className = "mt-4"; 
+                list.innerHTML = `<div class="col-span-full text-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-50 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm font-medium">No tasks assigned.</div>`;
                 return;
             }
+
+            // Apply timeline container styling dynamically (removes the old grid)
+            list.className = "relative border-l-2 border-blue-200 dark:border-gray-700 ml-4 mt-2 space-y-6";
 
             list.innerHTML = myTasks.map(t => {
                 const isDone = t.status === 'Completed';
                 const isRebook = t.status === 'Rebook';
-                // Check if the task date is strictly in the future
                 const isFuture = t.date > todayStr && !isDone && !isRebook;
                 
-                let bgClass, statusBadge, clickAction;
+                let bgClass, statusBadge, clickAction, dotClass;
 
                 if (isDone) {
-                    bgClass = 'bg-gray-50 opacity-60 border-gray-200';
-                    statusBadge = '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded tracking-widest border border-emerald-200">DONE</span>';
+                    bgClass = 'bg-gray-50 dark:bg-gray-800/50 opacity-75 border-gray-200 dark:border-gray-700';
+                    statusBadge = '<span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded tracking-widest border border-emerald-200 dark:border-emerald-800">DONE</span>';
+                    dotClass = 'bg-emerald-500 border-white dark:border-gray-900';
                     clickAction = '';
                 } else if (isRebook) {
-                    bgClass = 'bg-red-50/30 opacity-70 border-red-100';
-                    statusBadge = '<span class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded tracking-widest border border-red-200">REBOOK</span>';
+                    bgClass = 'bg-red-50/30 dark:bg-red-900/10 opacity-75 border-red-100 dark:border-red-900/50';
+                    statusBadge = '<span class="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded tracking-widest border border-red-200 dark:border-red-800">REBOOK</span>';
+                    dotClass = 'bg-red-500 border-white dark:border-gray-900';
                     clickAction = '';
                 } else if (isFuture) {
-                    // Future task styling - Locked
-                    bgClass = 'bg-gray-50 border-gray-200 opacity-80 hover:bg-gray-100 cursor-not-allowed';
-                    statusBadge = '<span class="text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded tracking-widest border border-orange-200"><i class="fa-solid fa-lock mr-1"></i> FUTURE</span>';
-                    // Trigger alert to ask admin
+                    bgClass = 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-not-allowed';
+                    statusBadge = '<span class="text-[10px] font-bold text-orange-700 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded tracking-widest border border-orange-200 dark:border-orange-800"><i class="fa-solid fa-lock mr-1"></i> FUTURE</span>';
+                    dotClass = 'bg-orange-400 border-white dark:border-gray-900';
                     clickAction = `onclick="alert('🔒 Locked: Future Dispatch\\n\\nThis task is scheduled for ${t.date}. If it is feasible to complete it today, please contact your Administrator to request early access (they can change the dispatch date to today).')"`;
                 } else {
-                    // Today or Past Pending
-                    bgClass = 'bg-white hover:bg-blue-50/50 hover:border-blue-300 cursor-pointer shadow-sm hover:shadow-md border-blue-100';
-                    statusBadge = '<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded tracking-widest border border-blue-200">PENDING</span>';
+                    bgClass = 'bg-white dark:bg-gray-800 hover:bg-blue-50/50 dark:hover:bg-gray-700 cursor-pointer shadow-md hover:shadow-lg border-blue-300 dark:border-blue-600 transform transition-transform hover:-translate-y-1';
+                    statusBadge = '<span class="text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded tracking-widest border border-blue-300 dark:border-blue-800 animate-pulse">NEXT UP</span>';
+                    dotClass = 'bg-blue-600 dark:bg-blue-500 border-blue-100 dark:border-blue-900 shadow-[0_0_10px_rgba(37,99,235,0.6)] animate-pulse'; // Glowing active dot
                     clickAction = `onclick="startAssignedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}', '${t.vehicle}', '${t.department || 'GENERAL'}')"`;
                 }
 
                 return `
-                <button type="button" ${clickAction} class="${bgClass} w-full text-left p-5 rounded-xl border transition-all relative overflow-hidden flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
-                    ${(!isDone && !isRebook && !isFuture) ? '<div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>' : ''}
-                    <div class="flex justify-between items-start mb-2 w-full">
-                        <div class="flex gap-1.5 flex-wrap">
-                            <span class="text-[9px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200 tracking-widest">${t.vehicle}</span>
-                            <span class="text-[9px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 tracking-widest">${t.date}</span>
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-[9px] top-6 w-4 h-4 rounded-full border-2 ${dotClass} z-10"></div>
+                    
+                    <button type="button" ${clickAction} class="${bgClass} w-full text-left p-5 md:p-6 rounded-xl border transition-all relative overflow-hidden flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex justify-between items-start mb-3 w-full">
+                            <div class="flex gap-2 flex-wrap items-center">
+                                <span class="text-[11px] font-black text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-md tracking-wider"><i class="fa-regular fa-calendar mr-1 text-gray-500 dark:text-gray-400"></i> ${t.date}</span>
+                                <span class="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-1 rounded border border-blue-100 dark:border-blue-800 tracking-widest"><i class="fa-solid fa-car mr-1"></i> ${t.vehicle}</span>
+                            </div>
+                            ${statusBadge}
                         </div>
-                        ${statusBadge}
-                    </div>
-                    <h3 class="font-bold text-blue-900 text-lg leading-tight mb-1 w-full truncate">${t.description}</h3>
-                    <p class="text-xs text-gray-500 font-medium w-full truncate"><i class="fa-solid fa-location-dot text-blue-400 mr-1"></i> ${t.destination}</p>
-                </button>
+                        <h3 class="font-bold text-blue-900 dark:text-white text-lg md:text-xl leading-tight mb-2 w-full">${t.description}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium w-full flex items-center mt-1"><i class="fa-solid fa-location-dot text-blue-500 dark:text-blue-400 mr-2 text-base"></i> ${t.destination}</p>
+                    </button>
+                </div>
                 `;
             }).join('');
         }
