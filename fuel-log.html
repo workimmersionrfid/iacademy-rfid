@@ -31,7 +31,7 @@
         }
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
-            if (!token) window.location.href = 'login.html';
+            if (!token) window.location.href = 'index.html';
         });
     </script>
 </head>
@@ -98,27 +98,27 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-blue-50 flex items-center gap-5">
-                <div class="bg-blue-50 text-blue-600 w-14 h-14 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-receipt"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Records</p>
-                    <h3 id="statTotalLogs" class="text-3xl font-black text-blue-900">0</h3>
-                </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="bg-white rounded-2xl shadow-md p-5 border border-blue-50">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Today's Cost</p>
+                <h3 id="statToday" class="text-2xl md:text-3xl font-black text-blue-900">₱0.00</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Fuel & Tolls</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-blue-50 flex items-center gap-5">
-                <div class="bg-blue-50 text-blue-600 w-14 h-14 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-droplet"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Liters Pumped</p>
-                    <h3 id="statTotalLiters" class="text-3xl font-black text-blue-900">0 L</h3>
-                </div>
+            <div class="bg-white rounded-2xl shadow-md p-5 border border-blue-50">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">This Week</p>
+                <h3 id="statWeek" class="text-2xl md:text-3xl font-black text-blue-900">₱0.00</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Mon-Sun Total</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-blue-50 flex items-center gap-5">
-                <div class="bg-blue-50 text-blue-600 w-14 h-14 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-peso-sign"></i></div>
-                <div>
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Expenditure</p>
-                    <h3 id="statTotalCost" class="text-3xl font-black text-blue-900">₱0.00</h3>
-                </div>
+            <div class="bg-white rounded-2xl shadow-md p-5 border border-blue-50">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">This Month</p>
+                <h3 id="statMonth" class="text-2xl md:text-3xl font-black text-blue-900">₱0.00</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Current Month Total</p>
+            </div>
+            <div class="bg-blue-800 rounded-2xl shadow-md p-5 border border-blue-900 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-white text-6xl"><i class="fa-solid fa-chart-line"></i></div>
+                <p class="text-[10px] font-bold text-blue-200 uppercase tracking-wider mb-1 relative z-10">Filtered View Total</p>
+                <h3 id="statTotalCost" class="text-2xl md:text-3xl font-black text-white relative z-10">₱0.00</h3>
+                <p id="statTotalLiters" class="text-[10px] text-blue-200 mt-1 relative z-10">0 L Pumped</p>
             </div>
         </div>
 
@@ -270,13 +270,31 @@
 
         function renderLogsTable(logsToDisplay) {
             const tableBody = document.getElementById('fuelLogsTable');
-            document.getElementById('statTotalLogs').innerText = logsToDisplay.length;
             
             let totalLiters = 0, totalCost = 0;
+            let todayCost = 0, weekCost = 0, monthCost = 0;
+
+            const today = moment().startOf('day');
+            const startOfWeek = moment().startOf('isoWeek');
+            const startOfMonth = moment().startOf('month');
+
+            // Calculate global totals for the summary cards
+            allLogs.forEach(l => {
+                const logCost = l.logType === 'Fuel' ? (parseFloat(l.total) || 0) : (parseFloat(l.amount) || 0);
+                const logDate = moment(l.date);
+
+                if (logDate.isSameOrAfter(today)) todayCost += logCost;
+                if (logDate.isSameOrAfter(startOfWeek)) weekCost += logCost;
+                if (logDate.isSameOrAfter(startOfMonth)) monthCost += logCost;
+            });
+
+            document.getElementById('statToday').innerText = `₱${todayCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('statWeek').innerText = `₱${weekCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('statMonth').innerText = `₱${monthCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
             if (logsToDisplay.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-gray-400 text-sm font-medium">No logs match your search.</td></tr>`;
-                document.getElementById('statTotalLiters').innerText = "0 L";
+                document.getElementById('statTotalLiters').innerText = "0 L Pumped";
                 document.getElementById('statTotalCost').innerText = "₱0.00";
                 return;
             }
@@ -322,17 +340,19 @@
                     <td class="p-4">
                         ${detailHTML}
                     </td>
-                    <td class="p-4 text-right font-black text-blue-900 text-base">₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="p-4 text-right font-black text-white bg-blue-900 border-l border-white/20 text-base">₱${cost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 </tr>`;
             }).join('');
 
-            document.getElementById('statTotalLiters').innerText = `${totalLiters.toFixed(2)} L`;
+            document.getElementById('statTotalLiters').innerText = `${totalLiters.toFixed(2)} L Pumped`;
             document.getElementById('statTotalCost').innerText = `₱${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         }
 
-        // REVISION: Export Combines Fuel and Tolls
+        // REVISION: Advanced Export for Finance
         function exportFuelToExcel() {
             if (filteredLogs.length === 0) return alert("No data to export!");
+            
+            // 1. Prepare raw data
             const exportData = filteredLogs.map(log => {
                 const isFuel = log.logType === 'Fuel';
                 return {
@@ -342,17 +362,37 @@
                     "Driver": log.driver,
                     "Vehicle": log.vehicle, 
                     "Odometer / Route": isFuel ? (log.odo || "N/A") : (log.expressway || "N/A"), 
-                    "Fuel Type": isFuel ? log.fuelType : "N/A",
-                    "Liters": isFuel ? log.liters : "N/A", 
-                    "Price per Liter": isFuel ? log.price : "N/A", 
-                    "Total Cost (PHP)": isFuel ? log.total : log.amount,
-                    "Station": isFuel ? (log.station || "N/A") : "N/A", 
+                    "Liters Pumped": isFuel ? log.liters : 0, 
+                    "Cost (PHP)": isFuel ? (log.total || 0) : (log.amount || 0),
                     "Notes": log.notes || ""
                 };
             });
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+            // 2. Prepare summary data
+            let totalFuelCost = 0;
+            let totalTollCost = 0;
+            filteredLogs.forEach(log => {
+                if (log.logType === 'Fuel') totalFuelCost += (parseFloat(log.total) || 0);
+                if (log.logType === 'Toll') totalTollCost += (parseFloat(log.amount) || 0);
+            });
+
+            const summaryData = [
+                { "Metric": "Report Generated On", "Value": new Date().toLocaleDateString() },
+                { "Metric": "Total Records Exported", "Value": filteredLogs.length },
+                { "Metric": "Total Fuel Expenses (PHP)", "Value": totalFuelCost },
+                { "Metric": "Total Toll Expenses (PHP)", "Value": totalTollCost },
+                { "Metric": "GRAND TOTAL (PHP)", "Value": totalFuelCost + totalTollCost }
+            ];
+
+            // 3. Create Workbook with 2 Sheets
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Financial Logs");
+            
+            const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(workbook, summarySheet, "Financial Summary");
+
+            const rawDataSheet = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(workbook, rawDataSheet, "Detailed Logs");
+            
             XLSX.writeFile(workbook, `Fleet_Financials_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
     </script>
