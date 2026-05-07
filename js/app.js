@@ -188,23 +188,11 @@ window.triggerGlobalSearch = function() {
 };
 
 // ==========================================
-// --- GLOBAL CHAT WIDGET & UI RESKIN ---
+// --- GLOBAL CHAT WIDGET SYSTEM ---
 // ==========================================
 const API_BASE_CHAT = 'https://iacademy-rfid.onrender.com/api';
 
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // NEW: AUTOMATIC GLOBAL UI RESKIN!
-    // This upgrades the entire app to the premium dark gradient and light grey background instantly
-    document.body.classList.replace('bg-brand-bg', 'bg-gray-100');
-    
-    document.querySelectorAll('.bg-gradient-to-r').forEach(banner => {
-        if (banner.classList.contains('from-blue-800')) {
-            banner.classList.remove('from-blue-800', 'via-blue-400', 'to-blue-50');
-            banner.classList.add('from-slate-900', 'via-blue-900', 'to-slate-900');
-        }
-    });
-
     const role = localStorage.getItem('userRole');
     const token = localStorage.getItem('token');
     
@@ -506,6 +494,7 @@ function initAdminChatLogic() {
         } catch(err) { alert('Failed to send message'); }
     });
 
+    // --- CHECK FOR OPEN CHAT ON LOAD ---
     if (adminChatOpen) {
         document.getElementById('adminChatBox').classList.remove('hidden');
         document.getElementById('adminChatBox').classList.add('flex');
