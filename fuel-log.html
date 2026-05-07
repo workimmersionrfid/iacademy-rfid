@@ -21,18 +21,41 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
     <script>
+
+        // 1. Tell Tailwind to use 'class' for dark mode
+
         tailwind.config = {
+
+            darkMode: 'class', 
+
             theme: {
+
                 extend: { 
+
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { blue: '#1e3a8a', bg: '#f8fafc' } }
+
+                    colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
+
                 }
+
             }
+
         }
-        document.addEventListener("DOMContentLoaded", () => {
-            const token = localStorage.getItem('token');
-            if (!token) window.location.href = 'index.html';
-        });
+
+
+
+        // 2. Check local storage for theme preference BEFORE the page renders
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+
+            document.documentElement.classList.add('dark');
+
+        } else {
+
+            document.documentElement.classList.remove('dark');
+
+        }
+
     </script>
 </head>
 <body class="bg-brand-bg font-sans min-h-screen text-gray-800 antialiased">

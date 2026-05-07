@@ -14,7 +14,9 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
     <script>
+        // 1. Tell Tailwind to use 'class' for dark mode
         tailwind.config = {
+            darkMode: 'class', 
             theme: {
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -22,11 +24,13 @@
                 }
             }
         }
-        document.addEventListener("DOMContentLoaded", () => {
-            const token = localStorage.getItem('token');
-            const role = localStorage.getItem('userRole');
-            if (!token || role !== 'admin') window.location.href = 'login.html';
-        });
+
+        // 2. Check local storage for theme preference BEFORE the page renders
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     </script>
     <style>
         .dpd-card-accent { border-bottom-left-radius: 100%; }

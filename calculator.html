@@ -8,18 +8,41 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
+
+        // 1. Tell Tailwind to use 'class' for dark mode
+
         tailwind.config = {
+
+            darkMode: 'class', 
+
             theme: {
+
                 extend: { 
+
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
+
                     colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
+
                 }
+
             }
+
         }
-        document.addEventListener("DOMContentLoaded", () => {
-            const token = localStorage.getItem('token');
-            if (!token) window.location.href = 'login.html';
-        });
+
+
+
+        // 2. Check local storage for theme preference BEFORE the page renders
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+
+            document.documentElement.classList.add('dark');
+
+        } else {
+
+            document.documentElement.classList.remove('dark');
+
+        }
+
     </script>
     <style>
         .dpd-card-accent { border-bottom-left-radius: 100%; }

@@ -11,7 +11,9 @@
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <script>
+        // 1. Tell Tailwind to use 'class' for dark mode
         tailwind.config = { 
+            darkMode: 'class',
             theme: { 
                 extend: { 
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -19,9 +21,20 @@
                 } 
             } 
         }
+
+        // 2. Check local storage for theme preference BEFORE the page renders
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // 3. Your existing Auth and Profile logic
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('userRole');
+            
+            // Note: Update to 'index.html' if you decide to go back to that later
             if (!token || role !== 'driver') window.location.href = 'login.html';
             else {
                 document.getElementById('driverName').innerText = localStorage.getItem('username');
