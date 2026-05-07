@@ -885,10 +885,17 @@
                 if ("geolocation" in navigator) {            
                     navigator.geolocation.getCurrentPosition(                
                         (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
-                        (err) => resolve({ lat: "N/A", lon: "N/A" }), 
+                        (err) => {
+                            // NEW: Pop up an alert if location fails or is denied!
+                            alert("⚠️ GPS Signal Not Found!\n\nPlease make sure Location Services are turned ON for this browser/app. We will log this location as 'N/A' for now.");
+                            resolve({ lat: "N/A", lon: "N/A" });
+                        }, 
                         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }            
                     );        
-                } else resolve({ lat: "N/A", lon: "N/A" });    
+                } else {
+                    alert("⚠️ Location Services are not supported by this browser.");
+                    resolve({ lat: "N/A", lon: "N/A" });
+                }
             });
         }
 
