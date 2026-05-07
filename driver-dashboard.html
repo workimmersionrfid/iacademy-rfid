@@ -478,6 +478,20 @@
         
         let vehicleDeptMap = {}; 
 
+        function getLiveLocation() {    
+            return new Promise((resolve) => {        
+                if ("geolocation" in navigator) {            
+                    navigator.geolocation.getCurrentPosition(                
+                        (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
+                        (err) => resolve({ lat: "N/A", lon: "N/A" }), 
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }            
+                    );        
+                } else {
+                    resolve({ lat: "N/A", lon: "N/A" });
+                }
+            });
+        }
+
         window.openFuelModal = function() {
             const m = document.getElementById('fuelModal');
             m.classList.remove('hidden'); m.classList.add('flex');
