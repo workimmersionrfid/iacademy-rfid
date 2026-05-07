@@ -180,6 +180,13 @@
                             <p class="text-xs mt-1">Please tap an assigned dispatch to unlock Travel Updates and Handover.</p>
                         </div>
 
+                        <div id="start-execution-section" class="hidden mb-6">
+                            <button id="btn-start-execution" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2 uppercase tracking-widest">
+                                <i class="fa-solid fa-location-crosshairs"></i> Start Execution
+                            </button>
+                            <p class="text-[10px] text-center text-gray-500 mt-2">This will activate your GPS tracking for this task.</p>
+                        </div>
+
                         <div id="task-action-controls" class="hidden">
                             <h3 class="font-bold text-blue-800 dark:text-blue-400 text-base mb-4">1. Travel Updates</h3>
                             <select id="transit-dropdown" class="w-full border border-gray-200 dark:border-gray-600 bg-blue-50/50 dark:bg-gray-900 rounded-xl p-3.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold text-blue-900 dark:text-white mb-4 transition-all">
@@ -851,7 +858,10 @@
             
             document.getElementById('active-task-info').classList.remove('hidden');
             document.getElementById('no-task-placeholder').classList.add('hidden');
-            document.getElementById('task-action-controls').classList.remove('hidden');
+            
+            // Show the Start button, but keep the actual form hidden for now
+            document.getElementById('start-execution-section').classList.remove('hidden');
+            document.getElementById('task-action-controls').classList.add('hidden');
 
             statusText.textContent = `STATUS: READY FOR TRANSIT`;
             statusText.classList.replace('text-gray-500', 'text-blue-600');
@@ -866,6 +876,25 @@
                 box.classList.add('scale-100', 'opacity-100'); 
             }, 10);
         };
+
+        // NEW: Event Listener for the Start Execution Button
+        document.getElementById('btn-start-execution').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-start-execution');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Locking GPS...`;
+            btn.disabled = true;
+
+            // This calls the GPS immediately, triggering the browser permission 
+            // and giving the laptop time to find the coordinates!
+            await getLiveLocation();
+
+            // Once GPS is ready, hide this button and reveal the real form
+            document.getElementById('start-execution-section').classList.add('hidden');
+            document.getElementById('task-action-controls').classList.remove('hidden');
+
+            // Reset button for next time
+            btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Start Execution`;
+            btn.disabled = false;
+        });
 
         window.closeExecutionModal = function() {
             const modal = document.getElementById('executionModal');
@@ -1107,6 +1136,9 @@
                 
                 document.getElementById('task-action-controls').classList.add('hidden');
                 document.getElementById('no-task-placeholder').classList.remove('hidden');
+                
+                // NEW: Hide the start execution section so it resets properly!
+                document.getElementById('start-execution-section').classList.add('hidden');
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
                 document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);        
