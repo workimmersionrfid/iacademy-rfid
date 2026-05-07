@@ -151,13 +151,20 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, firstName, lastName, middleName, email, password, role, department } = req.body;
         
+        // 1. Normalize the email and username to lowercase
+        const normalizedEmail = email.toLowerCase();
+        const normalizedUsername = username.toLowerCase();
+
         const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!passRegex.test(password)) {
             return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
         }
 
-        // NEW: Strict Double-Account Email/Username Check
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        // 2. Check using the normalized strings
+        const existingUser = await User.findOne({ 
+            $or: [{ email: normalizedEmail }, { username: normalizedUsername }] 
+        });
+        
         if (existingUser) {
             return res.status(400).json({ message: "An account with this Username or Email already exists." });
         }
@@ -165,12 +172,13 @@ app.post('/api/auth/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
+        // 3. Save the normalized strings to the database
         const newUser = new User({ 
-            username, 
+            username: normalizedUsername, 
             firstName, 
             lastName, 
             middleName, 
-            email, 
+            email: normalizedEmail, 
             password: hashedPassword, 
             role, 
             department, 
@@ -178,6 +186,7 @@ app.post('/api/auth/register', async (req, res) => {
         });
         
         await newUser.save();
+
         
         const backendUrl = `${req.protocol}://${req.get('host')}`;
         const verifyLink = `${backendUrl}/api/auth/verify/${verificationToken}`;

@@ -110,9 +110,9 @@
                 
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <h2 class="font-bold text-xl text-blue-900">Assigned Dispatches</h2>
-                    <button onclick="initDriverData()" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm transition-colors">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
-                    </button>
+                    <button onclick="refreshTasksWithUI(this)" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm transition-colors">
+    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+</button>
                 </div>
                 
                 <div class="p-6 overflow-y-auto max-h-[600px] custom-scrollbar">
@@ -822,16 +822,17 @@
         function getFinalTaskAndLocation() { return { finalTask: currentActiveTaskName, finalLoc: currentActiveTaskDest }; }
 
         function getLiveLocation() {    
-            return new Promise((resolve) => {        
-                if ("geolocation" in navigator) {            
-                    navigator.geolocation.getCurrentPosition(                
-                        (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
-                        (err) => resolve({ lat: "N/A", lon: "N/A" }), { timeout: 5000 }            
-                    );        
-                } else resolve({ lat: "N/A", lon: "N/A" });    
-            });
-        }
-
+    return new Promise((resolve) => {        
+        if ("geolocation" in navigator) {            
+            navigator.geolocation.getCurrentPosition(                
+                (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
+                (err) => resolve({ lat: "N/A", lon: "N/A" }), 
+                // Force high accuracy and give the phone 10 seconds to wake up the GPS antenna
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }            
+            );        
+        } else resolve({ lat: "N/A", lon: "N/A" });    
+    });
+}
         let uploadedImagesData = [];
         const fileNameDisplay = document.getElementById('file-name');
         const previewContainer = document.getElementById('previewContainer');
@@ -1050,6 +1051,16 @@
                 initDriverData();
             }
         });
+        window.refreshTasksWithUI = async function(btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing...`;
+        btn.disabled = true;
+        
+        await initDriverData();
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    };
     </script>
 </body>
 </html>
