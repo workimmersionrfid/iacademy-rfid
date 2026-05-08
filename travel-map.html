@@ -50,19 +50,21 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 p-6 flex flex-col md:flex-row gap-4 transition-colors duration-300 shrink-0">
+       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 p-5 flex flex-col md:flex-row gap-4 transition-colors duration-300 shrink-0 w-full md:w-max">
             
-            <div id="adminDriverSelectWrapper" class="hidden w-full md:w-1/4">
+            <div id="adminDriverSelectWrapper" class="hidden w-full md:w-64">
                 <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Filter by Driver</label>
                 <select id="driverSelect" onchange="loadDriverItinerary()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors cursor-pointer font-medium">
                     <option value="">Select driver...</option>
                 </select>
             </div>
 
-            <div class="w-full md:w-1/4">
+            <div class="w-full md:w-64">
                 <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Date</label>
                 <input type="date" id="itineraryDate" onchange="loadDriverItinerary()" class="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition-colors cursor-pointer font-medium">
             </div>
+
+        </div>
 
         </div>
 
