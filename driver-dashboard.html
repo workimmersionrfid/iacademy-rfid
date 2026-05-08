@@ -737,9 +737,13 @@
             }).join('');
         }
 
-        // NEW: Completed Task Viewing & Editing Logic
+        // NEW: Store the specific action log ID when viewing a completed task
+        let activeLogIdForReopen = null;
+
         window.openCompletedTask = async function(taskId, taskType, taskDesc, destName) {
             currentCompletedTaskId = taskId;
+            activeLogIdForReopen = null; // Reset it
+            
             document.getElementById('comp-task-desc').innerText = taskDesc;
             document.getElementById('comp-task-dest').innerHTML = `<i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i> ${destName}`;
 
@@ -765,7 +769,7 @@
                 // Find the specific handover log
                 const myHandoverLogs = logs.filter(l =>
                     l.driver_name === myName &&
-                    l.action === "Final Task Handover" &&
+                    (l.action === "Final Task Handover" || l.action === "Revised Task Handover") &&
                     l.task === exactTaskString
                 );
 
@@ -774,6 +778,8 @@
 
                 if (myHandoverLogs.length > 0) {
                     const log = myHandoverLogs[0];
+                    activeLogIdForReopen = log._id; // Capture the unique ID from the database!
+                    
                     detailsContainer.innerHTML = `
                         <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-800">
                             <span class="font-bold text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-widest">Status:</span>
@@ -786,6 +792,9 @@
                         <div class="flex flex-col mt-3">
                             <span class="font-bold text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">Comments:</span>
                             <span class="font-medium bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm italic text-gray-600 dark:text-gray-400">"${log.comments || 'No comments'}"</span>
+                        </div>
+                        <div class="mt-2 text-right">
+                            <span class="text-[9px] text-gray-400">Log ID: ${log._id}</span>
                         </div>
                     `;
                 } else {
@@ -823,6 +832,11 @@
             if (!currentCompletedTaskId) return;
             if (confirm("Are you sure you want to edit this task? \n\nFor auditing purposes, this will pull the task back into your 'Pending' list so you can submit a completely fresh, corrected Handover Log.")) {
                 try {
+                    // Temporarily memorize the old Log ID for the new submission
+                    if (activeLogIdForReopen) {
+                        localStorage.setItem(`revision_for_${currentCompletedTaskId}`, activeLogIdForReopen);
+                    }
+
                     // Change status back to Pending via API
                     await fetch(`${API_BASE}/tasks/${currentCompletedTaskId}`, {
                         method: 'PUT',
@@ -1262,13 +1276,24 @@
             const coords = await getLiveLocation();
             const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
 
+            // NEW: Check if this is a revision of an older log!
+            const revisionOfLogId = localStorage.getItem(`revision_for_${currentActiveTaskId}`);
+            let finalActionName = "Final Task Handover";
+            let finalComments = document.getElementById('comments').value || "None";
+            
+            if (revisionOfLogId) {
+                finalActionName = "Revised Task Handover";
+                finalComments = `[REVISION OF LOG ID: ${revisionOfLogId}] ` + finalComments;
+            }
+
             const payload = {        
-                driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Final Task Handover",        
+                driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: finalActionName,        
                 department: currentActiveTaskDept, task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
-                comments: document.getElementById('comments').value || "None",        
+                comments: finalComments,        
                 document_attached: uploadedImagesData.length > 0 ? JSON.stringify(uploadedImagesData) : "None", 
                 latitude: coords.lat, longitude: coords.lon,        
-                completion_type: dbCompletionType, incomplete_reasons: failReasonsStr, signature: sigData    
+                completion_type: dbCompletionType, incomplete_reasons: failReasonsStr, signature: sigData,
+                original_log_id: revisionOfLogId || "N/A"
             };
             
             const success = await sendActionLog(payload, "Handover Complete");    
@@ -1285,6 +1310,9 @@
                         });
                         alert(updateStatus === 'Rebook' ? "Task flagged for Rebooking by Admin." : "Task completed and removed from pending list!");
                     } else { alert("Task attempt logged. It remains on your pending list for later."); }
+                    
+                    // Clear the revision tracker once successfully submitted
+                    if (revisionOfLogId) localStorage.removeItem(`revision_for_${currentActiveTaskId}`);
                     
                     currentActiveTaskId = null; currentActiveVehicle = "N/A"; currentActiveTaskDept = "GENERAL"; 
                 }
