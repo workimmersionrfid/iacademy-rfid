@@ -560,9 +560,9 @@
 
     <div id="rebookModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 my-8 transform scale-95 opacity-0 transition-all duration-200" id="rebookBox">
-            <div class="p-5 bg-red-800 dark:bg-red-900 flex justify-between items-center border-b dark:border-red-900/50 transition-colors">
-                <h3 class="font-bold text-white text-base"><i class="fa-solid fa-rotate-right mr-2"></i> Rebook Task</h3>
-                <button onclick="closeRebookModal()" class="text-red-200 hover:text-white transition-colors">
+            <div id="rebookModalHeader" class="p-5 bg-red-800 dark:bg-red-900 flex justify-between items-center border-b dark:border-red-900/50 transition-colors">
+                <h3 id="rebookModalTitle" class="font-bold text-white text-base"><i class="fa-solid fa-rotate-right mr-2"></i> Rebook Task</h3>
+                <button onclick="closeRebookModal()" class="text-white hover:text-gray-200 transition-colors">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -577,26 +577,26 @@
 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">New Date</label>
-                    <input type="date" id="rDate" onchange="updateRebookDropdowns()" required class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white rounded-lg p-3 text-sm outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-1 focus:ring-red-500 transition-colors font-bold">
+                    <input type="date" id="rDate" onchange="updateRebookDropdowns()" required class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white rounded-lg p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 transition-colors font-bold">
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Reassign Driver</label>
-                    <select id="rDriver" onchange="updateRebookVehicleDropdown()" required class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg p-3 text-sm outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-1 focus:ring-red-500 transition-colors font-medium">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Assign Driver</label>
+                    <select id="rDriver" onchange="updateRebookVehicleDropdown()" required class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 transition-colors font-medium">
                         <option value="" disabled selected>Select new date first...</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Reassign Vehicle</label>
-                    <select id="rVehicle" required class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg p-3 text-sm outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-1 focus:ring-red-500 transition-colors font-medium">
+                    <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Assign Vehicle</label>
+                    <select id="rVehicle" required class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg p-3 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 transition-colors font-medium">
                         <option value="" disabled selected>Select driver first...</option>
                     </select>
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-4 transition-colors">
                     <button type="button" onclick="closeRebookModal()" class="w-1/3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold py-3.5 rounded-xl transition-colors text-sm shadow-sm">Cancel</button>
-                    <button type="submit" id="btnSubmitRebook" class="w-2/3 bg-red-700 dark:bg-red-600 hover:bg-red-800 dark:hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm">Confirm Rebook</button>
+                    <button type="submit" id="btnSubmitRebook" class="w-2/3 bg-red-700 dark:bg-red-600 hover:bg-red-800 dark:hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm">Confirm</button>
                 </div>
             </form>
         </div>
@@ -1282,7 +1282,6 @@
                 if (deptFilter !== 'All' && t.department !== deptFilter) return false;
                 if (driverFilter !== 'All' && t.driver !== driverFilter) return false;
                 if (taskFilter !== 'All' && t.taskType !== taskFilter) return false;
-                
                 if (statusFilter !== 'All' && t.status !== statusFilter) return false;
 
                 if (startBoundary && endBoundary) {
@@ -1299,19 +1298,23 @@
                     const isDone = t.status === 'Completed';
                     const isRebook = t.status === 'Rebook';
                     
+                    // NEW: Pending tasks now have an "Edit Date" button next to them
                     let statusHtml = isDone ? `<span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold px-3 py-1.5 rounded-md text-[10px] border border-blue-100 dark:border-blue-800 uppercase tracking-widest shadow-sm">Completed</span>`
-                                   : (isRebook ? `<button onclick="openRebookModal('${t._id}')" class="bg-red-50 dark:bg-red-900/30 hover:bg-red-600 dark:hover:bg-red-700 hover:text-white hover:border-red-600 text-red-700 dark:text-red-400 font-bold px-3 py-1.5 rounded-md text-[10px] border border-red-200 dark:border-red-800 uppercase tracking-widest transition-all cursor-pointer shadow-sm group"><i class="fa-solid fa-rotate-right mr-1 group-hover:animate-spin"></i> Rebook</button>`
-                                   : `<span class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold px-3 py-1.5 rounded-md text-[10px] border border-gray-200 dark:border-gray-700 uppercase tracking-widest shadow-sm">Pending</span>`);
+                                   : (isRebook ? `<button onclick="openRebookModal('${t._id}', false)" class="bg-red-50 dark:bg-red-900/30 hover:bg-red-600 dark:hover:bg-red-700 hover:text-white hover:border-red-600 text-red-700 dark:text-red-400 font-bold px-3 py-1.5 rounded-md text-[10px] border border-red-200 dark:border-red-800 uppercase tracking-widest transition-all cursor-pointer shadow-sm group"><i class="fa-solid fa-rotate-right mr-1 group-hover:animate-spin"></i> Rebook</button>`
+                                   : `<div class="flex flex-col gap-2 items-start">
+                                        <span class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold px-3 py-1.5 rounded-md text-[10px] border border-gray-200 dark:border-gray-700 uppercase tracking-widest shadow-sm">Pending</span>
+                                        <button onclick="openRebookModal('${t._id}', true)" class="text-[9px] font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-calendar-day"></i> Edit Date</button>
+                                      </div>`);
 
                     return `
                     <tr class="hover:bg-blue-50/30 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="p-4">${statusHtml}</td>
-                        <td class="p-4">
+                        <td class="p-4 align-top w-28">${statusHtml}</td>
+                        <td class="p-4 align-top w-40">
                             <div class="font-medium text-gray-800 dark:text-gray-200">${t.date}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${t.driver} &bull; <span class="font-bold text-blue-600 dark:text-blue-400">${t.department || 'N/A'}</span></div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${t.driver} <br><span class="font-bold text-blue-600 dark:text-blue-400 text-[10px] uppercase">${t.department || 'N/A'}</span></div>
                         </td>
-                        <td class="p-4 text-gray-600 dark:text-gray-400 font-medium">${t.vehicle}</td>
-                        <td class="p-4">
+                        <td class="p-4 align-top text-gray-600 dark:text-gray-400 font-medium">${t.vehicle}</td>
+                        <td class="p-4 align-top">
                             <div class="font-bold text-blue-900 dark:text-white">${t.destination}</div>
                             <div class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mt-1">${t.taskType || 'Standard Task'}</div>
                             <div class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 max-w-[300px] mt-0.5" title="${t.description}">${t.description}</div>
@@ -1321,6 +1324,68 @@
             }
         }
 
+        // NEW: This modal now dynamically changes color/text based on whether it is an Edit or a Rebook!
+        window.openRebookModal = function(taskId, isEdit = false) {
+            const task = allTasks.find(t => t._id === taskId);
+            if (!task) return;
+
+            document.getElementById('rTaskId').value = task._id;
+            document.getElementById('rTaskDept').value = task.department || 'GENERAL';
+            document.getElementById('rTaskDesc').innerText = `${task.destination} — ${task.description}`;
+            
+            document.getElementById('rDate').value = "";
+            document.getElementById('rDriver').innerHTML = '<option value="" disabled selected>Select new date first...</option>';
+            document.getElementById('rVehicle').innerHTML = '<option value="" disabled selected>Select driver first...</option>';
+
+            const header = document.getElementById('rebookModalHeader');
+            const title = document.getElementById('rebookModalTitle');
+            const btn = document.getElementById('btnSubmitRebook');
+
+            if (isEdit) {
+                header.className = "p-5 bg-blue-800 dark:bg-blue-900 flex justify-between items-center border-b dark:border-blue-900/50 transition-colors";
+                title.innerHTML = `<i class="fa-solid fa-calendar-day mr-2"></i> Edit Dispatch Date`;
+                btn.innerHTML = `Save Changes`;
+                btn.className = "w-2/3 bg-blue-700 dark:bg-blue-600 hover:bg-blue-800 dark:hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm";
+            } else {
+                header.className = "p-5 bg-red-800 dark:bg-red-900 flex justify-between items-center border-b dark:border-red-900/50 transition-colors";
+                title.innerHTML = `<i class="fa-solid fa-rotate-right mr-2"></i> Rebook Task`;
+                btn.innerHTML = `Confirm Rebook`;
+                btn.className = "w-2/3 bg-red-700 dark:bg-red-600 hover:bg-red-800 dark:hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm";
+            }
+
+            const modal = document.getElementById('rebookModal');
+            const box = document.getElementById('rebookBox');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 10);
+        }
+
+        window.submitRebook = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitRebook');
+            const origText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+            btn.disabled = true;
+
+            const taskId = document.getElementById('rTaskId').value;
+
+            try {
+                const res = await fetch(`https://iacademy-rfid.onrender.com/api/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        date: document.getElementById('rDate').value,
+                        driver: document.getElementById('rDriver').value,
+                        vehicle: document.getElementById('rVehicle').value,
+                        status: 'Pending'
+                    })
+                });
+
+                if (res.ok) {
+                    closeRebookModal();
+                    loadDashboardData(); 
+                } else alert("Failed to update task.");
+            } catch (err) { alert("Network error."); } finally { btn.innerHTML = origText; btn.disabled = false; }
+        }
         function renderVehicleList() {
             const vList = document.getElementById('vehicleList');
             if (allVehicles.length === 0) vList.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-400">No vehicles registered yet.</td></tr>`;
