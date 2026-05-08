@@ -11,7 +11,6 @@
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <script>
-        // 1. Tell Tailwind to use 'class' for dark mode
         tailwind.config = { 
             darkMode: 'class',
             theme: { 
@@ -22,14 +21,12 @@
             } 
         }
 
-        // 2. Check local storage for theme preference BEFORE the page renders
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
 
-        // 3. Your existing Auth and Profile logic
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('userRole');
@@ -64,7 +61,7 @@
 
     <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-       <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors">
+        <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors">
             <div class="relative z-10">
                 <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide uppercase" id="driverDept">Department</p>
                 <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight" id="driverName">Driver Name</h1>
@@ -281,6 +278,41 @@
                     </div>
                 </div>
             </div>
+
+            <div id="completedModal" class="fixed inset-0 bg-gray-900/80 hidden items-center justify-center z-[100] p-4 backdrop-blur-sm overflow-y-auto">
+                <div class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-emerald-50 dark:border-gray-700 flex flex-col transform scale-95 opacity-0 transition-all duration-200" id="completedModalBox">
+                    
+                    <div class="p-5 bg-emerald-700 dark:bg-emerald-800 flex justify-between items-center shrink-0 transition-colors">
+                        <h2 class="font-bold text-white text-lg"><i class="fa-solid fa-check-circle mr-2"></i> Completed Dispatch</h2>
+                        <button onclick="closeCompletedModal()" class="text-emerald-200 hover:text-white transition-colors">
+                            <i class="fa-solid fa-xmark text-2xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6 bg-white dark:bg-gray-800 transition-colors">
+                        <h3 id="comp-task-desc" class="text-lg font-bold text-emerald-900 dark:text-white leading-tight mb-1">Task Desc</h3>
+                        <p id="comp-task-dest" class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-6"><i class="fa-solid fa-location-dot mr-1"></i> Dest</p>
+
+                        <div class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl p-4 mb-6 shadow-inner">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">Your Handover Record</p>
+                            <div id="comp-log-details" class="text-sm text-gray-700 dark:text-gray-300 space-y-3">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Fetching your submission...
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="archiveCompletedTask()" class="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold py-3.5 rounded-xl transition-colors text-xs flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-box-archive"></i> Archive Task
+                            </button>
+                            <button onclick="reopenCompletedTask()" class="w-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-bold py-3.5 rounded-xl transition-colors text-xs flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit / Reopen
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 text-center mt-3">Need to change your submission? Reopen the task to submit a new handover log.</p>
+                    </div>
+                </div>
+            </div>
+
     </main>
 
     <div id="fuelModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm overflow-y-auto">
@@ -465,7 +497,6 @@
             </div>
         </div>
     </div>
-
         
     <script src="js/app.js"></script>
 
@@ -478,26 +509,14 @@
         let currentActiveTaskDest = "N/A";
         let currentActiveTaskDept = "GENERAL"; 
 
+        // NEW: Store the current completed task ID
+        let currentCompletedTaskId = null;
+
         const statusText = document.getElementById('status-text');
 
         let allVehicles = [];
         let allTasks = [];
-        
         let vehicleDeptMap = {}; 
-
-        function getLiveLocation() {    
-            return new Promise((resolve) => {        
-                if ("geolocation" in navigator) {            
-                    navigator.geolocation.getCurrentPosition(                
-                        (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
-                        (err) => resolve({ lat: "N/A", lon: "N/A" }), 
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }            
-                    );        
-                } else {
-                    resolve({ lat: "N/A", lon: "N/A" });
-                }
-            });
-        }
 
         window.openFuelModal = function() {
             const m = document.getElementById('fuelModal');
@@ -519,9 +538,8 @@
             m.classList.remove('flex'); m.classList.add('hidden');
         };
 
-       async function initDriverData() {
+        async function initDriverData() {
             try {
-                // NEW: Added the drivers fetch so we can check their work profile!
                 const [tasksRes, vehiclesRes, driversRes] = await Promise.all([
                     fetch(`${API_BASE}/tasks`),
                     fetch(`${API_BASE}/vehicles`),
@@ -532,7 +550,6 @@
                 allVehicles = await vehiclesRes.json();
                 const allDrivers = await driversRes.json();
 
-                // NEW: Render the Driver's Schedule Badges
                 const myName = localStorage.getItem('username');
                 const myProfile = allDrivers.find(d => d.username === myName);
                 
@@ -638,11 +655,29 @@
             }
         };
 
+        function getLiveLocation() {    
+            return new Promise((resolve) => {        
+                if ("geolocation" in navigator) {            
+                    navigator.geolocation.getCurrentPosition(                
+                        (pos) => resolve({ lat: pos.coords.latitude.toString(), lon: pos.coords.longitude.toString() }),                
+                        (err) => resolve({ lat: "N/A", lon: "N/A" }), 
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }            
+                    );        
+                } else {
+                    resolve({ lat: "N/A", lon: "N/A" });
+                }
+            });
+        }
+
         function renderMyTasks() {
             const myName = localStorage.getItem('username');
             const todayStr = new Date().toISOString().split('T')[0]; 
             
-            let myTasks = allTasks.filter(t => t.driver === myName);
+            // NEW: Pull hidden/archived tasks from local storage
+            const archivedTasks = JSON.parse(localStorage.getItem('archivedTasks') || '[]');
+            
+            // Filter out tasks the user has hidden
+            let myTasks = allTasks.filter(t => t.driver === myName && !archivedTasks.includes(t._id));
             
             myTasks.sort((a, b) => {
                 const dateDiff = new Date(a.date) - new Date(b.date);
@@ -655,7 +690,7 @@
             const list = document.getElementById('taskList');
             
             if(myTasks.length === 0) {
-                list.innerHTML = `<div class="col-span-full text-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-50 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm font-medium transition-colors">No tasks assigned.</div>`;
+                list.innerHTML = `<div class="col-span-full text-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-50 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm font-medium transition-colors">No active tasks assigned.</div>`;
                 return;
             }
 
@@ -667,9 +702,10 @@
                 let bgClass, statusBadge, clickAction;
 
                 if (isDone) {
-                    bgClass = 'bg-gray-50 dark:bg-gray-800 opacity-60 border-gray-200 dark:border-gray-700';
-                    statusBadge = '<span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded tracking-widest border border-emerald-200 dark:border-emerald-800">DONE</span>';
-                    clickAction = '';
+                    // NEW: Allow clicking on completed tasks to view/reopen them
+                    bgClass = 'bg-gray-50 dark:bg-gray-800 opacity-80 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer shadow-sm hover:shadow-md';
+                    statusBadge = '<span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded tracking-widest border border-emerald-200 dark:border-emerald-800">DONE (TAP TO VIEW)</span>';
+                    clickAction = `onclick="openCompletedTask('${t._id}', '${t.taskType || 'Standard Dispatch'}', '${t.description.replace(/'/g, "\\'")}', '${t.destination.replace(/'/g, "\\'")}')"`;
                 } else if (isRebook) {
                     bgClass = 'bg-red-50/30 dark:bg-red-900/20 opacity-70 border-red-100 dark:border-red-900/50';
                     statusBadge = '<span class="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded tracking-widest border border-red-200 dark:border-red-800">REBOOK</span>';
@@ -700,6 +736,113 @@
                 `;
             }).join('');
         }
+
+        // NEW: Completed Task Viewing & Editing Logic
+        window.openCompletedTask = async function(taskId, taskType, taskDesc, destName) {
+            currentCompletedTaskId = taskId;
+            document.getElementById('comp-task-desc').innerText = taskDesc;
+            document.getElementById('comp-task-dest').innerHTML = `<i class="fa-solid fa-location-dot mr-1 text-emerald-500"></i> ${destName}`;
+
+            const modal = document.getElementById('completedModal');
+            const box = document.getElementById('completedModalBox');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            const detailsContainer = document.getElementById('comp-log-details');
+            detailsContainer.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Fetching your submission...';
+
+            try {
+                const res = await fetch(`${API_BASE}/action-logs`);
+                const logs = await res.json();
+                const myName = localStorage.getItem('username');
+                
+                const exactTaskString = `${taskType}: ${taskDesc}`;
+
+                // Find the specific handover log
+                const myHandoverLogs = logs.filter(l =>
+                    l.driver_name === myName &&
+                    l.action === "Final Task Handover" &&
+                    l.task === exactTaskString
+                );
+
+                // Get the most recent attempt
+                myHandoverLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if (myHandoverLogs.length > 0) {
+                    const log = myHandoverLogs[0];
+                    detailsContainer.innerHTML = `
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <span class="font-bold text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-widest">Status:</span>
+                            <span class="${log.delivery_status === 'Successful' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'} font-black text-sm uppercase tracking-wide bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-sm border border-gray-100 dark:border-gray-700">${log.delivery_status}</span>
+                        </div>
+                        <div class="flex flex-col mt-3">
+                            <span class="font-bold text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">Reasons/Remarks:</span>
+                            <span class="font-medium bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">${log.incomplete_reasons || 'None provided'}</span>
+                        </div>
+                        <div class="flex flex-col mt-3">
+                            <span class="font-bold text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">Comments:</span>
+                            <span class="font-medium bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm italic text-gray-600 dark:text-gray-400">"${log.comments || 'No comments'}"</span>
+                        </div>
+                    `;
+                } else {
+                    detailsContainer.innerHTML = "No submission data found.";
+                }
+
+            } catch (e) {
+                detailsContainer.innerHTML = "Failed to load submission data.";
+            }
+        };
+
+        window.closeCompletedModal = function() {
+            const modal = document.getElementById('completedModal');
+            const box = document.getElementById('completedModalBox');
+            box.classList.remove('scale-100', 'opacity-100');
+            box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        };
+
+        window.archiveCompletedTask = function() {
+            if (!currentCompletedTaskId) return;
+            let archived = JSON.parse(localStorage.getItem('archivedTasks') || '[]');
+            if (!archived.includes(currentCompletedTaskId)) {
+                archived.push(currentCompletedTaskId);
+                localStorage.setItem('archivedTasks', JSON.stringify(archived));
+            }
+            closeCompletedModal();
+            renderMyTasks(); 
+        };
+
+        window.reopenCompletedTask = async function() {
+            if (!currentCompletedTaskId) return;
+            if (confirm("Are you sure you want to edit this task? \n\nFor auditing purposes, this will pull the task back into your 'Pending' list so you can submit a completely fresh, corrected Handover Log.")) {
+                try {
+                    // Change status back to Pending via API
+                    await fetch(`${API_BASE}/tasks/${currentCompletedTaskId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'Pending' })
+                    });
+
+                    // Pull it out of local archive if it was hiding there
+                    let archived = JSON.parse(localStorage.getItem('archivedTasks') || '[]');
+                    archived = archived.filter(id => id !== currentCompletedTaskId);
+                    localStorage.setItem('archivedTasks', JSON.stringify(archived));
+
+                    closeCompletedModal();
+                    alert("Task has been re-opened! It is now back in your Pending queue.");
+                    await initDriverData(); 
+                } catch (err) {
+                    alert("Failed to re-open task.");
+                }
+            }
+        };
 
         function calculateTotalFuelCost() {
             const price = parseFloat(document.getElementById('fPrice').value) || 0;
@@ -903,7 +1046,6 @@
             document.getElementById('active-task-info').classList.remove('hidden');
             document.getElementById('no-task-placeholder').classList.add('hidden');
             
-            // Show the Start button, but keep the actual form hidden for now
             document.getElementById('start-execution-section').classList.remove('hidden');
             document.getElementById('task-action-controls').classList.add('hidden');
 
@@ -921,21 +1063,16 @@
             }, 10);
         };
 
-        // NEW: Event Listener for the Start Execution Button
         document.getElementById('btn-start-execution').addEventListener('click', async () => {
             const btn = document.getElementById('btn-start-execution');
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Locking GPS...`;
             btn.disabled = true;
 
-            // This calls the GPS immediately, triggering the browser permission 
-            // and giving the laptop time to find the coordinates!
             await getLiveLocation();
 
-            // Once GPS is ready, hide this button and reveal the real form
             document.getElementById('start-execution-section').classList.add('hidden');
             document.getElementById('task-action-controls').classList.remove('hidden');
 
-            // Reset button for next time
             btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Start Execution`;
             btn.disabled = false;
         });
@@ -952,8 +1089,6 @@
         };
 
         function getFinalTaskAndLocation() { return { finalTask: currentActiveTaskName, finalLoc: currentActiveTaskDest }; }
-
-    
 
         let uploadedImagesData = [];
         const fileNameDisplay = document.getElementById('file-name');
@@ -1164,7 +1299,6 @@
                 document.getElementById('task-action-controls').classList.add('hidden');
                 document.getElementById('no-task-placeholder').classList.remove('hidden');
                 
-                // NEW: Hide the start execution section so it resets properly!
                 document.getElementById('start-execution-section').classList.add('hidden');
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
