@@ -389,42 +389,117 @@
         function exportFuelToExcel() {
             if (filteredLogs.length === 0) return alert("No data to export!");
             
-            const exportData = filteredLogs.map(log => {
-                const isFuel = log.logType === 'Fuel';
-                return {
-                    "Date": log.date, 
-                    "Expense Type": log.logType,
-                    "Department": log.department, 
-                    "Driver": log.driver,
-                    "Vehicle": log.vehicle, 
-                    "Odometer / Route": isFuel ? (log.odo || "N/A") : (log.expressway || "N/A"), 
-                    "Liters Pumped": isFuel ? log.liters : 0, 
-                    "Cost (PHP)": isFuel ? (log.total || 0) : (log.amount || 0),
-                    "Notes": log.notes || ""
+            const btn = document.querySelector('button[onclick="exportFuelToExcel()"]');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating Report...`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // --- 1. SETUP TIME BUCKETS (Using Moment.js) ---
+                const today = moment().startOf('day');
+                const startOfWeek = moment().startOf('isoWeek');
+                const startOfMonth = moment().startOf('month');
+                const startOfYear = moment().startOf('year');
+
+                let execSummary = {
+                    today: { fuel: 0, toll: 0 }, week: { fuel: 0, toll: 0 },
+                    month: { fuel: 0, toll: 0 }, year: { fuel: 0, toll: 0 }, total: { fuel: 0, toll: 0 }
                 };
-            });
 
-            let totalFuelCost = 0;
-            let totalTollCost = 0;
-            filteredLogs.forEach(log => {
-                if (log.logType === 'Fuel') totalFuelCost += (parseFloat(log.total) || 0);
-                if (log.logType === 'Toll') totalTollCost += (parseFloat(log.amount) || 0);
-            });
+                let deptSummary = {};
+                let vehicleSummary = {};
 
-            const summaryData = [
-                { "Metric": "Report Generated On", "Value": new Date().toLocaleDateString() },
-                { "Metric": "Total Records Exported", "Value": filteredLogs.length },
-                { "Metric": "Total Fuel Expenses (PHP)", "Value": totalFuelCost },
-                { "Metric": "Total Toll Expenses (PHP)", "Value": totalTollCost },
-                { "Metric": "GRAND TOTAL (PHP)", "Value": totalFuelCost + totalTollCost }
-            ];
+                // --- 2. PROCESS DATA & AGGREGATE ---
+                const rawAuditData = filteredLogs.map(log => {
+                    const isFuel = log.logType === 'Fuel';
+                    const cost = isFuel ? (parseFloat(log.total) || 0) : (parseFloat(log.amount) || 0);
+                    const logDate = moment(log.date);
 
-            const workbook = XLSX.utils.book_new();
-            const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-            XLSX.utils.book_append_sheet(workbook, summarySheet, "Financial Summary");
-            const rawDataSheet = XLSX.utils.json_to_sheet(exportData);
-            XLSX.utils.book_append_sheet(workbook, rawDataSheet, "Detailed Logs");
-            XLSX.writeFile(workbook, `Fleet_Financials_${new Date().toISOString().split('T')[0]}.xlsx`);
+                    // A. Timeframe Aggregation
+                    if (isFuel) execSummary.total.fuel += cost; else execSummary.total.toll += cost;
+                    
+                    if (logDate.isSameOrAfter(today)) { if(isFuel) execSummary.today.fuel += cost; else execSummary.today.toll += cost; }
+                    if (logDate.isSameOrAfter(startOfWeek)) { if(isFuel) execSummary.week.fuel += cost; else execSummary.week.toll += cost; }
+                    if (logDate.isSameOrAfter(startOfMonth)) { if(isFuel) execSummary.month.fuel += cost; else execSummary.month.toll += cost; }
+                    if (logDate.isSameOrAfter(startOfYear)) { if(isFuel) execSummary.year.fuel += cost; else execSummary.year.toll += cost; }
+
+                    // B. Department Aggregation (Cost Centers)
+                    const dept = log.department || "UNASSIGNED";
+                    if (!deptSummary[dept]) deptSummary[dept] = { fuel: 0, toll: 0, total: 0 };
+                    if (isFuel) deptSummary[dept].fuel += cost; else deptSummary[dept].toll += cost;
+                    deptSummary[dept].total += cost;
+
+                    // C. Vehicle Aggregation (Assets)
+                    const veh = log.vehicle || "UNKNOWN VEHICLE";
+                    if (!vehicleSummary[veh]) vehicleSummary[veh] = { fuel: 0, toll: 0, liters: 0, total: 0 };
+                    if (isFuel) {
+                        vehicleSummary[veh].fuel += cost;
+                        vehicleSummary[veh].liters += (parseFloat(log.liters) || 0);
+                    } else {
+                        vehicleSummary[veh].toll += cost;
+                    }
+                    vehicleSummary[veh].total += cost;
+
+                    // D. Formatting the Raw Audit Row
+                    return {
+                        "System ID": log._id || "N/A",
+                        "Transaction Date": log.date, 
+                        "Expense Type": log.logType,
+                        "Cost Center (Dept)": dept, 
+                        "Driver": log.driver,
+                        "Asset (Vehicle)": veh, 
+                        "Odometer / Route": isFuel ? (log.odo || "N/A") : (log.expressway || "N/A"), 
+                        "Liters Pumped": isFuel ? parseFloat(log.liters || 0) : 0, 
+                        "Total Cost (PHP)": cost,
+                        "Driver Notes": log.notes || ""
+                    };
+                });
+
+                // --- 3. BUILD EXCEL SHEETS ---
+                const workbook = XLSX.utils.book_new();
+
+                // TAB 1: Executive Summary
+                const execData = [
+                    ["iACADEMY FLEET FINANCIAL REPORT"],
+                    ["Report Generated On:", moment().format('MMMM Do YYYY, h:mm:ss a')],
+                    ["Total Records Exported:", filteredLogs.length],
+                    [],
+                    ["TIME PERIOD", "FUEL EXPENSES (PHP)", "TOLL EXPENSES (PHP)", "COMBINED TOTAL (PHP)"],
+                    ["Today", execSummary.today.fuel, execSummary.today.toll, execSummary.today.fuel + execSummary.today.toll],
+                    ["This Week", execSummary.week.fuel, execSummary.week.toll, execSummary.week.fuel + execSummary.week.toll],
+                    ["This Month", execSummary.month.fuel, execSummary.month.toll, execSummary.month.fuel + execSummary.month.toll],
+                    ["This Year", execSummary.year.fuel, execSummary.year.toll, execSummary.year.fuel + execSummary.year.toll],
+                    ["ALL-TIME (Filtered)", execSummary.total.fuel, execSummary.total.toll, execSummary.total.fuel + execSummary.total.toll]
+                ];
+                const wsExec = XLSX.utils.aoa_to_sheet(execData);
+                XLSX.utils.book_append_sheet(workbook, wsExec, "Executive Summary");
+
+                // TAB 2: Department Allocation
+                const deptData = [["DEPARTMENT (COST CENTER)", "FUEL COST (PHP)", "TOLL COST (PHP)", "TOTAL ALLOCATION (PHP)"]];
+                Object.keys(deptSummary).sort().forEach(d => {
+                    deptData.push([d, deptSummary[d].fuel, deptSummary[d].toll, deptSummary[d].total]);
+                });
+                const wsDept = XLSX.utils.aoa_to_sheet(deptData);
+                XLSX.utils.book_append_sheet(workbook, wsDept, "Department Allocation");
+
+                // TAB 3: Asset Ledger (Vehicles)
+                const vehData = [["ASSET (VEHICLE)", "TOTAL LITERS PUMPED", "FUEL COST (PHP)", "TOLL COST (PHP)", "TOTAL ASSET COST (PHP)"]];
+                Object.keys(vehicleSummary).sort().forEach(v => {
+                    vehData.push([v, vehicleSummary[v].liters, vehicleSummary[v].fuel, vehicleSummary[v].toll, vehicleSummary[v].total]);
+                });
+                const wsVeh = XLSX.utils.aoa_to_sheet(vehData);
+                XLSX.utils.book_append_sheet(workbook, wsVeh, "Asset Ledger");
+
+                // TAB 4: Raw Audit Trail
+                const wsRaw = XLSX.utils.json_to_sheet(rawAuditData);
+                XLSX.utils.book_append_sheet(workbook, wsRaw, "Raw Audit Data");
+
+                // --- 4. TRIGGER DOWNLOAD ---
+                XLSX.writeFile(workbook, `Fleet_Financial_Report_${moment().format('YYYY-MM-DD')}.xlsx`);
+
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }, 500); // Small timeout allows UI to show the "Generating..." spinner
         }
     </script>
 </body>
