@@ -64,12 +64,19 @@
 
     <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
         
-        <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors">
+       <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-gray-800 dark:via-blue-900 dark:to-gray-900 rounded-2xl shadow-md p-8 md:p-12 relative overflow-hidden flex items-center justify-between transition-colors">
             <div class="relative z-10">
                 <p class="text-blue-100 text-sm font-medium mb-1 tracking-wide uppercase" id="driverDept">Department</p>
                 <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight" id="driverName">Driver Name</h1>
+                
+                <div class="mt-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <span class="text-[10px] text-blue-200 uppercase tracking-widest font-medium">My Schedule:</span>
+                    <div id="driverSchedule" class="flex gap-1.5 flex-wrap">
+                        <span class="text-blue-200 text-xs"><i class="fa-solid fa-spinner fa-spin"></i> Syncing...</span>
+                    </div>
+                </div>
             </div>
-            <div class="hidden md:block relative z-10 text-white/20">
+            <div class="hidden md:block relative z-10 text-white/10">
                 <i class="fa-solid fa-truck-fast text-9xl"></i>
             </div>
         </div>
@@ -512,15 +519,38 @@
             m.classList.remove('flex'); m.classList.add('hidden');
         };
 
-        async function initDriverData() {
+       async function initDriverData() {
             try {
-                const [tasksRes, vehiclesRes] = await Promise.all([
+                // NEW: Added the drivers fetch so we can check their work profile!
+                const [tasksRes, vehiclesRes, driversRes] = await Promise.all([
                     fetch(`${API_BASE}/tasks`),
-                    fetch(`${API_BASE}/vehicles`)
+                    fetch(`${API_BASE}/vehicles`),
+                    fetch(`${API_BASE}/drivers`)
                 ]);
                 
                 allTasks = await tasksRes.json();
                 allVehicles = await vehiclesRes.json();
+                const allDrivers = await driversRes.json();
+
+                // NEW: Render the Driver's Schedule Badges
+                const myName = localStorage.getItem('username');
+                const myProfile = allDrivers.find(d => d.username === myName);
+                
+                if (myProfile) {
+                    const workDays = myProfile.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                    const allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    
+                    document.getElementById('driverSchedule').innerHTML = allDays.map(day => {
+                        const isWorkDay = workDays.includes(day);
+                        const shortDay = day.substring(0, 3).toUpperCase();
+                        
+                        if (isWorkDay) {
+                            return `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 text-[10px] font-bold px-2.5 py-1 rounded shadow-sm tracking-widest">${shortDay}</span>`;
+                        } else {
+                            return `<span class="bg-slate-800/50 text-slate-500 border border-slate-700/50 text-[10px] font-medium px-2.5 py-1 rounded tracking-widest opacity-60">${shortDay}</span>`;
+                        }
+                    }).join('');
+                }
 
                 document.getElementById('fDate').valueAsDate = new Date();
                 document.getElementById('tollDate').valueAsDate = new Date();
