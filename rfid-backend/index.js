@@ -23,10 +23,16 @@ mongoose.connect(process.env.MONGODB_URI)
 // --- NODEMAILER TRANSPORTER SETUP ---
 // ==========================================
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com', 
+    port: 465,
+    secure: true,
     auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS
+    },
+   
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -465,9 +471,11 @@ app.post('/api/tasks', async (req, res) => {
 
 app.put('/api/tasks/:id', async (req, res) => {
     try {
-        const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
         res.json(updatedTask);
-    } catch (err) { res.status(400).json({ error: err.message }); }
+    } catch (err) { 
+        res.status(400).json({ error: err.message }); 
+    }
 });
 
 // --- ADVANCED ACTION & HANDOVER LOGS ---
