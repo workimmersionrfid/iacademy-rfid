@@ -22,41 +22,23 @@
     </style>
     
     <script>
-
         // 1. Tell Tailwind to use 'class' for dark mode
-
         tailwind.config = {
-
             darkMode: 'class', 
-
             theme: {
-
                 extend: { 
-
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-
                     colors: { brand: { blue: '#1e3a8a', blueHover: '#1e40af', bg: '#f8fafc', border: '#e2e8f0' } }
-
                 }
-
             }
-
         }
-
-
 
         // 2. Check local storage for theme preference BEFORE the page renders
-
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-
             document.documentElement.classList.add('dark');
-
         } else {
-
             document.documentElement.classList.remove('dark');
-
         }
-
     </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen text-gray-800 dark:text-gray-200 antialiased">
@@ -188,6 +170,7 @@
         </button>
     </div>
     
+    <script src="js/shared/auth.js"></script>
     <script src="js/app.js"></script>
     
     <script>
@@ -210,6 +193,21 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            // 2. Check Roles (Allow Admin AND Superadmin)
+            if (typeof checkAuthAndRole === 'function') {
+                if (!checkAuthAndRole(['admin', 'superadmin'])) return;
+            }
+
+            // 3. Inject Floating God Mode Button for Super Admins
+            if (localStorage.getItem('userRole') === 'superadmin' && !document.getElementById('godModeBtn')) {
+                const floatingBtn = document.createElement('a');
+                floatingBtn.id = 'godModeBtn';
+                floatingBtn.href = 'superadmin-dashboard.html';
+                floatingBtn.className = 'fixed bottom-8 right-8 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-black py-4 px-6 rounded-full shadow-2xl z-[100] transition-transform hover:scale-105 flex items-center gap-2 border-2 border-yellow-500';
+                floatingBtn.innerHTML = '<i class="fa-solid fa-chess-king text-lg"></i> Return to God Mode';
+                document.body.appendChild(floatingBtn);
+            }
+
             if (typeof renderNavigation === 'function') renderNavigation('reports');
             fetchInitialData();
 

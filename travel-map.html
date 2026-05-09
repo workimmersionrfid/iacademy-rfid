@@ -110,7 +110,9 @@
         </div>
     </main>
 
+    <script src="js/shared/auth.js"></script>
     <script src="js/app.js"></script>
+    
     <script>
         const API_BASE = 'https://iacademy-rfid.onrender.com/api';
         
@@ -122,7 +124,6 @@
         const userRole = localStorage.getItem('userRole');
         const currentUser = localStorage.getItem('username');
 
-        // 1. Instant Load Map
         function loadGoogleMaps() {
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAeJ7SLq9sJ1ZYhTaWAnsOB260RJLxK8Jw&callback=initTrackingMap`;
@@ -151,6 +152,21 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            // 2. Check Roles (Allow Admin AND Superadmin)
+            if (typeof checkAuthAndRole === 'function') {
+                if (!checkAuthAndRole(['admin', 'superadmin'])) return;
+            }
+
+            // 3. Inject Floating God Mode Button for Super Admins
+            if (localStorage.getItem('userRole') === 'superadmin' && !document.getElementById('godModeBtn')) {
+                const floatingBtn = document.createElement('a');
+                floatingBtn.id = 'godModeBtn';
+                floatingBtn.href = 'superadmin-dashboard.html';
+                floatingBtn.className = 'fixed bottom-8 right-8 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-black py-4 px-6 rounded-full shadow-2xl z-[100] transition-transform hover:scale-105 flex items-center gap-2 border-2 border-yellow-500';
+                floatingBtn.innerHTML = '<i class="fa-solid fa-chess-king text-lg"></i> Return to God Mode';
+                document.body.appendChild(floatingBtn);
+            }
+
             if (typeof renderNavigation === 'function') renderNavigation('travel-map');
             loadGoogleMaps();
         });
@@ -159,7 +175,8 @@
             const dateInput = document.getElementById('itineraryDate');
             dateInput.valueAsDate = new Date();
 
-            if (userRole === 'admin') {
+            // Allow both Admin and Superadmin to see driver filter
+            if (userRole === 'admin' || userRole === 'superadmin') {
                 document.getElementById('driverSelect').classList.remove('hidden');
                 try {
                     const res = await fetch(`${API_BASE}/drivers`);
@@ -178,7 +195,7 @@
 
         async function loadDriverItinerary() {
             let targetDriver = currentUser;
-            if (userRole === 'admin') {
+            if (userRole === 'admin' || userRole === 'superadmin') {
                 targetDriver = document.getElementById('driverSelect').value;
             }
             
@@ -205,6 +222,7 @@
                     new Date(l.timestamp).toISOString().startsWith(targetDate)
                 );
                 
+                // Logs are usually sorted DESC by timestamp, so [0] is latest log
                 const latestLog = dateLogs.length > 0 ? dateLogs[0] : null;
 
                 renderItineraryUI(targetDriver, selectedTasks, latestLog, targetDate);
@@ -263,9 +281,7 @@
                 return;
             }
 
-            let html = '';
-            
-            html += `
+            let html = `
                 <div class="relative pl-6">
                     <div class="absolute -left-[9px] top-1 w-4 h-4 bg-gray-200 dark:bg-gray-600 border-2 border-white dark:border-gray-900 rounded-full z-10"></div>
                     <div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 opacity-60">
