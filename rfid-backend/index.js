@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const nodemailer = require('nodemailer'); 
 const crypto = require('crypto'); 
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
+const { google } = require('googleapis');
 
 const app = express();
 app.use(cors());
@@ -20,18 +20,55 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ==========================================
-// --- GMAIL API (OAUTH2) SETUP ---
+// --- GMAIL REST API SETUP (BULLETPROOF) ---
 // ==========================================
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        type: "OAuth2",
-        user: process.env.EMAIL_USER,
-        clientId: process.env.GMAIL_CLIENT_ID,
-        clientSecret: process.env.GMAIL_CLIENT_SECRET,
-        refreshToken: process.env.GMAIL_REFRESH_TOKEN
+const sendEmail = async (options) => {
+    try {
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.GMAIL_CLIENT_ID,
+            process.env.GMAIL_CLIENT_SECRET,
+            "https://developers.google.com/oauthplayground"
+        );
+
+        oauth2Client.setCredentials({
+            refresh_token: process.env.GMAIL_REFRESH_TOKEN
+        });
+
+        const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+        const utf8Subject = `=?utf-8?B?${Buffer.from(options.subject).toString('base64')}?=`;
+        
+        const messageParts = [
+            `From: "iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
+            `To: ${options.to}`,
+            `Subject: ${utf8Subject}`,
+            `Content-Type: text/html; charset=utf-8`,
+            `MIME-Version: 1.0`,
+            ``,
+            options.html
+        ];
+
+        const message = messageParts.join('\n');
+        const encodedMessage = Buffer.from(message)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+        const result = await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: {
+                raw: encodedMessage
+            }
+        });
+
+        console.log("✅ Email sent successfully via HTTP REST API to:", options.to);
+        return result.data;
+    } catch (error) {
+        console.error("🚨 Detailed Gmail API Error:", error.message || error); 
+        throw error;
     }
-});
+};
 
 // ==========================================
 // --- DATABASE MODELS (SCHEMAS) ---
@@ -208,7 +245,6 @@ app.post('/api/auth/register', async (req, res) => {
         const verifyLink = `${backendUrl}/api/auth/verify/${verificationToken}`;
 
         const mailOptions = {
-            from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
             to: normalizedEmail,
             subject: 'Verify Your Driver Account',
             html: `
@@ -222,8 +258,8 @@ app.post('/api/auth/register', async (req, res) => {
             `
         };
 
-        // NEW OAUTH2 EMAIL SENDER
-        await transporter.sendMail(mailOptions);
+        // NEW BULLETPROOF OAUTH2 EMAIL SENDER
+        await sendEmail(mailOptions);
 
         res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
@@ -293,7 +329,6 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         const resetLink = `${frontendUrl}/reset-password.html?token=${token}`;
 
         const mailOptions = {
-            from: `"iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: 'Password Reset Request',
             html: `
@@ -308,8 +343,8 @@ app.post('/api/auth/forgot-password', async (req, res) => {
             `
         };
 
-        // NEW OAUTH2 EMAIL SENDER
-        await transporter.sendMail(mailOptions);
+        // NEW BULLETPROOF OAUTH2 EMAIL SENDER
+        await sendEmail(mailOptions);
 
         res.json({ message: 'An e-mail has been sent to ' + user.email + ' with further instructions.' });
     } catch (err) { res.status(500).json({ message: err.message }); }
