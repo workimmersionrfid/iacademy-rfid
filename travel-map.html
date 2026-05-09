@@ -154,7 +154,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             // 2. Check Roles (Allow Admin AND Superadmin)
             if (typeof checkAuthAndRole === 'function') {
-                if (!checkAuthAndRole(['admin', 'superadmin'])) return;
+                if (!checkAuthAndRole(['admin', 'superadmin', 'driver'])) return;
             }
 
             // 3. Inject Floating God Mode Button for Super Admins
