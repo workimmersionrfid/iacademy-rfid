@@ -158,9 +158,12 @@ const pushToGoogleSheet = async (data) => {
 // --- DRIVER LIST & PROFILE ROUTES ---
 app.get('/api/drivers', async (req, res) => {
     try {
-        const drivers = await User.find({ role: 'driver' }, 'username department workDays');
+        // Use '-password' to send all profile data EXCEPT the password
+        const drivers = await User.find({ role: 'driver' }, '-password');
         res.json(drivers);
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) { 
+        res.status(500).json({ message: err.message }); 
+    }
 });
 
 app.put('/api/drivers/:id/profile', async (req, res) => {
@@ -449,9 +452,11 @@ app.post('/api/scan-receipt', async (req, res) => {
 // 1. Get all Admins
 app.get('/api/admins', async (req, res) => {
     try {
-        const admins = await User.find({ role: 'admin' }, '-password');
+        const admins = await User.find({ role: 'admin' }).select('-password');
         res.json(admins);
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // 2. Delete ANY User (Admin or Driver)
