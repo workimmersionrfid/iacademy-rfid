@@ -7,8 +7,6 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto'); 
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
-const { google } = require('googleapis');
-const OAuth2 = google.auth.OAuth2;
 
 const app = express();
 app.use(cors());
@@ -24,46 +22,16 @@ mongoose.connect(process.env.MONGODB_URI)
 // ==========================================
 // --- GMAIL API (OAUTH2) SETUP ---
 // ==========================================
-const createTransporter = async () => {
-    try {
-        const oauth2Client = new OAuth2(
-            process.env.GMAIL_CLIENT_ID,
-            process.env.GMAIL_CLIENT_SECRET,
-            "https://developers.google.com/oauthplayground"
-        );
-
-        oauth2Client.setCredentials({
-            refresh_token: process.env.GMAIL_REFRESH_TOKEN
-        });
-
-        // Generate a fresh access token
-        const accessToken = await new Promise((resolve, reject) => {
-            oauth2Client.getAccessToken((err, token) => {
-                if (err) {
-                    console.error("Gmail API Token Error:", err);
-                    reject("Failed to create access token");
-                }
-                resolve(token);
-            });
-        });
-
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                type: "OAuth2",
-                user: process.env.EMAIL_USER,
-                accessToken: accessToken,
-                clientId: process.env.GMAIL_CLIENT_ID,
-                clientSecret: process.env.GMAIL_CLIENT_SECRET,
-                refreshToken: process.env.GMAIL_REFRESH_TOKEN
-            }
-        });
-
-        return transporter;
-    } catch (error) {
-        console.error("Transporter Creation Failed:", error);
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        type: "OAuth2",
+        user: process.env.EMAIL_USER,
+        clientId: process.env.GMAIL_CLIENT_ID,
+        clientSecret: process.env.GMAIL_CLIENT_SECRET,
+        refreshToken: process.env.GMAIL_REFRESH_TOKEN
     }
-};
+});
 
 // ==========================================
 // --- DATABASE MODELS (SCHEMAS) ---
@@ -255,8 +223,7 @@ app.post('/api/auth/register', async (req, res) => {
         };
 
         // NEW OAUTH2 EMAIL SENDER
-        const emailTransporter = await createTransporter();
-        await emailTransporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
 
         res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
@@ -342,8 +309,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         };
 
         // NEW OAUTH2 EMAIL SENDER
-        const emailTransporter = await createTransporter();
-        await emailTransporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
 
         res.json({ message: 'An e-mail has been sent to ' + user.email + ' with further instructions.' });
     } catch (err) { res.status(500).json({ message: err.message }); }
