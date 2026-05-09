@@ -35,7 +35,11 @@
                 <i class="fa-solid fa-chess-king text-yellow-400 text-2xl"></i>
                 <h1 class="text-xl font-black tracking-tight">Super Admin <span class="font-light text-blue-300">Portal</span></h1>
             </div>
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 sm:gap-6">
+                <a href="dashboard.html" class="hidden sm:flex items-center gap-2 bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors shadow-sm">
+                    <i class="fa-solid fa-desktop"></i> Standard Admin Panel
+                </a>
+                
                 <button onclick="toggleTheme()" class="text-gray-300 hover:text-yellow-400 transition-colors"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
                 <button onclick="logout()" class="text-xs font-bold uppercase tracking-widest text-red-400 hover:text-red-300"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
             </div>
