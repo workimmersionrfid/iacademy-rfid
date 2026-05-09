@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto'); 
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
+const { google } = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
 
 const app = express();
 app.use(cors());
@@ -20,21 +22,48 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ==========================================
-// --- NODEMAILER TRANSPORTER SETUP ---
+// --- GMAIL API (OAUTH2) SETUP ---
 // ==========================================
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    family: 4, // <--- THIS IS THE MAGIC LINE! It forces standard IPv4.
-    tls: {
-        rejectUnauthorized: false
+const createTransporter = async () => {
+    try {
+        const oauth2Client = new OAuth2(
+            process.env.GMAIL_CLIENT_ID,
+            process.env.GMAIL_CLIENT_SECRET,
+            "https://developers.google.com/oauthplayground"
+        );
+
+        oauth2Client.setCredentials({
+            refresh_token: process.env.GMAIL_REFRESH_TOKEN
+        });
+
+        // Generate a fresh access token
+        const accessToken = await new Promise((resolve, reject) => {
+            oauth2Client.getAccessToken((err, token) => {
+                if (err) {
+                    console.error("Gmail API Token Error:", err);
+                    reject("Failed to create access token");
+                }
+                resolve(token);
+            });
+        });
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                type: "OAuth2",
+                user: process.env.EMAIL_USER,
+                accessToken: accessToken,
+                clientId: process.env.GMAIL_CLIENT_ID,
+                clientSecret: process.env.GMAIL_CLIENT_SECRET,
+                refreshToken: process.env.GMAIL_REFRESH_TOKEN
+            }
+        });
+
+        return transporter;
+    } catch (error) {
+        console.error("Transporter Creation Failed:", error);
     }
-});
+};
 
 // ==========================================
 // --- DATABASE MODELS (SCHEMAS) ---
@@ -225,7 +254,10 @@ app.post('/api/auth/register', async (req, res) => {
             `
         };
 
-        await transporter.sendMail(mailOptions);
+        // NEW OAUTH2 EMAIL SENDER
+        const emailTransporter = await createTransporter();
+        await emailTransporter.sendMail(mailOptions);
+
         res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ message: 'Database constraint: Username or Email already exists' });
@@ -309,7 +341,10 @@ app.post('/api/auth/forgot-password', async (req, res) => {
             `
         };
 
-        await transporter.sendMail(mailOptions);
+        // NEW OAUTH2 EMAIL SENDER
+        const emailTransporter = await createTransporter();
+        await emailTransporter.sendMail(mailOptions);
+
         res.json({ message: 'An e-mail has been sent to ' + user.email + ' with further instructions.' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });

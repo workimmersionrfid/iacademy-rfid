@@ -38,8 +38,7 @@
         }
     </script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300 font-sans min-h-screen flex items-start md:items-center justify-center p-6 py-12 relative overflow-x-hidden overflow-y-auto">
     <button onclick="toggleTheme()" class="absolute top-6 right-6 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/40 hover:bg-white/80 dark:bg-gray-800 dark:hover:bg-gray-700 text-blue-900 dark:text-gray-400 dark:hover:text-yellow-400 text-xl transition-all shadow-sm backdrop-blur-sm">
         <i class="fa-solid fa-moon dark:hidden"></i>
         <i class="fa-solid fa-sun hidden dark:inline"></i>
@@ -98,9 +97,13 @@
         </div>
     </div>
 
-    <button type="submit" class="w-full bg-blue-800 dark:bg-blue-600 hover:bg-blue-900 dark:hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider">
+   <button type="submit" class="w-full bg-blue-800 dark:bg-blue-600 hover:bg-blue-900 dark:hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition-colors mt-2 text-sm uppercase tracking-wider">
         Create Driver Account
     </button>
+    
+    <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-6 font-medium">
+        Already have an account? <a href="login.html" class="text-blue-700 dark:text-blue-400 font-bold hover:underline transition-colors">Sign In Here</a>
+    </p>
 </form>
     </div>
 
