@@ -178,7 +178,7 @@
         let allLogs = [];
         let filteredLogs = [];
         let allDrivers = [];
-        let activeReportStatus = 'All'; // Tracking for Clickable Status Cards
+        let activeReportStatus = 'All';
 
         window.openImageModal = function(src) {
             document.getElementById('modalImage').src = src;
@@ -193,12 +193,14 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 2. Check Roles (Allow Admin AND Superadmin)
+            // Check Roles (Allow Admin AND Superadmin only)
             if (typeof checkAuthAndRole === 'function') {
-                if (!checkAuthAndRole(['admin', 'superadmin'])) return;
+                if (!checkAuthAndRole(['admin', 'superadmin'])) {
+                    return;
+                }
             }
 
-            // 3. Inject Floating God Mode Button for Super Admins
+            // Inject Floating God Mode Button for Super Admins
             if (localStorage.getItem('userRole') === 'superadmin' && !document.getElementById('godModeBtn')) {
                 const floatingBtn = document.createElement('a');
                 floatingBtn.id = 'godModeBtn';
@@ -208,7 +210,10 @@
                 document.body.appendChild(floatingBtn);
             }
 
-            if (typeof renderNavigation === 'function') renderNavigation('reports');
+            if (typeof renderNavigation === 'function') {
+                renderNavigation('reports');
+            }
+            
             fetchInitialData();
 
             $('#reportDateRange').daterangepicker({
@@ -235,7 +240,6 @@
 
         async function fetchInitialData() {
             try {
-                // Fetch Logs and Drivers concurrently
                 const [logsRes, driversRes] = await Promise.all([
                     fetch(`${API_BASE}/action-logs`),
                     fetch(`${API_BASE}/drivers`)
@@ -244,24 +248,31 @@
                 allLogs = await logsRes.json();
                 allDrivers = await driversRes.json();
 
-                // Populate Dropdowns Dynamically
                 const driverSelect = document.getElementById('reportDriverFilter');
-                allDrivers.forEach(d => driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`);
+                allDrivers.forEach(d => {
+                    driverSelect.innerHTML += `<option value="${d.username}">${d.username}</option>`;
+                });
 
                 const departments = ["SHS", "COLLEGE", "REGISTRAR", "ADMISSIONS", "OSAS", "LIBRARY", "CLINIC", "ADMIN", "FINANCE", "PURCHASING", "IT", "ELPD", "ADCOM", "GENERAL"];
                 const deptSelect = document.getElementById('reportDeptFilter');
-                departments.forEach(dept => deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`);
+                
+                departments.forEach(dept => {
+                    deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+                });
 
-                renderReportBoard(); // Initial render
+                renderReportBoard(); 
+
             } catch (error) {
                 document.getElementById('resultsTable').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-500 dark:text-red-400 font-bold">Failed to load database.</td></tr>`;
             }
         }
 
-        // --- NEW CLICKABLE STATUS LOGIC ---
         window.toggleReportStatus = function(status) {
-            if (activeReportStatus === status) activeReportStatus = 'All';
-            else activeReportStatus = status;
+            if (activeReportStatus === status) {
+                activeReportStatus = 'All';
+            } else {
+                activeReportStatus = status;
+            }
             renderReportBoard(); 
         };
 
@@ -269,18 +280,20 @@
             $('#reportDateRange').val('');
             document.getElementById('reportDeptFilter').value = 'All';
             document.getElementById('reportDriverFilter').value = 'All';
-            document.getElementById('reportTaskFilter').value = 'All'; // Changed to 'All'
+            document.getElementById('reportTaskFilter').value = 'All';
             activeReportStatus = 'All';
+            
             renderReportBoard();
         };
 
         window.renderReportBoard = function() {
-            const fTask = document.getElementById('reportTaskFilter').value; // Removed .toLowerCase()
+            const fTask = document.getElementById('reportTaskFilter').value; 
             const fDept = document.getElementById('reportDeptFilter').value; 
             const fDriver = document.getElementById('reportDriverFilter').value; 
             
             const isDateSelected = $('#reportDateRange').val() !== '';
-            let startBoundary = null, endBoundary = null;
+            let startBoundary = null;
+            let endBoundary = null;
 
             if (isDateSelected) {
                 const datePicker = $('#reportDateRange').data('daterangepicker');
@@ -290,25 +303,36 @@
                 endBoundary.setHours(23, 59, 59, 999);
             }
 
-            // 1. Apply Base Filters (Date, Dept, Driver, Task)
             let baseFilteredLogs = allLogs.filter(log => {
-                if (fTask !== 'All' && log.task !== fTask) return false; // Updated logic to match exact dropdown values
-                if (fDept !== 'All' && log.department !== fDept) return false;
-                if (fDriver !== 'All' && log.driver_name !== fDriver) return false;
-                
+                if (fTask !== 'All' && log.task !== fTask) {
+                    return false; 
+                }
+                if (fDept !== 'All' && log.department !== fDept) {
+                    return false;
+                }
+                if (fDriver !== 'All' && log.driver_name !== fDriver) {
+                    return false;
+                }
                 if (startBoundary && endBoundary) {
                     const logDate = new Date(log.timestamp);
-                    if (logDate < startBoundary || logDate > endBoundary) return false;
+                    if (logDate < startBoundary || logDate > endBoundary) {
+                        return false;
+                    }
                 }
                 return true;
             });
 
-            // 2. Compute Numbers for the Clickable Cards
-            let statComp = 0, statFail = 0, statTrans = 0;
+            let statComp = 0;
+            let statFail = 0;
+            let statTrans = 0;
+
             baseFilteredLogs.forEach(log => {
                 if(log.action === "Final Task Handover") {
-                    if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") statComp++;
-                    else if(log.completion_type === "Failed") statFail++;
+                    if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") {
+                        statComp++;
+                    } else if(log.completion_type === "Failed") {
+                        statFail++;
+                    }
                 } else if(log.action === "Travel Update") {
                     statTrans++;
                 }
@@ -318,25 +342,34 @@
             document.getElementById('repCountFailed').innerText = statFail;
             document.getElementById('repCountTransit').innerText = statTrans;
 
-            // 3. Handle Active Button Styling
-            document.querySelectorAll('.rep-status-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'dark:ring-offset-gray-900', 'scale-105', 'shadow-md'));
+            document.querySelectorAll('.rep-status-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'dark:ring-offset-gray-900', 'scale-105', 'shadow-md');
+            });
+            
             if (activeReportStatus !== 'All') {
                 const activeBtn = document.getElementById(`btn-rep-${activeReportStatus.toLowerCase()}`);
-                if (activeBtn) activeBtn.classList.add('ring-2', 'ring-offset-2', 'dark:ring-offset-gray-900', 'scale-105', 'shadow-md');
+                if (activeBtn) {
+                    activeBtn.classList.add('ring-2', 'ring-offset-2', 'dark:ring-offset-gray-900', 'scale-105', 'shadow-md');
+                }
             }
 
-            // 4. Apply Final Status Filter Array Reduction
             filteredLogs = baseFilteredLogs;
+            
             if (activeReportStatus !== 'All') {
                 filteredLogs = baseFilteredLogs.filter(log => {
-                    if (activeReportStatus === 'Completed') return log.action === "Final Task Handover" && (log.completion_type === "Completed" || log.completion_type === "Completed_Remarks");
-                    if (activeReportStatus === 'Failed') return log.action === "Final Task Handover" && log.completion_type === "Failed";
-                    if (activeReportStatus === 'Transit') return log.action === "Travel Update";
+                    if (activeReportStatus === 'Completed') {
+                        return log.action === "Final Task Handover" && (log.completion_type === "Completed" || log.completion_type === "Completed_Remarks");
+                    }
+                    if (activeReportStatus === 'Failed') {
+                        return log.action === "Final Task Handover" && log.completion_type === "Failed";
+                    }
+                    if (activeReportStatus === 'Transit') {
+                        return log.action === "Travel Update";
+                    }
                     return true;
                 });
             }
 
-            // 5. Paint the Table
             renderTableHTML(filteredLogs);
         }
 
@@ -354,24 +387,31 @@
 
                     let statusBadge = `<span class="text-gray-500 dark:text-gray-400">${log.delivery_status}</span>`;
                     
-                    if(log.action === "Final Task Handover") {
-                        if(log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") {
+                    if (log.action === "Final Task Handover") {
+                        if (log.completion_type === "Completed" || log.completion_type === "Completed_Remarks") {
                             statusBadge = `<span class="text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
-                        } else if(log.completion_type === "Failed") {
+                        } else if (log.completion_type === "Failed") {
                             statusBadge = `<span class="text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded border border-red-200 dark:border-red-900/50 font-bold text-[10px] uppercase">${log.delivery_status}</span>`;
                         }
-                    } else if(log.action === "Travel Update") {
+                    } else if (log.action === "Travel Update") {
                         statusBadge = `<span class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded border border-blue-200 dark:border-blue-800 font-bold text-[10px] uppercase"><i class="fa-solid fa-route mr-1"></i> ${log.delivery_status}</span>`;
-                    } else if(log.action === "Started Navigation") {
+                    } else if (log.action === "Started Navigation") {
                         statusBadge = `<span class="text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-2 py-1 rounded border border-purple-200 dark:border-purple-800 font-bold text-[10px] uppercase"><i class="fa-solid fa-map-pin mr-1"></i> Triggered GPS</span>`;
-                    } else if(log.action === "Driver Shift Clock-In") {
+                    } else if (log.action === "Driver Shift Clock-In") {
                         statusBadge = `<span class="text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded border border-green-200 dark:border-green-800 font-bold text-[10px] uppercase"><i class="fa-solid fa-clock mr-1"></i> Shift Start</span>`;
-                    } else if(log.action === "Driver Shift Clock-Out") {
+                    } else if (log.action === "Driver Shift Clock-Out") {
                         statusBadge = `<span class="text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 font-bold text-[10px] uppercase"><i class="fa-solid fa-stopwatch mr-1"></i> Shift End</span>`;
                     }
 
-                    let comments = (log.comments && log.comments !== "None" && log.comments !== "undefined") ? `<div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 italic">"${log.comments}"</div>` : '';
-                    let incompleteReasons = (log.incomplete_reasons && log.incomplete_reasons !== "None") ? `<div class="text-[10px] text-red-500 dark:text-red-400 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>` : '';
+                    let comments = '';
+                    if (log.comments && log.comments !== "None" && log.comments !== "undefined") {
+                        comments = `<div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 italic">"${log.comments}"</div>`;
+                    }
+
+                    let incompleteReasons = '';
+                    if (log.incomplete_reasons && log.incomplete_reasons !== "None") {
+                        incompleteReasons = `<div class="text-[10px] text-red-500 dark:text-red-400 font-semibold mt-1">Reason: ${log.incomplete_reasons}</div>`;
+                    }
 
                     let proofHTML = '';
                     if (log.document_attached && log.document_attached !== "None") {
@@ -389,7 +429,6 @@
                         }
                     }
 
-                    // --- NEW: RENDER THE E-SIGNATURE ---
                     let signatureHTML = '';
                     if (log.signature && log.signature !== "None") {
                         signatureHTML = `
@@ -399,7 +438,7 @@
                         </div>`;
                     }
 
-                   let gpsHTML = '';
+                    let gpsHTML = '';
                     if (log.latitude && log.longitude && log.latitude !== "N/A" && log.longitude !== "N/A") {
                         gpsHTML = `
                         <div class="mt-2">
@@ -432,14 +471,18 @@
                             ${incompleteReasons}
                             ${comments}
                             ${proofHTML}
-                            ${signatureHTML} </td>
+                            ${signatureHTML} 
+                        </td>
                     </tr>`;
                 }).join('');
             }
         }
         
         window.exportToExcel = function() {
-            if (filteredLogs.length === 0) return alert("No data to export!");
+            if (filteredLogs.length === 0) {
+                return alert("No data to export!");
+            }
+            
             const exportData = filteredLogs.map(log => ({
                 "Date": new Date(log.timestamp).toLocaleDateString(),
                 "Time": new Date(log.timestamp).toLocaleTimeString(),
@@ -456,6 +499,7 @@
                 "Remarks/Reasons": log.incomplete_reasons !== "None" ? log.incomplete_reasons : "",
                 "Comments": log.comments !== "None" ? log.comments : "",
             }));
+            
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Logs");

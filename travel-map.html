@@ -87,7 +87,9 @@
                     </div>
 
                     <div class="relative border-l-2 border-gray-100 dark:border-gray-700 ml-4 space-y-8 pb-4 transition-colors" id="itineraryTimeline">
-                        <div class="text-center p-8 text-blue-400 dark:text-blue-500 text-sm font-medium -ml-4"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Loading Itinerary...</div>
+                        <div class="text-center p-8 text-blue-400 dark:text-blue-500 text-sm font-medium -ml-4">
+                            <i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Loading Itinerary...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -98,7 +100,9 @@
                 <div class="absolute top-4 right-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-20 w-64 transition-colors">
                     <h4 class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">Tracking Status</h4>
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400"><i class="fa-solid fa-truck"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <i class="fa-solid fa-truck"></i>
+                        </div>
                         <div>
                             <p class="text-xs font-bold text-gray-800 dark:text-gray-200" id="mapStatusText">Connecting...</p>
                             <p class="text-[10px] text-gray-500 dark:text-gray-400" id="mapActionText">Fetching route data</p>
@@ -145,16 +149,22 @@
             directionsRenderer = new google.maps.DirectionsRenderer({
                 map: map,
                 suppressMarkers: true, 
-                polylineOptions: { strokeColor: '#2563eb', strokeWeight: 6, strokeOpacity: 0.8 }
+                polylineOptions: { 
+                    strokeColor: '#2563eb', 
+                    strokeWeight: 6, 
+                    strokeOpacity: 0.8 
+                }
             });
 
             initializeApp();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 2. Check Roles (Allow Admin AND Superadmin)
+            // 2. Check Roles (Allow Admin, Superadmin, and Driver)
             if (typeof checkAuthAndRole === 'function') {
-                if (!checkAuthAndRole(['admin', 'superadmin', 'driver'])) return;
+                if (!checkAuthAndRole(['admin', 'superadmin', 'driver'])) {
+                    return;
+                }
             }
 
             // 3. Inject Floating God Mode Button for Super Admins
@@ -167,7 +177,10 @@
                 document.body.appendChild(floatingBtn);
             }
 
-            if (typeof renderNavigation === 'function') renderNavigation('travel-map');
+            if (typeof renderNavigation === 'function') {
+                renderNavigation('travel-map');
+            }
+            
             loadGoogleMaps();
         });
 
@@ -182,12 +195,18 @@
                     const res = await fetch(`${API_BASE}/drivers`);
                     const drivers = await res.json();
                     const select = document.getElementById('driverSelect');
+                    
                     drivers.forEach(d => {
                         select.innerHTML += `<option value="${d.username}">${d.username}</option>`;
                     });
-                } catch (err) { console.error("Could not load drivers."); }
+                } catch (err) { 
+                    console.error("Could not load drivers."); 
+                }
                 
-                document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-gray-400 dark:text-gray-500 text-sm font-medium -ml-4">Select a driver from the top menu to view their itinerary.</div>`;
+                document.getElementById('itineraryTimeline').innerHTML = `
+                    <div class="text-center p-8 text-gray-400 dark:text-gray-500 text-sm font-medium -ml-4">
+                        Select a driver from the top menu to view their itinerary.
+                    </div>`;
             } else {
                 loadDriverItinerary();
             }
@@ -195,15 +214,21 @@
 
         async function loadDriverItinerary() {
             let targetDriver = currentUser;
+            
             if (userRole === 'admin' || userRole === 'superadmin') {
                 targetDriver = document.getElementById('driverSelect').value;
             }
             
             const targetDate = document.getElementById('itineraryDate').value;
             
-            if (!targetDriver || !targetDate) return;
+            if (!targetDriver || !targetDate) {
+                return;
+            }
 
-            document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-blue-400 dark:text-blue-500 text-sm font-medium -ml-4"><i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Fetching Route Data...</div>`;
+            document.getElementById('itineraryTimeline').innerHTML = `
+                <div class="text-center p-8 text-blue-400 dark:text-blue-500 text-sm font-medium -ml-4">
+                    <i class="fa-solid fa-spinner fa-spin mb-3 text-2xl"></i><br>Fetching Route Data...
+                </div>`;
 
             try {
                 const [tasksRes, logsRes] = await Promise.all([
@@ -218,7 +243,8 @@
                 
                 const dateLogs = allLogs.filter(l => 
                     l.driver_name === targetDriver && 
-                    l.latitude && l.latitude !== "N/A" &&
+                    l.latitude && 
+                    l.latitude !== "N/A" &&
                     new Date(l.timestamp).toISOString().startsWith(targetDate)
                 );
                 
@@ -230,7 +256,10 @@
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('itineraryTimeline').innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400 text-sm font-bold -ml-4">Error loading itinerary data.</div>`;
+                document.getElementById('itineraryTimeline').innerHTML = `
+                    <div class="text-center p-8 text-red-500 dark:text-red-400 text-sm font-bold -ml-4">
+                        Error loading itinerary data.
+                    </div>`;
             }
         }
 
@@ -254,7 +283,9 @@
             if (latestLog) {
                 const logTime = new Date(latestLog.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 lastUpdateText.innerText = `Last GPS Ping: ${logTime} (${latestLog.action})`;
-                lastUpdateText.classList.replace('text-gray-500', 'text-emerald-700'); lastUpdateText.classList.replace('dark:text-gray-400', 'dark:text-emerald-400');
+                lastUpdateText.classList.replace('text-gray-500', 'text-emerald-700'); 
+                lastUpdateText.classList.replace('dark:text-gray-400', 'dark:text-emerald-400');
+                
                 pulseWrap.classList.remove('hidden');
                 pulse.classList.replace('bg-gray-400', 'bg-emerald-400');
                 pulse.nextElementSibling.classList.replace('bg-gray-500', 'bg-emerald-500');
@@ -262,12 +293,17 @@
                 document.getElementById('mapStatusText').innerText = isToday ? "Live Tracking Active" : "Historical GPS Data";
                 document.getElementById('mapActionText').innerText = `${latestLog.action} at ${logTime}`;
                 
-                if (!isToday) pulse.classList.remove('animate-ping');
-                else pulse.classList.add('animate-ping');
+                if (!isToday) {
+                    pulse.classList.remove('animate-ping');
+                } else {
+                    pulse.classList.add('animate-ping');
+                }
 
             } else {
                 lastUpdateText.innerText = `No GPS Data for this date`;
-                lastUpdateText.classList.replace('text-emerald-700', 'text-gray-500'); lastUpdateText.classList.replace('dark:text-emerald-400', 'dark:text-gray-400');
+                lastUpdateText.classList.replace('text-emerald-700', 'text-gray-500'); 
+                lastUpdateText.classList.replace('dark:text-emerald-400', 'dark:text-gray-400');
+                
                 pulseWrap.classList.add('hidden');
                 
                 document.getElementById('mapStatusText').innerText = "No GPS Signal";
@@ -277,7 +313,10 @@
             const timeline = document.getElementById('itineraryTimeline');
             
             if (tasks.length === 0) {
-                timeline.innerHTML = `<div class="text-center p-8 text-gray-400 dark:text-gray-500 text-sm font-medium -ml-4">No tasks found for this date.</div>`;
+                timeline.innerHTML = `
+                    <div class="text-center p-8 text-gray-400 dark:text-gray-500 text-sm font-medium -ml-4">
+                        No tasks found for this date.
+                    </div>`;
                 return;
             }
 
@@ -315,6 +354,11 @@
                     titleColor = 'text-gray-800 dark:text-gray-200';
                 }
 
+                let nextDestBadge = '';
+                if (isNext && isToday) {
+                    nextDestBadge = `<div class="mt-3 inline-block bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Next Destination</div>`;
+                }
+
                 html += `
                     <div class="relative pl-6 mt-6">
                         <div class="absolute -left-[9px] top-4 w-4 h-4 ${dotColor} border-2 border-white dark:border-gray-900 rounded-full z-10 transition-all"></div>
@@ -323,7 +367,7 @@
                             <span class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">${t.taskType || 'Stop ' + (index + 1)}</span>
                             <h4 class="font-bold text-base mt-0.5 ${titleColor}">${t.destination}</h4>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1" title="${t.description}">${t.description}</p>
-                            ${(isNext && isToday) ? `<div class="mt-3 inline-block bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Next Destination</div>` : ''}
+                            ${nextDestBadge}
                         </div>
                     </div>
                 `;
@@ -333,7 +377,9 @@
         }
 
         function updateLiveMap(tasks, latestLog, targetDate) {
-            if (!map || !directionsService) return;
+            if (!map || !directionsService) {
+                return;
+            }
 
             directionsRenderer.setDirections({routes: []});
 
@@ -341,11 +387,16 @@
             let currentLocation = { lat: 14.5632, lng: 121.0142 }; 
 
             if (latestLog && latestLog.latitude) {
-                currentLocation = { lat: parseFloat(latestLog.latitude), lng: parseFloat(latestLog.longitude) };
+                currentLocation = { 
+                    lat: parseFloat(latestLog.latitude), 
+                    lng: parseFloat(latestLog.longitude) 
+                };
+                
+                const isToday = (targetDate === new Date().toISOString().split('T')[0]);
                 
                 const carIcon = {
                     path: 'M17.402,0H5.643C2.526,0,0,3.467,0,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759c3.116,0,5.644-2.527,5.644-5.644 V6.584C23.044,3.467,20.518,0,17.402,0z M22.057,14.188v11.665l-2.729,0.351v-4.806L22.057,14.188z M20.625,10.773 c-1.016,3.9-2.219,8.51-2.219,8.51H4.638l-2.222-8.51C2.417,10.773,11.3,7.755,20.625,10.773z M3.748,21.713v4.492l-2.73-0.349 V14.502L3.748,21.713z M1.018,37.938V27.579l2.73,0.343v8.196L1.018,37.938z M2.575,40.882l2.218-3.336h13.771l2.219,3.336H2.575z M19.328,35.805v-7.872l2.729-0.355v10.048L19.328,35.805z',
-                    fillColor: (targetDate === new Date().toISOString().split('T')[0]) ? '#2563eb' : '#6b7280', 
+                    fillColor: isToday ? '#2563eb' : '#6b7280', 
                     fillOpacity: 1,
                     strokeWeight: 0,
                     scale: 0.6,
@@ -353,7 +404,12 @@
                 };
 
                 if (!driverMarker) {
-                    driverMarker = new google.maps.Marker({ position: currentLocation, map: map, icon: carIcon, title: 'Driver Location' });
+                    driverMarker = new google.maps.Marker({ 
+                        position: currentLocation, 
+                        map: map, 
+                        icon: carIcon, 
+                        title: 'Driver Location' 
+                    });
                 } else {
                     driverMarker.setIcon(carIcon);
                     driverMarker.setPosition(currentLocation);
@@ -364,7 +420,10 @@
 
             if (pendingTasks.length > 0) {
                 const finalDestination = pendingTasks[pendingTasks.length - 1].destination;
-                const waypoints = pendingTasks.slice(0, -1).map(t => ({ location: t.destination, stopover: true }));
+                const waypoints = pendingTasks.slice(0, -1).map(t => ({ 
+                    location: t.destination, 
+                    stopover: true 
+                }));
 
                 directionsService.route({
                     origin: currentLocation,
@@ -389,7 +448,9 @@
             } else if (tasks.length > 0 && pendingTasks.length === 0) {
                 document.getElementById('mapStatusText').innerText = "Route Completed";
                 document.getElementById('mapActionText').innerText = "All stops finished";
-                if(driverMarker) map.setZoom(16);
+                if (driverMarker) {
+                    map.setZoom(16);
+                }
             }
         }
     </script>
