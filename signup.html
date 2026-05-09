@@ -55,42 +55,42 @@
 
         <form id="signupForm" class="p-8 space-y-4">
     <div>
-        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Username</label>
+        <label for="username" class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Username</label>
         <div class="relative">
             <i class="fa-solid fa-user-tag absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 transition-colors"></i>
-            <input type="text" id="username" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
+            <input type="text" id="username" name="username" autocomplete="username" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">First Name</label>
-            <input type="text" id="firstName" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
+            <label for="firstName" class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">First Name</label>
+            <input type="text" id="firstName" name="firstName" autocomplete="given-name" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
         </div>
         <div>
-            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Last Name</label>
-            <input type="text" id="lastName" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
+            <label for="lastName" class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Last Name</label>
+            <input type="text" id="lastName" name="lastName" autocomplete="family-name" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
         </div>
     </div>
 
     <div>
-        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Middle Name (Optional)</label>
-        <input type="text" id="middleName" class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
+        <label for="middleName" class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Middle Name (Optional)</label>
+        <input type="text" id="middleName" name="middleName" autocomplete="additional-name" class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
     </div>
 
     <div>
-        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Email Address</label>
+        <label for="email" class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Email Address</label>
         <div class="relative">
             <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 transition-colors"></i>
-            <input type="email" id="email" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
+            <input type="email" id="email" name="email" autocomplete="email" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
         </div>
     </div>
 
     <div>
-        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Password</label>
+        <label for="password" class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 transition-colors">Password</label>
         <div class="relative">
             <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 transition-colors"></i>
-            <input type="password" id="password" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 pr-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
+            <input type="password" id="password" name="password" autocomplete="new-password" required class="w-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 rounded-xl pl-11 pr-11 p-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all text-blue-900 dark:text-white">
             <button type="button" onclick="togglePassword('password', 'toggleIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                 <i id="toggleIcon" class="fa-solid fa-eye"></i>
             </button>
