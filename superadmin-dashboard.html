@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - iACADEMY RFID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } };
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else { document.documentElement.classList.remove('dark'); }
+        
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 font-sans min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <nav class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-[1400px] mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-chess-king text-yellow-400 text-2xl"></i>
+                <h1 class="text-xl font-black tracking-tight">Super Admin <span class="font-light text-blue-300">Portal</span></h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <button onclick="toggleTheme()" class="text-gray-300 hover:text-yellow-400 transition-colors"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
+                <button onclick="logout()" class="text-xs font-bold uppercase tracking-widest text-red-400 hover:text-red-300"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
+        
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto custom-scrollbar" aria-label="Tabs">
+                <button id="btn-overview" onclick="switchTab('overview')" class="tab-btn border-blue-800 dark:border-blue-400 text-blue-800 dark:text-blue-400 font-bold whitespace-nowrap py-4 px-1 border-b-2 text-sm uppercase tracking-wide transition-colors">
+                    <i class="fa-solid fa-chart-line mr-2"></i> System Overview
+                </button>
+                <button id="btn-admins" onclick="switchTab('admins')" class="tab-btn border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium uppercase tracking-wide transition-colors">
+                    <i class="fa-solid fa-users-gear mr-2"></i> Manage Admins
+                </button>
+                <button id="btn-settings" onclick="switchTab('settings')" class="tab-btn border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium uppercase tracking-wide transition-colors">
+                    <i class="fa-solid fa-server mr-2"></i> Danger Zone
+                </button>
+            </nav>
+        </div>
+
+        <div id="tab-overview" class="tab-content animate-fade-in space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-blue-50 dark:border-gray-700 flex items-center justify-between">
+                    <div><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Drivers</p><h3 id="statDrivers" class="text-3xl font-black text-blue-900 dark:text-white">0</h3></div>
+                    <i class="fa-solid fa-id-card text-blue-100 dark:text-gray-700 text-5xl"></i>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-blue-50 dark:border-gray-700 flex items-center justify-between">
+                    <div><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Admins</p><h3 id="statAdmins" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">0</h3></div>
+                    <i class="fa-solid fa-user-tie text-blue-100 dark:text-gray-700 text-5xl"></i>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-blue-50 dark:border-gray-700 flex items-center justify-between">
+                    <div><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Fleet</p><h3 id="statFleet" class="text-3xl font-black text-blue-900 dark:text-white">0</h3></div>
+                    <i class="fa-solid fa-car text-blue-100 dark:text-gray-700 text-5xl"></i>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-blue-50 dark:border-gray-700 flex items-center justify-between">
+                    <div><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">System Health</p><h3 class="text-xl font-black text-blue-900 dark:text-white mt-1">Active</h3></div>
+                    <i class="fa-solid fa-heart-pulse text-emerald-100 dark:text-emerald-900/50 text-5xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-admins" class="tab-content hidden animate-fade-in">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-blue-50 dark:border-gray-700 overflow-hidden flex flex-col relative transition-colors">
+                <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
+                    <div>
+                        <h2 class="font-bold text-xl text-blue-900 dark:text-white">Administrator Accounts</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Manage users who have access to the standard Control Center.</p>
+                    </div>
+                    <button onclick="openCreateAdminModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm transition-colors uppercase tracking-wide">
+                        <i class="fa-solid fa-plus mr-1"></i> Create Admin
+                    </button>
+                </div>
+                <div class="overflow-x-auto p-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                            <tr>
+                                <th class="p-4 font-bold">Username / Name</th>
+                                <th class="p-4 font-bold">Email</th>
+                                <th class="p-4 font-bold">Status</th>
+                                <th class="p-4 font-bold text-right">God Mode Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminListBody" class="text-sm divide-y divide-gray-50 dark:divide-gray-800">
+                            <tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading admins...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="tab-content hidden animate-fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-red-100 dark:border-red-900/30 p-8 transition-colors">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center rounded-full"><i class="fa-solid fa-user-check text-xl"></i></div>
+                        <div><h2 class="text-xl font-bold text-gray-800 dark:text-white">Mass Verification</h2><p class="text-xs text-gray-500">Bypass email verification for all pending accounts.</p></div>
+                    </div>
+                    <button onclick="forceVerifyAll()" class="w-full mt-2 border-2 border-red-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold py-3 rounded-xl transition-colors uppercase tracking-widest text-xs">Force Verify All Pending Accounts</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="createAdminModal" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="p-5 bg-emerald-700 flex justify-between items-center">
+                <h3 class="font-bold text-white text-base"><i class="fa-solid fa-user-plus mr-2"></i> Register New Admin</h3>
+                <button onclick="closeCreateAdminModal()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="createAdminForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Username</label>
+                    <input type="text" id="aUsername" required class="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">First Name</label>
+                        <input type="text" id="aFirst" required class="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Last Name</label>
+                        <input type="text" id="aLast" required class="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Email Address</label>
+                    <input type="email" id="aEmail" required class="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Temporary Password</label>
+                    <input type="password" id="aPassword" required class="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500">
+                    <p class="text-[9px] text-gray-400 mt-1">Must contain 1 uppercase, 1 lowercase, 1 number, and be 8+ characters.</p>
+                </div>
+                <div class="pt-2 border-t border-gray-100 dark:border-gray-700 mt-4">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm uppercase tracking-wide">Create Administrator</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="forcePassModal" class="fixed inset-0 bg-gray-900/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-red-500">
+            <div class="p-5 bg-red-700 flex justify-between items-center">
+                <h3 class="font-bold text-white text-base"><i class="fa-solid fa-lock-open mr-2"></i> Force Password Reset</h3>
+                <button onclick="closeForcePassModal()" class="text-red-200 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="forcePassForm" class="p-6 space-y-4">
+                <input type="hidden" id="fpUserId">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">You are forcefully overriding the password for <strong id="fpUsername" class="text-gray-800 dark:text-gray-200"></strong>.</p>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">New Password</label>
+                    <input type="text" id="fpPassword" required class="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm bg-gray-50 dark:bg-gray-900 text-red-600 outline-none focus:ring-1 focus:ring-red-500 font-bold">
+                    <p class="text-[9px] text-gray-400 mt-1">Must contain 1 uppercase, 1 lowercase, 1 number, and be 8+ characters.</p>
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors text-sm uppercase tracking-wide">Override Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/shared/auth.js"></script>
+
+    <script src="js/superadmin/api.js"></script>
+    <script src="js/superadmin/ui.js"></script>
+
+    <script>
+        // Kick off the boot sequence!
+        document.addEventListener("DOMContentLoaded", () => {
+            if (checkAuthAndRole('superadmin')) {
+                fetchSystemData();
+            }
+        });
+    </script>
+</body>
+</html>
