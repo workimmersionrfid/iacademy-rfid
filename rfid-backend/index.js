@@ -257,6 +257,8 @@ app.post('/api/tolls', async (req, res) => {
 // --- SECURE TOLL ESTIMATION PROXY ---
 app.post('/api/toll-estimate', async (req, res) => {
     try {
+        console.log("🛣️ Sending Request to TollGuru...");
+        
         const response = await fetch('https://apis.tollguru.com/toll/v2/origin-destination-waypoints', {
             method: 'POST',
             headers: {
@@ -266,11 +268,18 @@ app.post('/api/toll-estimate', async (req, res) => {
             body: JSON.stringify(req.body)
         });
 
-        if (!response.ok) throw new Error("Toll API Failed");
+        // We grab the data FIRST, even if it's an error, so we can read it!
+        const data = await response.json(); 
+
+        if (!response.ok) {
+            console.error("🚨 TollGuru API Rejected the Request:", data);
+            return res.status(response.status).json({ error: "Toll API Failed", details: data });
+        }
         
-        const data = await response.json();
+        console.log("✅ TollGuru API Success!");
         res.json(data);
     } catch (err) {
+        console.error("🚨 Backend Proxy Crash:", err.message);
         res.status(500).json({ error: err.message });
     }
 });

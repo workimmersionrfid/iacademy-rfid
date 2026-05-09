@@ -469,6 +469,25 @@ window.updateRebookVehicleDropdown = function() {
     else if (autoSelectPlate) rVehicleSelect.value = autoSelectPlate;
 };
 
+// --- VEHICLE MASTER DATABASE ---
+const masterVehicleDatabase = {
+    "Toyota Vios": { fuel: "Ron95", eff: 14.5 },
+    "Toyota Fortuner": { fuel: "Diesel", eff: 10.2 },
+    "Toyota Hi-Ace": { fuel: "Diesel", eff: 9.5 },
+    "Mitsubishi Xpander": { fuel: "Ron91", eff: 13.0 },
+    "Mitsubishi Montero": { fuel: "Diesel", eff: 11.0 },
+    "Honda Beat": { fuel: "Gasoline", eff: 45.0 },
+    "Honda City": { fuel: "Ron95", eff: 15.2 },
+    "Suzuki Carry": { fuel: "Gasoline", eff: 12.5 },
+    "Ford Ranger": { fuel: "Diesel", eff: 11.5 },
+    "Hyundai Tucson": { fuel: "Ron95", eff: 10.8 },
+    "Kia Picanto": { fuel: "Ron91", eff: 18.0 },
+    "Geely Coolray": { fuel: "Ron95", eff: 12.0 },
+    "Suzuki Ertiga": { fuel: "Ron91", eff: 14.0 },
+    "Yamaha Mio": { fuel: "Gasoline", eff: 42.0 },
+    "Isuzu D-Max": { fuel: "Diesel", eff: 12.5 }
+};
+
 window.autoFillSpecs = function() {
     const modelSelect = document.getElementById('vModel').value;
     const fuelSelect = document.getElementById('vFuel');
@@ -481,7 +500,7 @@ window.autoFillSpecs = function() {
         customModelInput.required = true;
         fuelSelect.disabled = false; effInput.disabled = false;
         fuelSelect.value = ""; effInput.value = "";
-    } else if (typeof masterVehicleDatabase !== 'undefined' && masterVehicleDatabase[modelSelect]) {
+    } else if (masterVehicleDatabase[modelSelect]) {
         customModelGroup.classList.add('hidden');
         customModelInput.required = false;
         fuelSelect.value = masterVehicleDatabase[modelSelect].fuel;
@@ -489,7 +508,6 @@ window.autoFillSpecs = function() {
         fuelSelect.disabled = true; effInput.disabled = true;
     }
 };
-
 // Event Listeners for boot sequence
 document.addEventListener("DOMContentLoaded", () => {
     renderNavigation('dashboard');

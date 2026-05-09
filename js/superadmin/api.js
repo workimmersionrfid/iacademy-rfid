@@ -3,6 +3,8 @@
 // ==========================================
 const API_BASE = 'https://iacademy-rfid.onrender.com/api';
 
+window.allSuperDrivers = []; // Store drivers globally for the modal
+
 window.fetchSystemData = async function() {
     try {
         const [driversRes, adminsRes, fleetRes] = await Promise.all([
@@ -11,15 +13,16 @@ window.fetchSystemData = async function() {
             fetch(`${API_BASE}/vehicles`)
         ]);
         
-        const drivers = await driversRes.json();
+        window.allSuperDrivers = await driversRes.json();
         const admins = await adminsRes.json();
         const fleet = await fleetRes.json();
         
-        document.getElementById('statDrivers').innerText = drivers.length;
+        document.getElementById('statDrivers').innerText = window.allSuperDrivers.length;
         document.getElementById('statAdmins').innerText = admins.length;
         document.getElementById('statFleet').innerText = fleet.length;
         
         renderAdminTable(admins);
+        renderSuperDriverTable(window.allSuperDrivers);
     } catch (e) { console.error("Error fetching data", e); }
 };
 
@@ -44,6 +47,34 @@ window.forceVerifyAll = async function() {
             } else alert('Failed to verify accounts.');
         } catch (err) { alert('Network Error'); }
     }
+};
+
+// Handle Driver Profile Saving
+window.saveProfileFromModal = async function() {
+    const driverId = document.getElementById('modalDriverId').value;
+    const deptElements = document.querySelectorAll('.modal-dept-cb:checked');
+    const schedElements = document.querySelectorAll('.modal-sched-cb:checked');
+    
+    const selectedDepartments = Array.from(deptElements).map(cb => cb.value);
+    const selectedWorkDays = Array.from(schedElements).map(cb => cb.value);
+
+    if (selectedDepartments.length === 0) selectedDepartments.push("Pending Assignment");
+    if (selectedWorkDays.length === 0) return alert("Please assign at least one work day.");
+
+    const btn = document.getElementById('btnSaveModal');
+    const origText = btn.innerHTML;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API_BASE}/drivers/${driverId}/profile`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ department: selectedDepartments, workDays: selectedWorkDays }) 
+        });
+        if (res.ok) { closeProfileModal(); fetchSystemData(); } 
+        else alert("Failed to update driver profile.");
+    } catch (err) { alert("Network error."); } 
+    finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 
 // Event Listeners for Forms
