@@ -39,20 +39,24 @@ window.renderAdminTable = function(admins) {
             ? `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">Verified</span>`
             : `<span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest border border-red-200 dark:border-red-800">Unverified</span>`;
 
+        // Checkmark for verifying, X for unverifying
+        const verifyIcon = a.isVerified ? 'fa-user-xmark' : 'fa-user-check';
+        const verifyColor = a.isVerified ? 'hover:text-orange-600' : 'hover:text-emerald-600';
+
         return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
             <td class="p-4"><div class="font-bold text-gray-800 dark:text-gray-200">${a.username}</div><div class="text-xs text-gray-500">${a.firstName} ${a.lastName}</div></td>
             <td class="p-4 text-xs font-medium text-gray-600 dark:text-gray-400">${a.email}</td>
             <td class="p-4">${isVerified}</td>
             <td class="p-4 text-right flex justify-end gap-2">
-                <button onclick="openForcePassModal('${a._id}', '${a.username}')" class="bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 hover:text-blue-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors"><i class="fa-solid fa-key mr-1"></i> Pass</button>
-                <button onclick="deleteUser('${a._id}', '${a.username}')" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-600 hover:text-white text-red-600 dark:text-red-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-red-200 dark:border-red-800 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="toggleVerification('${a._id}', ${a.isVerified}, '${a.username}')" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 ${verifyColor} text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors" title="Toggle Verification"><i class="fa-solid ${verifyIcon}"></i></button>
+                <button onclick="openForcePassModal('${a._id}', '${a.username}')" class="bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 hover:text-blue-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors" title="Force Password Reset"><i class="fa-solid fa-key"></i></button>
+                <button onclick="deleteUser('${a._id}', '${a.username}')" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-600 hover:text-white text-red-600 dark:text-red-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-red-200 dark:border-red-800 transition-colors" title="Delete User"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>`;
     }).join('');
 };
 
-// --- DRIVER MANAGEMENT UI ---
 window.renderSuperDriverTable = function(drivers) {
     const tbody = document.getElementById('driverListBody');
     if (drivers.length === 0) {
@@ -74,6 +78,9 @@ window.renderSuperDriverTable = function(drivers) {
         const driverWorkDays = d.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']; 
         const scheduleBadges = driverWorkDays.map(day => `<span class="text-[10px] font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-0.5 rounded m-0.5 inline-block uppercase">${day.substring(0,3)}</span>`).join('');
 
+        const verifyIcon = d.isVerified ? 'fa-user-xmark' : 'fa-user-check';
+        const verifyColor = d.isVerified ? 'hover:text-orange-600' : 'hover:text-emerald-600';
+
         return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
             <td class="p-4 align-middle">
@@ -86,9 +93,10 @@ window.renderSuperDriverTable = function(drivers) {
             </td>
             <td class="p-4 align-middle">${isVerified}</td>
             <td class="p-4 text-right align-middle flex justify-end gap-2 flex-wrap max-w-[200px] ml-auto">
-                <button onclick="openProfileModal('${d._id}')" class="bg-white dark:bg-gray-800 hover:bg-blue-100 hover:text-blue-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
-                <button onclick="openForcePassModal('${d._id}', '${d.username}')" class="bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 hover:text-blue-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors"><i class="fa-solid fa-key mr-1"></i> Pass</button>
-                <button onclick="deleteUser('${d._id}', '${d.username}')" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-600 hover:text-white text-red-600 dark:text-red-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-red-200 dark:border-red-800 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="openProfileModal('${d._id}')" class="bg-white dark:bg-gray-800 hover:bg-blue-100 hover:text-blue-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors" title="Edit Profile"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="toggleVerification('${d._id}', ${d.isVerified}, '${d.username}')" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 ${verifyColor} text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors" title="Toggle Verification"><i class="fa-solid ${verifyIcon}"></i></button>
+                <button onclick="openForcePassModal('${d._id}', '${d.username}')" class="bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 hover:text-blue-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-gray-200 dark:border-gray-600 transition-colors" title="Force Password Reset"><i class="fa-solid fa-key"></i></button>
+                <button onclick="deleteUser('${d._id}', '${d.username}')" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-600 hover:text-white text-red-600 dark:text-red-400 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest border border-red-200 dark:border-red-800 transition-colors" title="Delete User"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>`;
     }).join('');

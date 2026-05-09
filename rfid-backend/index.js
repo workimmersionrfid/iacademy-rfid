@@ -485,6 +485,27 @@ app.put('/api/users/force-verify-all', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// --- TOGGLE USER VERIFICATION STATUS (SUPER ADMIN) ---
+app.put('/api/users/:id/verify', async (req, res) => {
+    try {
+        const User = mongoose.model('User'); // Grab the User model
+        const user = await User.findById(req.params.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Flip the boolean: If it's true, make it false. If false, make it true.
+        user.isVerified = !user.isVerified; 
+        await user.save();
+        
+        res.json({ message: `User verification updated to ${user.isVerified}` });
+    } catch (err) {
+        console.error("Verification Toggle Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ==========================================
 // --- START SERVER ---
 // ==========================================

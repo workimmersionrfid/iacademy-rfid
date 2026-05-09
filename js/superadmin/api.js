@@ -3,7 +3,7 @@
 // ==========================================
 const API_BASE = 'https://iacademy-rfid.onrender.com/api';
 
-window.allSuperDrivers = []; // Store drivers globally for the modal
+window.allSuperDrivers = []; 
 
 window.fetchSystemData = async function() {
     try {
@@ -36,6 +36,18 @@ window.deleteUser = async function(id, username) {
     }
 };
 
+// NEW: Individual Verification Toggle
+window.toggleVerification = async function(id, currentStatus, username) {
+    const actionText = currentStatus ? "UNVERIFY" : "VERIFY";
+    if (confirm(`Are you sure you want to manually ${actionText} the account for ${username}?`)) {
+        try {
+            const res = await fetch(`${API_BASE}/users/${id}/verify`, { method: 'PUT' });
+            if (res.ok) fetchSystemData();
+            else alert('Failed to update verification status.');
+        } catch (err) { alert('Network Error'); }
+    }
+};
+
 window.forceVerifyAll = async function() {
     if (confirm(`Are you sure you want to bypass email verification for all currently pending accounts?`)) {
         try {
@@ -49,7 +61,6 @@ window.forceVerifyAll = async function() {
     }
 };
 
-// Handle Driver Profile Saving
 window.saveProfileFromModal = async function() {
     const driverId = document.getElementById('modalDriverId').value;
     const deptElements = document.querySelectorAll('.modal-dept-cb:checked');
@@ -77,10 +88,7 @@ window.saveProfileFromModal = async function() {
     finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 
-// Event Listeners for Forms
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // Create Admin Form
     const createForm = document.getElementById('createAdminForm');
     if (createForm) {
         createForm.addEventListener('submit', async (e) => {
@@ -115,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Force Password Reset Form
     const passForm = document.getElementById('forcePassForm');
     if (passForm) {
         passForm.addEventListener('submit', async (e) => {
