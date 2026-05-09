@@ -6,14 +6,16 @@ function checkAuthAndRole(allowedRoles) {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('userRole');
     
+    // 1. Check if they are logged in at all
     if (!token || !role) {
         window.location.href = 'login.html';
         return false;
     }
 
-    // Convert to an array if it's a single string (e.g., 'driver' becomes ['driver'])
+    // 2. Convert to an array if it's a single string (e.g., 'driver' becomes ['driver'])
     const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
 
+    // 3. Check if their role is inside the allowed list
     if (!rolesArray.includes(role)) {
         alert("Unauthorized Access. You do not have permission to view this page.");
         window.location.href = 'login.html';
