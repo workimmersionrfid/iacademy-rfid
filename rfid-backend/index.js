@@ -24,13 +24,13 @@ mongoose.connect(process.env.MONGODB_URI)
 // ==========================================
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,           // Changed from 465 to 587
-    secure: false,       // MUST be false when using port 587
-    requireTLS: true,    // Forces the connection to upgrade to secure TLS
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
+    family: 4, // <--- THIS IS THE MAGIC LINE! It forces standard IPv4.
     tls: {
         rejectUnauthorized: false
     }
