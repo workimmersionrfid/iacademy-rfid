@@ -6,7 +6,6 @@ const cors = require('cors');
 const crypto = require('crypto'); 
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
-const { google } = require('googleapis');
 
 const app = express();
 app.use(cors());
@@ -20,57 +19,6 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ==========================================
-// --- GMAIL REST API SETUP (BULLETPROOF) ---
-// ==========================================
-const sendEmail = async (options) => {
-    try {
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.GMAIL_CLIENT_ID,
-            process.env.GMAIL_CLIENT_SECRET,
-            "https://developers.google.com/oauthplayground"
-        );
-
-        oauth2Client.setCredentials({
-            refresh_token: process.env.GMAIL_REFRESH_TOKEN
-        });
-
-        const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-
-        const utf8Subject = `=?utf-8?B?${Buffer.from(options.subject).toString('base64')}?=`;
-        
-        const messageParts = [
-            `From: "iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
-            `To: ${options.to}`,
-            `Subject: ${utf8Subject}`,
-            `Content-Type: text/html; charset=utf-8`,
-            `MIME-Version: 1.0`,
-            ``,
-            options.html
-        ];
-
-        const message = messageParts.join('\n');
-        const encodedMessage = Buffer.from(message)
-            .toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
-
-        const result = await gmail.users.messages.send({
-            userId: 'me',
-            requestBody: {
-                raw: encodedMessage
-            }
-        });
-
-        console.log("✅ Email sent successfully via HTTP REST API to:", options.to);
-        return result.data;
-    } catch (error) {
-        console.error("🚨 Detailed Gmail API Error:", error.message || error); 
-        throw error;
-    }
-};
-
-// ==========================================
 // --- DATABASE MODELS (SCHEMAS) ---
 // ==========================================
 
@@ -81,7 +29,7 @@ const userSchema = new mongoose.Schema({
     middleName: { type: String, default: "" },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['admin', 'driver'], default: 'driver' },
+    role: { type: String, enum: ['superadmin', 'admin', 'driver'], default: 'driver' },
     department: { type: [String], default: ['Pending Assignment'] },
     workDays: { type: [String], default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
     isVerified: { type: Boolean, default: false },
@@ -163,9 +111,10 @@ const messageSchema = new mongoose.Schema({
     text: String,
     timestamp: { type: Date, default: Date.now },
     isRead: { type: Boolean, default: false },
-    hiddenBy: { type: [String], default: [] } // NEW: Tracks who "deleted" the message from their screen
+    hiddenBy: { type: [String], default: [] } 
 });
 
+// Build the models first so the routes can use them!
 const User = mongoose.model('User', userSchema);
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 const FuelLog = mongoose.model('FuelLog', logSchema);
@@ -173,6 +122,15 @@ const TollLog = mongoose.model('TollLog', tollSchema);
 const Task = mongoose.model('Task', taskSchema);
 const ActionLog = mongoose.model('ActionLog', actionLogSchema);
 const Message = mongoose.model('Message', messageSchema);
+
+// ==========================================
+// --- IMPORT FRAGMENTED ROUTES ---
+// ==========================================
+
+// Tell Express to route all /api/auth requests to your new auth.js file
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+
 
 // ==========================================
 // --- GOOGLE SHEETS LIVE SYNC HELPER ---
@@ -192,182 +150,10 @@ const pushToGoogleSheet = async (data) => {
     }
 };
 
+
 // ==========================================
 // --- API ROUTES ---
 // ==========================================
-
-// --- AUTHENTICATION & EMAIL ROUTES ---
-app.post('/api/auth/register', async (req, res) => {
-    try {
-        const { username, firstName, lastName, middleName, email, password, role, department } = req.body;
-        
-        const normalizedEmail = email.toLowerCase().trim();
-        const normalizedUsername = username.toLowerCase().trim();
-
-        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        if (!passRegex.test(password)) {
-            return res.status(400).json({ message: 'Password does not meet standard format requirements.' });
-        }
-
-        const existingUser = await User.findOne({ 
-            $or: [
-                { email: { $regex: new RegExp('^' + normalizedEmail + '$', 'i') } }, 
-                { username: { $regex: new RegExp('^' + normalizedUsername + '$', 'i') } }
-            ] 
-        });
-        
-        if (existingUser) {
-            if (existingUser.email.toLowerCase() === normalizedEmail) {
-                return res.status(400).json({ message: "An account with this Email Address already exists." });
-            } else {
-                return res.status(400).json({ message: "This Username is already taken." });
-            }
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        
-        const newUser = new User({ 
-            username: normalizedUsername, 
-            firstName, 
-            lastName, 
-            middleName, 
-            email: normalizedEmail, 
-            password: hashedPassword, 
-            role, 
-            department, 
-            verificationToken 
-        });
-        
-        await newUser.save();
-
-        const backendUrl = `${req.protocol}://${req.get('host')}`;
-        const verifyLink = `${backendUrl}/api/auth/verify/${verificationToken}`;
-
-        const mailOptions = {
-            to: normalizedEmail,
-            subject: 'Verify Your Driver Account',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
-                    <h2 style="color: #1e3a8a;">Welcome to iACADEMY Fleet Management!</h2>
-                    <p>Hello <b>${username}</b>,</p>
-                    <p>Your driver account has been successfully registered. To activate your account and allow administrators to assign your department, please verify your email address by clicking the button below:</p>
-                    <a href="${verifyLink}" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 15px; margin-bottom: 15px;">Verify Email Address</a>
-                    <p style="font-size: 12px; color: #64748b;">If the button doesn't work, copy and paste this link into your browser:<br>${verifyLink}</p>
-                </div>
-            `
-        };
-
-        // NEW BULLETPROOF OAUTH2 EMAIL SENDER
-        await sendEmail(mailOptions);
-
-        res.status(201).json({ message: 'Account created successfully! Please check your email to verify.' });
-    } catch (err) {
-        if (err.code === 11000) return res.status(400).json({ message: 'Database constraint: Username or Email already exists' });
-        res.status(500).json({ message: err.message });
-    }
-});
-
-app.get('/api/auth/verify/:token', async (req, res) => {
-    try {
-        const { token } = req.params;
-        const user = await User.findOne({ verificationToken: token });
-        
-        if (!user) {
-            return res.status(400).send("Invalid or expired verification link. Please contact your administrator.");
-        }
-
-        user.isVerified = true;
-        user.verificationToken = undefined;
-        await user.save();
-
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
-        res.redirect(`${frontendUrl}/login.html?verified=success`);
-    } catch (err) {
-        res.status(500).send("Server Error during verification.");
-    }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const normalizedUsername = username.toLowerCase().trim();
-        const user = await User.findOne({ username: { $regex: new RegExp('^' + normalizedUsername + '$', 'i') } });
-        
-        if (!user) return res.status(404).json({ message: 'User not found' });
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
-
-        if (!user.isVerified) {
-            return res.status(403).json({ message: 'Email not verified. Please check your inbox.', isVerified: false });
-        }
-
-        const token = jwt.sign({ id: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, { expiresIn: '1d' });
-        res.json({ 
-            message: 'Login successful', 
-            token, 
-            role: user.role, 
-            department: user.department,
-            isVerified: user.isVerified 
-        });
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.post('/api/auth/forgot-password', async (req, res) => {
-    try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ message: 'No account with that email address exists.' });
-
-        const token = crypto.randomBytes(20).toString('hex');
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; 
-        await user.save();
-
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
-        const resetLink = `${frontendUrl}/reset-password.html?token=${token}`;
-
-        const mailOptions = {
-            to: user.email,
-            subject: 'Password Reset Request',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
-                    <h2 style="color: #1e3a8a;">Password Reset Request</h2>
-                    <p>Hello <b>${user.username}</b>,</p>
-                    <p>You are receiving this because you (or someone else) have requested the reset of the password for your account. Please click on the button below to complete the process:</p>
-                    <a href="${resetLink}" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 15px; margin-bottom: 15px;">Reset Password</a>
-                    <p>This link will expire in 1 hour.</p>
-                    <p style="font-size: 12px; color: #64748b;">If you did not request this, please ignore this email and your password will remain unchanged.</p>
-                </div>
-            `
-        };
-
-        // NEW BULLETPROOF OAUTH2 EMAIL SENDER
-        await sendEmail(mailOptions);
-
-        res.json({ message: 'An e-mail has been sent to ' + user.email + ' with further instructions.' });
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.post('/api/auth/reset-password', async (req, res) => {
-    try {
-        const { token, password } = req.body;
-        const user = await User.findOne({ 
-            resetPasswordToken: token, 
-            resetPasswordExpires: { $gt: Date.now() } 
-        });
-
-        if (!user) return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
-
-        user.password = await bcrypt.hash(password, 10);
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
-
-        res.json({ message: 'Success! Your password has been changed.' });
-    } catch (err) { res.status(500).json({ message: err.message }); }
-});
 
 // --- DRIVER LIST & PROFILE ROUTES ---
 app.get('/api/drivers', async (req, res) => {
@@ -558,16 +344,14 @@ app.post('/api/action-logs', async (req, res) => {
 // --- MESSAGING / CHAT ROUTES ---
 // ==========================================
 
-// Get messages for a specific user (filters out soft-deleted ones!)
+// Get messages for a specific user
 app.get('/api/messages/:username', async (req, res) => {
     try {
         const username = req.params.username;
         if (username === 'Admin') {
-            // Send to Admin only if Admin hasn't hidden it
             const messages = await Message.find({ hiddenBy: { $ne: 'Admin' } }).sort({ timestamp: 1 });
             res.json(messages);
         } else {
-            // Send to Driver only if Driver hasn't hidden it
             const messages = await Message.find({
                 $or: [{ sender: username }, { receiver: username }],
                 hiddenBy: { $ne: username }
@@ -597,13 +381,9 @@ app.put('/api/messages/mark-read', async (req, res) => {
     } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// NEW: Clear/Soft-Delete Chat Messages Route
 app.put('/api/messages/clear', async (req, res) => {
     try {
         const { driverUsername, clearedBy } = req.body; 
-        
-        // Find all messages between Admin and this specific driver, 
-        // and add the person clicking the "Clear" button to the hiddenBy list
         await Message.updateMany(
             {
                 $or: [
@@ -627,9 +407,7 @@ app.post('/api/scan-receipt', async (req, res) => {
     try {
         const { image } = req.body; 
 
-        if (!image) {
-            return res.status(400).json({ error: "No image provided" });
-        }
+        if (!image) return res.status(400).json({ error: "No image provided" });
 
         const { data: { text } } = await Tesseract.recognize(image, 'eng');
         
@@ -637,9 +415,7 @@ app.post('/api/scan-receipt', async (req, res) => {
         let detectedExpressway = null;
 
         const amountMatch = text.match(/\d+\.\d{2}/);
-        if (amountMatch) {
-            detectedAmount = parseFloat(amountMatch[0]);
-        }
+        if (amountMatch) detectedAmount = parseFloat(amountMatch[0]);
 
         const upperText = text.toUpperCase();
         if (upperText.includes('NLEX')) detectedExpressway = 'NLEX';
@@ -650,15 +426,49 @@ app.post('/api/scan-receipt', async (req, res) => {
         else if (upperText.includes('MCX')) detectedExpressway = 'MCX';
         else if (upperText.includes('CALAX')) detectedExpressway = 'CALAX';
 
-        res.json({
-            amount: detectedAmount,
-            expressway: detectedExpressway
-        });
-
+        res.json({ amount: detectedAmount, expressway: detectedExpressway });
     } catch (error) {
         console.error("OCR Processing Error:", error);
         res.status(500).json({ error: "Failed to scan receipt" });
     }
+});
+
+// ==========================================
+// --- SUPER ADMIN "GOD MODE" ROUTES ---
+// ==========================================
+
+// 1. Get all Admins
+app.get('/api/admins', async (req, res) => {
+    try {
+        const admins = await User.find({ role: 'admin' }, '-password');
+        res.json(admins);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// 2. Delete ANY User (Admin or Driver)
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ message: 'User permanently deleted.' });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// 3. Force Reset ANY User's Password (Bypass email)
+app.put('/api/users/:id/force-password', async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await User.findByIdAndUpdate(req.params.id, { password: hashedPassword });
+        res.json({ message: 'Password forcefully updated!' });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// 4. Force Verify ALL Unverified Accounts
+app.put('/api/users/force-verify-all', async (req, res) => {
+    try {
+        const result = await User.updateMany({ isVerified: false }, { isVerified: true, verificationToken: undefined });
+        res.json({ message: `${result.modifiedCount} accounts were instantly verified!` });
+    } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 // ==========================================
