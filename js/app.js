@@ -9,7 +9,8 @@ function renderNavigation(activePageId) {
     // 1. DYNAMIC NAVIGATION BASED ON ROLE
     let navItems = [];
     
-    if (role === 'admin') {
+    // UPDATED: Allow both 'admin' and 'superadmin' to see the Control Center menu
+    if (role === 'admin' || role === 'superadmin') {
         navItems = [
             { id: 'dashboard', name: 'Control Center', href: 'dashboard.html' },
             { id: 'reports', name: 'Reports & Analytics', href: 'reports.html' },
@@ -91,7 +92,7 @@ function renderNavigation(activePageId) {
         <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300">
             <div class="max-w-[1500px] mx-auto px-6 flex items-center justify-between gap-8 h-20 lg:h-auto">
                 
-                <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="window.location.href='${role === 'admin' ? 'dashboard.html' : 'driver-dashboard.html'}'">
+                <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="window.location.href='${(role === 'admin' || role === 'superadmin') ? 'dashboard.html' : 'driver-dashboard.html'}'">
                     <img src="logo.png" alt="iACADEMY RFID Logo" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-md transition-transform hover:scale-105">
                     <span class="font-black text-xl md:text-2xl tracking-tight text-gray-800 dark:text-white hidden sm:block ml-1">iACADEMY <span class="text-blue-800 dark:text-blue-400 font-light">RFID</span></span>
                 </div>
@@ -101,7 +102,7 @@ function renderNavigation(activePageId) {
                 </nav>
 
                 <div class="hidden lg:flex items-center gap-3 shrink-0 py-4">
-                    ${role === 'admin' ? `
+                    ${(role === 'admin' || role === 'superadmin') ? `
                     <button onclick="triggerGlobalSearch()" class="text-xl text-gray-400 dark:text-gray-300 hover:text-blue-800 dark:hover:text-blue-400 transition-colors bg-gray-50 dark:bg-gray-800 p-2 rounded-lg" title="Search">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
@@ -215,7 +216,8 @@ function injectGlobalChat(role) {
     chatWrapper.id = 'globalChatWrapper';
     document.body.appendChild(chatWrapper);
 
-    if (role === 'admin') {
+    // UPDATED: Allow both 'admin' and 'superadmin' to use the Admin Chat Widget
+    if (role === 'admin' || role === 'superadmin') {
         chatWrapper.innerHTML = `
             <div id="adminChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
                 <div id="adminChatBox" class="hidden w-80 sm:w-[400px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
