@@ -166,6 +166,20 @@ app.get('/api/drivers', async (req, res) => {
     }
 });
 
+// --- GET SINGLE DRIVER PROFILE ---
+app.get('/api/drivers/:username', async (req, res) => {
+    try {
+        const User = mongoose.model('User');
+        const driver = await User.findOne({ username: req.params.username }, '-password');
+        
+        if (!driver) return res.status(404).json({ message: 'Driver not found' });
+        
+        res.json(driver);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 app.put('/api/drivers/:id/profile', async (req, res) => {
     try {
         const { department, workDays } = req.body;
