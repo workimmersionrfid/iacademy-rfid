@@ -4,9 +4,10 @@
 const API_BASE = 'https://iacademy-rfid.onrender.com/api';
 
 window.allSuperDrivers = []; 
+window.unverifiedUsersCache = [];
 
 window.fetchSystemData = async function() {
-    const startTime = Date.now(); // Start timer for ping
+    const startTime = Date.now();
     try {
         const [driversRes, adminsRes, fleetRes] = await Promise.all([
             fetch(`${API_BASE}/drivers`),
@@ -18,6 +19,9 @@ window.fetchSystemData = async function() {
         const admins = await adminsRes.json();
         const fleet = await fleetRes.json();
         
+        // Cache unverified users for the Danger Zone Modal
+        window.unverifiedUsersCache = [...admins, ...window.allSuperDrivers].filter(u => !u.isVerified);
+
         // 1. Base Totals
         document.getElementById('statDrivers').innerText = window.allSuperDrivers.length;
         document.getElementById('statAdmins').innerText = admins.length;
@@ -44,18 +48,6 @@ window.fetchSystemData = async function() {
             document.getElementById('sysHealthStatus').className = "text-xl font-black text-emerald-500 dark:text-emerald-400 mt-1 mb-3";
             document.getElementById('sysHealthPing').innerText = `Ping: ${ping} ms`;
             document.getElementById('healthIcon').className = "fa-solid fa-heart-pulse text-emerald-100 dark:text-emerald-900/30 text-3xl";
-        }
-
-        // 4. Populate Chat Users
-        const chatSelect = document.getElementById('saChatUserSelect');
-        if (chatSelect) {
-            chatSelect.innerHTML = '<option value="" disabled selected>Select user to message...</option>';
-            const allUsers = [...admins, ...window.allSuperDrivers];
-            allUsers.forEach(u => {
-                if (u.username !== localStorage.getItem('username')) {
-                    chatSelect.innerHTML += `<option value="${u.username}">${u.role === 'driver' ? '🚗' : '👔'} ${u.username}</option>`;
-                }
-            });
         }
         
         renderAdminTable(admins);
@@ -92,17 +84,24 @@ window.toggleVerification = async function(id, currentStatus, username) {
     }
 };
 
-window.forceVerifyAll = async function() {
-    if (confirm(`Are you sure you want to bypass email verification for all currently pending accounts?`)) {
-        try {
-            const res = await fetch(`${API_BASE}/users/force-verify-all`, { method: 'PUT' });
-            const data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                fetchSystemData();
-            } else alert('Failed to verify accounts.');
-        } catch (err) { alert('Network Error'); }
-    }
+window.verifySelectedUsers = async function() {
+    const checkboxes = document.querySelectorAll('.verify-cb:checked');
+    const idsToVerify = Array.from(checkboxes).map(cb => cb.value);
+    if (idsToVerify.length === 0) return;
+    if (!confirm(`Are you sure you want to verify these ${idsToVerify.length} selected accounts?`)) return;
+
+    const btn = document.getElementById('btnVerifySelected');
+    const origText = btn.innerText;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying...`;
+    btn.disabled = true;
+
+    try {
+        await Promise.all(idsToVerify.map(id => fetch(`${API_BASE}/users/${id}/verify`, { method: 'PUT' })));
+        alert(`Successfully verified ${idsToVerify.length} accounts!`);
+        closeMassVerifyModal();
+        fetchSystemData();
+    } catch (err) { alert("An error occurred while verifying users."); } 
+    finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 
 window.saveProfileFromModal = async function() {
@@ -132,61 +131,8 @@ window.saveProfileFromModal = async function() {
     finally { btn.innerHTML = origText; btn.disabled = false; }
 };
 
-// --- CHAT API LOGIC ---
-window.fetchSaMessages = async function() {
-    const selectedUser = document.getElementById('saChatUserSelect').value;
-    const msgBox = document.getElementById('saChatMessages');
-    const myName = localStorage.getItem('username');
-
-    try {
-        const res = await fetch(`${API_BASE}/messages/${selectedUser}`);
-        const messages = await res.json();
-        
-        msgBox.innerHTML = '';
-        if (messages.length === 0) {
-            msgBox.innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">No messages yet. Say hi!</div>';
-            return;
-        }
-
-        messages.forEach(m => {
-            const isMe = m.sender === 'Admin' || m.sender === myName;
-            const align = isMe ? 'self-end bg-blue-600 text-white' : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
-            const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            msgBox.innerHTML += `
-                <div class="${align} max-w-[80%] rounded-xl px-3 py-2 text-xs shadow-sm">
-                    <div>${m.text}</div>
-                    <div class="text-[9px] opacity-70 mt-1 text-right">${time}</div>
-                </div>
-            `;
-        });
-        msgBox.scrollTop = msgBox.scrollHeight;
-
-        await fetch(`${API_BASE}/messages/mark-read`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: selectedUser, role: 'superadmin' })
-        });
-    } catch (err) { console.error("Chat Error", err); }
-};
-
-window.sendSaMessage = async function(e) {
-    e.preventDefault();
-    const selectedUser = document.getElementById('saChatUserSelect').value;
-    const input = document.getElementById('saChatInput');
-    const text = input.value.trim();
-    if (!text || !selectedUser) return;
-
-    try {
-        await fetch(`${API_BASE}/messages`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sender: 'Admin', receiver: selectedUser, text: text })
-        });
-        input.value = '';
-        fetchSaMessages();
-    } catch (err) { alert("Failed to send message."); }
-};
-
 document.addEventListener("DOMContentLoaded", () => {
+    // Register Admin Form
     const createForm = document.getElementById('createAdminForm');
     if (createForm) {
         createForm.addEventListener('submit', async (e) => {
@@ -221,6 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Force Password Form
     const passForm = document.getElementById('forcePassForm');
     if (passForm) {
         passForm.addEventListener('submit', async (e) => {
@@ -248,6 +195,38 @@ document.addEventListener("DOMContentLoaded", () => {
                     alert('Password has been forcefully overridden!');
                     closeForcePassModal();
                 } else alert('Failed to override password.');
+            } catch (err) { alert('Network Error'); }
+            finally { btn.innerHTML = origHTML; btn.disabled = false; }
+        });
+    }
+
+    // Account Status (Suspend/Activate) Form
+    const statusForm = document.getElementById('accountStatusForm');
+    if (statusForm) {
+        statusForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitStatus');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Updating...`;
+            btn.disabled = true;
+
+            const id = document.getElementById('statusUserId').value;
+            const action = document.getElementById('statusAction').value; // 'active' or 'suspended'
+            const duration = document.getElementById('suspendDuration').value;
+
+            try {
+                // Sends status to backend. (Backend needs to update user.isSuspended based on this payload)
+                const res = await fetch(`${API_BASE}/users/${id}/status`, {
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ status: action, duration: action === 'suspended' ? duration : null })
+                });
+                
+                if (res.ok) {
+                    alert(`Account status updated to: ${action.toUpperCase()}`);
+                    closeAccountStatusModal();
+                    fetchSystemData(); // Refresh UI
+                } else alert('Failed to update account status.');
             } catch (err) { alert('Network Error'); }
             finally { btn.innerHTML = origHTML; btn.disabled = false; }
         });

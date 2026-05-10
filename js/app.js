@@ -708,8 +708,7 @@ function initSuperAdminChatLogic() {
     };
 
     async function populateSaUserDropdown() {
-        if (allUsersCache.length > 0) return; // Prevent re-fetching if already loaded
-        
+        if (allUsersCache.length > 0) return; 
         try {
             const [driversRes, adminsRes] = await Promise.all([
                 fetch(`${API_BASE_CHAT}/drivers`),
@@ -722,7 +721,7 @@ function initSuperAdminChatLogic() {
             const select = document.getElementById('saChatUserSelect');
             const myName = localStorage.getItem('username');
             
-            // FIX: We use '=' to completely wipe out any hardcoded HTML duplicates or emojis!
+            // This strictly assigns the broadcast option ONCE and wipes out anything else
             select.innerHTML = `
                 <option value="" disabled selected>Select user to message...</option>
                 <option value="BROADCAST" class="text-blue-600 dark:text-blue-400 font-black">BROADCAST TO ALL</option>
@@ -734,11 +733,9 @@ function initSuperAdminChatLogic() {
                     select.innerHTML += `<option value="${u.username}">${u.username} ${roleLabel}</option>`;
                 }
             });
-        } catch (e) { 
-            console.error("Failed to load users for chat", e); 
-        }
+        } catch (e) { console.error("Failed to load users for chat", e); }
     }
-
+    
     window.loadSaMessages = async function() {
         const selectedUser = document.getElementById('saChatUserSelect').value;
         const input = document.getElementById('saChatInput');
