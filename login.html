@@ -146,7 +146,9 @@
 
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userRole', data.role);
-                    localStorage.setItem('username', username);
+                    
+                    localStorage.setItem('username', data.username); 
+                    
                     if (data.department) localStorage.setItem('userDept', data.department);
 
                     if (data.role === 'superadmin') window.location.href = 'superadmin-dashboard.html';

@@ -170,7 +170,12 @@ app.get('/api/drivers', async (req, res) => {
 app.get('/api/drivers/:username', async (req, res) => {
     try {
         const User = mongoose.model('User');
-        const driver = await User.findOne({ username: req.params.username }, '-password');
+        
+        // Use Regex to make the database search case-insensitive!
+        // This means "LARSEN08", "larsen08", and "LaRsEn08" will all match correctly.
+        const driver = await User.findOne({ 
+            username: { $regex: new RegExp('^' + req.params.username.trim() + '$', 'i') } 
+        }, '-password');
         
         if (!driver) return res.status(404).json({ message: 'Driver not found' });
         
