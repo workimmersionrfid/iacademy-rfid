@@ -112,7 +112,9 @@ window.openProfileModal = function(driverId) {
     const deptArray = Array.isArray(driver.department) ? driver.department : (driver.department ? [driver.department] : []);
     const driverWorkDays = driver.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const allModalDepts = ["Pending Assignment", "SHS", "COLLEGE", "REGISTRAR", "ADMISSIONS", "OSAS", "LIBRARY", "CLINIC", "ADMIN", "FINANCE", "PURCHASING", "IT", "ELPD", "ADCOM", "GENERAL"];
+    
+    // 🚨 FIX: Removed "Pending Assignment" from this list so it cannot be manually ticked!
+    const allModalDepts = ["SHS", "COLLEGE", "REGISTRAR", "ADMISSIONS", "OSAS", "LIBRARY", "CLINIC", "ADMIN", "FINANCE", "PURCHASING", "IT", "ELPD", "ADCOM", "GENERAL"];
 
     document.getElementById('modalDeptList').innerHTML = allModalDepts.map(dept => `
         <label class="flex items-center text-[10px] text-gray-700 dark:text-gray-300 font-bold tracking-wide uppercase cursor-pointer p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors">

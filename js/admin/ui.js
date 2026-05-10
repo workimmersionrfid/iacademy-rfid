@@ -299,7 +299,7 @@ window.updateVehicleDropdown = function() {
         const isCoded = codingDigits.includes(plate.charAt(plate.length - 1));
 
         if (assignedTo && assignedTo !== selectedDriver) {
-            dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
+            dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo}</option>`;
         } else if (assignedTo === selectedDriver) {
             dVehicleSelect.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-600 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to ${selectedDriver})</option>`;
             autoSelectPlate = v.plateNumber; availableCount++;
@@ -336,9 +336,8 @@ window.openProfileModal = function(driverId) {
     const driverWorkDays = driver.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    const allModalDepts = ["Pending Assignment", ...departmentsList];
-
-    document.getElementById('modalDeptList').innerHTML = allModalDepts.map(dept => `
+    // 🚨 FIX: Removed "Pending Assignment" to prevent accidental manual assignment
+    document.getElementById('modalDeptList').innerHTML = departmentsList.map(dept => `
         <label class="flex items-center text-[10px] text-gray-700 dark:text-gray-300 font-bold tracking-wide uppercase cursor-pointer p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors">
             <input type="checkbox" value="${dept}" class="modal-dept-cb mr-3 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500" ${deptArray.includes(dept) ? 'checked' : ''}>
             <span class="truncate">${dept}</span>
@@ -453,7 +452,7 @@ window.updateRebookVehicleDropdown = function() {
         const lastDigit = plate.charAt(plate.length - 1);
 
         if (assignedTo && assignedTo !== selectedDriver) {
-            rVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo.toUpperCase()}</option>`;
+            rVehicleSelect.innerHTML += `<option value="${v.plateNumber}" disabled class="text-orange-500 bg-orange-50">⚠️ ${v.plateNumber} - USED BY ${assignedTo}</option>`;
         } else if (assignedTo === selectedDriver) {
             rVehicleSelect.innerHTML += `<option value="${v.plateNumber}" class="text-emerald-600 bg-emerald-50 font-bold">✅ ${v.plateNumber} (Assigned to ${selectedDriver})</option>`;
             autoSelectPlate = v.plateNumber; availableCount++;
@@ -510,60 +509,70 @@ window.autoFillSpecs = function() {
 };
 // Event Listeners for boot sequence
 document.addEventListener("DOMContentLoaded", () => {
-    renderNavigation('dashboard');
+    if(typeof renderNavigation === 'function') renderNavigation('dashboard');
     renderDeptCards();
-    loadGoogleMaps();
-    loadDashboardData();
-    document.getElementById('dDate').addEventListener('change', updateModalDropdowns);
+    if(typeof loadGoogleMaps === 'function') loadGoogleMaps();
+    if(typeof loadDashboardData === 'function') loadDashboardData();
+    
+    if(document.getElementById('dDate')) {
+        document.getElementById('dDate').addEventListener('change', updateModalDropdowns);
+    }
 
-    $('#dashDateRangePicker').daterangepicker({
-        opens: 'right', autoUpdateInput: false, locale: { format: 'MM/DD/YYYY', cancelLabel: 'Clear' },
-        ranges: {
-            'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'Month to date': [moment().startOf('month'), moment()],
-            'Last week': [moment().subtract(1, 'week').startOf('isoWeek'), moment().subtract(1, 'week').endOf('isoWeek')],
-            'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-        }
-    });
-    $('#dashDateRangePicker').on('apply.daterangepicker', function(ev, picker) {
-        $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-        renderLogsList(); 
-    });
-    $('#dashDateRangePicker').on('cancel.daterangepicker', function(ev, picker) { $(this).val(''); renderLogsList(); });
+    if($('#dashDateRangePicker').length) {
+        $('#dashDateRangePicker').daterangepicker({
+            opens: 'right', autoUpdateInput: false, locale: { format: 'MM/DD/YYYY', cancelLabel: 'Clear' },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Month to date': [moment().startOf('month'), moment()],
+                'Last week': [moment().subtract(1, 'week').startOf('isoWeek'), moment().subtract(1, 'week').endOf('isoWeek')],
+                'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+        $('#dashDateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+            renderLogsList(); 
+        });
+        $('#dashDateRangePicker').on('cancel.daterangepicker', function(ev, picker) { $(this).val(''); renderLogsList(); });
+    }
 
-    $('#dispatchDateRange').daterangepicker({
-        opens: 'right', autoUpdateInput: false, locale: { format: 'MM/DD/YYYY', cancelLabel: 'Clear' },
-        ranges: {
-            'Today': [moment(), moment()],
-            'Tomorrow': [moment().add(1, 'days'), moment().add(1, 'days')],
-            'Next 7 Days': [moment(), moment().add(6, 'days')],
-            'This Month': [moment().startOf('month'), moment().endOf('month')]
-        }
-    });
-    $('#dispatchDateRange').on('apply.daterangepicker', function(ev, picker) {
-        $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-        renderLiveBoard(); 
-    });
-    $('#dispatchDateRange').on('cancel.daterangepicker', function(ev, picker) { $(this).val(''); renderLiveBoard(); });
+    if($('#dispatchDateRange').length) {
+        $('#dispatchDateRange').daterangepicker({
+            opens: 'right', autoUpdateInput: false, locale: { format: 'MM/DD/YYYY', cancelLabel: 'Clear' },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Tomorrow': [moment().add(1, 'days'), moment().add(1, 'days')],
+                'Next 7 Days': [moment(), moment().add(6, 'days')],
+                'This Month': [moment().startOf('month'), moment().endOf('month')]
+            }
+        });
+        $('#dispatchDateRange').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+            renderLiveBoard(); 
+        });
+        $('#dispatchDateRange').on('cancel.daterangepicker', function(ev, picker) { $(this).val(''); renderLiveBoard(); });
+    }
 
     // Vehicle Form Submission
-    document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`; btn.disabled = true;
+    const vehicleForm = document.getElementById('vehicleForm');
+    if (vehicleForm) {
+        vehicleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`; btn.disabled = true;
 
-        const finalModel = document.getElementById('vModel').value === 'Other' ? document.getElementById('vModelCustom').value : document.getElementById('vModel').value;
-        const vehicleData = {
-            model: finalModel, plateNumber: document.getElementById('vPlate').value.toUpperCase(),
-            year: document.getElementById('vYear').value, fuelType: document.getElementById('vFuel').value,
-            efficiency: parseFloat(document.getElementById('vEfficiency').value)
-        };
+            const finalModel = document.getElementById('vModel').value === 'Other' ? document.getElementById('vModelCustom').value : document.getElementById('vModel').value;
+            const vehicleData = {
+                model: finalModel, plateNumber: document.getElementById('vPlate').value.toUpperCase(),
+                year: document.getElementById('vYear').value, fuelType: document.getElementById('vFuel').value,
+                efficiency: parseFloat(document.getElementById('vEfficiency').value)
+            };
 
-        try {
-            const res = await fetch(`${API_BASE}/vehicles`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(vehicleData) });
-            if (res.ok) { document.getElementById('vehicleForm').reset(); autoFillSpecs(); loadDashboardData(); }
-        } catch (err) { console.error('Error saving vehicle:', err); } 
-        finally { btn.innerHTML = `Register Fleet Vehicle`; btn.disabled = false; }
-    });
+            try {
+                const res = await fetch(`${API_BASE}/vehicles`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(vehicleData) });
+                if (res.ok) { document.getElementById('vehicleForm').reset(); autoFillSpecs(); loadDashboardData(); }
+            } catch (err) { console.error('Error saving vehicle:', err); } 
+            finally { btn.innerHTML = `Register Fleet Vehicle`; btn.disabled = false; }
+        });
+    }
 });

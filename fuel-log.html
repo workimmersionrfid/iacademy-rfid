@@ -411,7 +411,6 @@
             btn.disabled = true;
 
             setTimeout(() => {
-                // --- 1. SETUP TIME BUCKETS (Using Moment.js) ---
                 const today = moment().startOf('day');
                 const startOfWeek = moment().startOf('isoWeek');
                 const startOfMonth = moment().startOf('month');
@@ -425,7 +424,6 @@
                 let deptSummary = {};
                 let vehicleSummary = {};
 
-                // --- 2. PROCESS DATA & AGGREGATE ---
                 const rawAuditData = filteredLogs.map(log => {
                     const isFuel = log.logType === 'Fuel';
                     const cost = isFuel ? (parseFloat(log.total) || 0) : (parseFloat(log.amount) || 0);
@@ -439,11 +437,24 @@
                     if (logDate.isSameOrAfter(startOfMonth)) { if(isFuel) execSummary.month.fuel += cost; else execSummary.month.toll += cost; }
                     if (logDate.isSameOrAfter(startOfYear)) { if(isFuel) execSummary.year.fuel += cost; else execSummary.year.toll += cost; }
 
-                    // B. Department Aggregation (Cost Centers)
-                    const dept = log.department || "UNASSIGNED";
-                    if (!deptSummary[dept]) deptSummary[dept] = { fuel: 0, toll: 0, total: 0 };
-                    if (isFuel) deptSummary[dept].fuel += cost; else deptSummary[dept].toll += cost;
-                    deptSummary[dept].total += cost;
+                    // B. Department Aggregation (🚨 FIX APPLIED HERE)
+                    const rawDeptString = log.department || "UNASSIGNED";
+                    
+                    // Split comma-separated departments into an array (e.g. "IT, ELPD" becomes ["IT", "ELPD"])
+                    let deptsArray = rawDeptString.split(',').map(d => d.trim()).filter(Boolean);
+                    if (deptsArray.length === 0) deptsArray = ["UNASSIGNED"];
+                    
+                    // Divide the cost equally among the departments
+                    const splitCost = cost / deptsArray.length;
+
+                    deptsArray.forEach(dept => {
+                        // Clean up the name for the report
+                        if (dept === "Pending Assignment") dept = "UNASSIGNED";
+
+                        if (!deptSummary[dept]) deptSummary[dept] = { fuel: 0, toll: 0, total: 0 };
+                        if (isFuel) deptSummary[dept].fuel += splitCost; else deptSummary[dept].toll += splitCost;
+                        deptSummary[dept].total += splitCost;
+                    });
 
                     // C. Vehicle Aggregation (Assets)
                     const veh = log.vehicle || "UNKNOWN VEHICLE";
@@ -461,7 +472,7 @@
                         "System ID": log._id || "N/A",
                         "Transaction Date": log.date, 
                         "Expense Type": log.logType,
-                        "Cost Center (Dept)": dept, 
+                        "Cost Center (Dept)": rawDeptString, // Keep original string for raw audit trail
                         "Driver": log.driver,
                         "Asset (Vehicle)": veh, 
                         "Odometer / Route": isFuel ? (log.odo || "N/A") : (log.expressway || "N/A"), 
@@ -471,7 +482,7 @@
                     };
                 });
 
-                // --- 3. BUILD EXCEL SHEETS ---
+                // --- BUILD EXCEL SHEETS ---
                 const workbook = XLSX.utils.book_new();
 
                 // TAB 1: Executive Summary
@@ -510,7 +521,7 @@
                 const wsRaw = XLSX.utils.json_to_sheet(rawAuditData);
                 XLSX.utils.book_append_sheet(workbook, wsRaw, "Raw Audit Data");
 
-                // --- 4. TRIGGER DOWNLOAD ---
+                // TRIGGER DOWNLOAD
                 XLSX.writeFile(workbook, `Fleet_Financial_Report_${moment().format('YYYY-MM-DD')}.xlsx`);
 
                 btn.innerHTML = origHTML;
