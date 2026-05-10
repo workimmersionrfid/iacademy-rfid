@@ -478,26 +478,26 @@
             }
         }
         
-        window.exportToExcel = function() {
+       window.exportToExcel = function() {
             if (filteredLogs.length === 0) {
                 return alert("No data to export!");
             }
             
+            // Map the data to perfectly match our 13-column Google Sheet format
             const exportData = filteredLogs.map(log => ({
-                "Date": new Date(log.timestamp).toLocaleDateString(),
-                "Time": new Date(log.timestamp).toLocaleTimeString(),
-                "Department": log.department || "General",
-                "Driver Name": log.driver_name,
-                "Plate Number": log.plate_number,
-                "Action Type": log.action,
-                "Task": log.task,
-                "Destination": log.location,
-                "Coordinates": (log.latitude && log.latitude !== "N/A") ? `${log.latitude}, ${log.longitude}` : "N/A",
-                "Status": log.delivery_status,
-                "Result Type": log.completion_type || "N/A",
-                "E-Signature": (log.signature && log.signature !== "None") ? "Signed" : "None", 
-                "Remarks/Reasons": log.incomplete_reasons !== "None" ? log.incomplete_reasons : "",
-                "Comments": log.comments !== "None" ? log.comments : "",
+                "Date & Time": new Date(log.timestamp).toLocaleString(),
+                "Driver": log.driver_name || "N/A",
+                "Department": log.department || "N/A",
+                "Vehicle": log.plate_number || "N/A",
+                "Record Type": log.action || "N/A",
+                "Task Status / Outcome": log.delivery_status || "N/A",
+                "Reasons / Remarks": (log.incomplete_reasons && log.incomplete_reasons !== "None") ? log.incomplete_reasons : "N/A",
+                "Next Steps": log.next_steps || "N/A",
+                "Comments / Notes": (log.comments && log.comments !== "None") ? log.comments : "N/A",
+                "Fuel Log (PHP)": "", // Action logs don't have fuel costs, keep blank
+                "Toll Log (PHP)": "", // Action logs don't have toll costs, keep blank
+                "Total Cost (PHP)": 0,
+                "GPS Coordinates": (log.latitude && log.latitude !== "N/A") ? `${log.latitude}, ${log.longitude}` : "N/A"
             }));
             
             const worksheet = XLSX.utils.json_to_sheet(exportData);
