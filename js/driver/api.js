@@ -9,20 +9,20 @@ let vehicleDeptMap = {};
 
 async function initDriverData() {
     try {
-        const [tasksRes, vehiclesRes, driversRes] = await Promise.all([
+        const myName = localStorage.getItem('username');
+        
+        // Fetch tasks, vehicles, AND the specific driver's profile simultaneously
+        const [tasksRes, vehiclesRes, profileRes] = await Promise.all([
             fetch(`${API_BASE}/tasks`),
             fetch(`${API_BASE}/vehicles`),
-            fetch(`${API_BASE}/drivers`)
+            fetch(`${API_BASE}/drivers/${myName}`) // <-- Using the new backend route!
         ]);
         
         allTasks = await tasksRes.json();
         allVehicles = await vehiclesRes.json();
-        const allDrivers = await driversRes.json();
-
-        const myName = localStorage.getItem('username');
-        const myProfile = allDrivers.find(d => d.username === myName);
         
-        if (myProfile) {
+        if (profileRes.ok) {
+            const myProfile = await profileRes.json();
             const workDays = myProfile.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
             const allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
             
@@ -36,6 +36,8 @@ async function initDriverData() {
                     return `<span class="bg-slate-800/50 text-slate-500 border border-slate-700/50 text-[10px] font-medium px-2.5 py-1 rounded tracking-widest opacity-60">${shortDay}</span>`;
                 }
             }).join('');
+        } else {
+             document.getElementById('driverSchedule').innerHTML = `<span class="text-red-300 text-xs font-bold uppercase tracking-widest">Failed to load schedule</span>`;
         }
 
         if(document.getElementById('fDate')) document.getElementById('fDate').valueAsDate = new Date();
@@ -47,7 +49,10 @@ async function initDriverData() {
             updateModalVehicleDropdown('toll');
         }
 
-    } catch (err) { console.error("Error loading data:", err); }
+    } catch (err) { 
+        console.error("Error loading data:", err); 
+        document.getElementById('driverSchedule').innerHTML = `<span class="text-red-300 text-xs font-bold uppercase tracking-widest">Offline</span>`;
+    }
 }
 
 function getLiveLocation() {    
