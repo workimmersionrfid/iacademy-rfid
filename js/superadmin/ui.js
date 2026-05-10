@@ -113,7 +113,6 @@ window.openProfileModal = function(driverId) {
     const driverWorkDays = driver.workDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     
-    // 🚨 FIX: Removed "Pending Assignment" from this list so it cannot be manually ticked!
     const allModalDepts = ["SHS", "COLLEGE", "REGISTRAR", "ADMISSIONS", "OSAS", "LIBRARY", "CLINIC", "ADMIN", "FINANCE", "PURCHASING", "IT", "ELPD", "ADCOM", "GENERAL"];
 
     document.getElementById('modalDeptList').innerHTML = allModalDepts.map(dept => `
@@ -141,4 +140,33 @@ window.closeProfileModal = function() {
     const box = document.getElementById('driverProfileBox');
     box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
     setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 200);
+};
+
+// --- CHAT WIDGET UI LOGIC ---
+let saChatInterval;
+
+window.toggleSaChat = function() {
+    const panel = document.getElementById('saChatPanel');
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        setTimeout(() => { panel.classList.remove('scale-95', 'opacity-0'); panel.classList.add('scale-100', 'opacity-100'); }, 10);
+    } else {
+        panel.classList.remove('scale-100', 'opacity-100'); panel.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => { panel.classList.add('hidden'); }, 200);
+        clearInterval(saChatInterval);
+    }
+};
+
+window.loadSaMessages = async function() {
+    const selectedUser = document.getElementById('saChatUserSelect').value;
+    const input = document.getElementById('saChatInput');
+    const btn = document.getElementById('saChatBtn');
+    
+    if (!selectedUser) return;
+    
+    input.disabled = false; btn.disabled = false;
+    await fetchSaMessages();
+    
+    clearInterval(saChatInterval);
+    saChatInterval = setInterval(fetchSaMessages, 5000); // Auto-refresh every 5 seconds
 };
