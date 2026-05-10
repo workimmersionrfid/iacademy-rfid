@@ -569,7 +569,12 @@ if(document.getElementById('btn-clock-in')) {
         const coords = await getLiveLocation();
         let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
         try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
-        sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
+        
+        const success = await sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
+        
+        if (success) {
+            showSuccessPopup('Clocked In!', 'Your shift has officially started. Drive safely!');
+        }
     });
 }
 
@@ -578,7 +583,12 @@ if(document.getElementById('btn-clock-out')) {
         const coords = await getLiveLocation();    
         let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
         try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
-        sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
+        
+        const success = await sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
+        
+        if (success) {
+            showSuccessPopup('Clocked Out!', 'Your shift has ended. Great work today!');
+        }
     });
 }
 
@@ -753,3 +763,41 @@ if(document.getElementById('completion-status')) {
         }
     });
 }
+
+// ==========================================
+// --- SUCCESS POPUP NOTIFICATION ---
+// ==========================================
+window.showSuccessPopup = function(title, message) {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-gray-900/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    
+    const box = document.createElement('div');
+    box.className = 'bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-90 transition-all duration-300 border border-emerald-100 dark:border-gray-700';
+    
+    box.innerHTML = `
+        <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+            <i class="fa-solid fa-check text-4xl"></i>
+        </div>
+        <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-2 tracking-tight">${title}</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">${message}</p>
+        <button class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md uppercase tracking-wider text-sm" onclick="this.closest('.fixed').remove()">
+            Got it
+        </button>
+    `;
+    
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    
+    requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        box.classList.remove('scale-90');
+    });
+    
+    setTimeout(() => {
+        if (document.body.contains(overlay)) {
+            overlay.classList.add('opacity-0');
+            box.classList.add('scale-90');
+            setTimeout(() => overlay.remove(), 300);
+        }
+    }, 3500);
+};

@@ -15,7 +15,7 @@ async function initDriverData() {
         const [tasksRes, vehiclesRes, profileRes] = await Promise.all([
             fetch(`${API_BASE}/tasks`),
             fetch(`${API_BASE}/vehicles`),
-            fetch(`${API_BASE}/drivers/${myName}`) // <-- Using the new backend route!
+            fetch(`${API_BASE}/drivers/${myName}`)
         ]);
         
         allTasks = await tasksRes.json();
@@ -85,7 +85,7 @@ async function sendActionLog(payload, successMsg) {
             if(statusText) {
                 statusText.textContent = `STATUS: ${successMsg.toUpperCase()}`; 
                 statusText.classList.replace('text-gray-500', 'text-blue-600');
-                statusText.classList.replace('dark:text-gray-400', 'dark:text-blue-400');
+                statusText.classList.replace('dark:text-blue-400', 'dark:text-blue-400');
             }
             return true; 
         } else throw new Error("Server Error");
