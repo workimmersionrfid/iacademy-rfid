@@ -216,19 +216,57 @@ function injectGlobalChat(role) {
     chatWrapper.id = 'globalChatWrapper';
     document.body.appendChild(chatWrapper);
 
-    // UPDATED: Allow both 'admin' and 'superadmin' to use the Admin Chat Widget
-    if (role === 'admin' || role === 'superadmin') {
+    // ==========================================
+    // 1. SUPER ADMIN CHAT UI (Global Comms & Broadcast)
+    // ==========================================
+    if (role === 'superadmin') {
+        chatWrapper.innerHTML = `
+            <div id="saChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
+                <div id="saChatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
+                    <div class="bg-blue-900 text-white p-4 flex justify-between items-center transition-colors">
+                        <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-chess-king"></i> Global Comms</h3>
+                        <button onclick="window.toggleSaChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    
+                    <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <select id="saChatUserSelect" onchange="window.loadSaMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
+                            <option value="" disabled selected>Select user to message...</option>
+                            <option value="BROADCAST" class="text-blue-600 dark:text-blue-400 font-black">📢 BROADCAST TO ALL</option>
+                        </select>
+                    </div>
+
+                    <div id="saChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
+                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
+                    </div>
+                    
+                    <form id="saChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
+                        <input type="text" id="saChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
+                        <button type="submit" id="saChatBtn" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+                <button onclick="window.toggleSaChat()" class="w-14 h-14 bg-blue-800 hover:bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span id="saChatBadge" class="hidden absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
+                </button>
+            </div>
+        `;
+        initSuperAdminChatLogic(); 
+
+    // ==========================================
+    // 2. STANDARD ADMIN CHAT UI (Inbox Style)
+    // ==========================================
+    } else if (role === 'admin') {
         chatWrapper.innerHTML = `
             <div id="adminChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
-                <div id="adminChatBox" class="hidden w-80 sm:w-[400px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
+                <div id="adminChatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
                     <div class="bg-blue-800 dark:bg-blue-900 p-4 flex justify-between items-center text-white transition-colors">
                         <div class="flex items-center gap-2">
                             <button id="btnBackChat" onclick="window.showChatList()" class="hidden hover:text-blue-200 transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
-                            <h3 id="chatHeaderTitle" class="font-bold flex items-center gap-2"><i class="fa-solid fa-inbox"></i> Driver Messages</h3>
+                            <h3 id="chatHeaderTitle" class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-inbox"></i> Driver Messages</h3>
                         </div>
                         <div class="flex items-center gap-3">
                             <button id="btnClearChat" onclick="window.clearAdminChat()" class="hidden text-red-300 hover:text-red-400 transition-colors" title="Clear Conversation"><i class="fa-solid fa-trash-can"></i></button>
-                            <button onclick="window.toggleAdminChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                            <button onclick="window.toggleAdminChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
                     <div id="chatContactList" class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 custom-scrollbar p-2 space-y-1 transition-colors">
@@ -237,12 +275,12 @@ function injectGlobalChat(role) {
                     <div id="activeChatView" class="hidden flex-1 flex flex-col min-h-0">
                         <div id="adminChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors"></div>
                         <form id="adminChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
-                            <input type="text" id="adminChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm transition-colors">
-                            <button type="submit" class="bg-blue-700 dark:bg-blue-600 hover:bg-blue-800 dark:hover:bg-blue-700 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-colors shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+                            <input type="text" id="adminChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm">
+                            <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-colors shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
                         </form>
                     </div>
                 </div>
-                <button onclick="window.toggleAdminChat()" class="w-14 h-14 bg-blue-800 dark:bg-blue-600 hover:bg-blue-900 dark:hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
+                <button onclick="window.toggleAdminChat()" class="w-14 h-14 bg-blue-800 hover:bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
                     <i class="fa-solid fa-comments"></i>
                     <span id="adminChatBadge" class="hidden absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
                 </button>
@@ -250,26 +288,29 @@ function injectGlobalChat(role) {
         `;
         initAdminChatLogic();
 
+    // ==========================================
+    // 3. DRIVER CHAT UI
+    // ==========================================
     } else if (role === 'driver') {
         chatWrapper.innerHTML = `
             <div id="driverChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
-                <div id="chatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300">
+                <div id="chatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
                     <div class="bg-blue-800 dark:bg-blue-900 p-4 flex justify-between items-center text-white transition-colors">
-                        <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-headset"></i> Control Center</h3>
+                        <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-headset"></i> Control Center</h3>
                         <div class="flex items-center gap-3">
-                            <button onclick="window.clearDriverChat()" class="text-red-300 hover:text-red-400 transition-colors" title="Clear Conversation"><i class="fa-solid fa-trash-can"></i></button>
-                            <button onclick="window.toggleChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                            <button onclick="window.clearDriverChat()" class="text-red-300 hover:text-red-400 transition-colors" title="Clear Conversation"><i class="fa-solid fa-trash-can text-lg"></i></button>
+                            <button onclick="window.toggleChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
-                    <div id="chatMessages" class="p-4 h-80 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
+                    <div id="chatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
                         <div class="text-center text-xs text-gray-400 dark:text-gray-500 my-2">Send a message to the Admin. Request early access for future tasks here.</div>
                     </div>
                     <form id="chatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
-                        <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm transition-colors">
-                        <button type="submit" class="bg-blue-700 dark:bg-blue-600 hover:bg-blue-800 dark:hover:bg-blue-700 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-colors shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+                        <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm">
+                        <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-colors shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
                     </form>
                 </div>
-                <button onclick="window.toggleChat()" class="w-14 h-14 bg-blue-800 dark:bg-blue-600 hover:bg-blue-900 dark:hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
+                <button onclick="window.toggleChat()" class="w-14 h-14 bg-blue-800 hover:bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
                     <i class="fa-solid fa-comments"></i>
                     <span id="chatBadge" class="hidden absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
                 </button>
@@ -278,7 +319,6 @@ function injectGlobalChat(role) {
         initDriverChatLogic();
     }
 }
-
 // ----------------------------------------------------
 // ADMIN CHAT LOGIC
 // ----------------------------------------------------
@@ -637,5 +677,224 @@ function initDriverChatLogic() {
     } else {
         setTimeout(loadMessages, 2000); 
         setInterval(() => { if(!driverChatOpen) loadMessages(); }, 10000);
+    }
+}
+// ----------------------------------------------------
+// SUPER ADMIN CHAT LOGIC (Global Comms & Broadcast)
+// ----------------------------------------------------
+function initSuperAdminChatLogic() {
+    let saChatOpen = localStorage.getItem('saChatOpen') === 'true';
+    let saChatInterval;
+    let allUsersCache = [];
+
+    window.toggleSaChat = function() {
+        saChatOpen = !saChatOpen;
+        localStorage.setItem('saChatOpen', saChatOpen); 
+        
+        const box = document.getElementById('saChatBox');
+        const badge = document.getElementById('saChatBadge');
+        
+        if (saChatOpen) {
+            box.classList.remove('hidden');
+            box.classList.add('flex');
+            badge.classList.add('hidden');
+            populateSaUserDropdown();
+            window.loadSaMessages();
+        } else {
+            box.classList.add('hidden');
+            box.classList.remove('flex');
+            clearInterval(saChatInterval);
+        }
+    };
+
+    async function populateSaUserDropdown() {
+        if (allUsersCache.length > 0) return; // Prevent re-fetching if already loaded
+        
+        try {
+            const [driversRes, adminsRes] = await Promise.all([
+                fetch(`${API_BASE_CHAT}/drivers`),
+                fetch(`${API_BASE_CHAT}/admins`)
+            ]);
+            const drivers = await driversRes.json();
+            const admins = await adminsRes.json();
+            allUsersCache = [...admins, ...drivers];
+
+            const select = document.getElementById('saChatUserSelect');
+            const myName = localStorage.getItem('username');
+            
+            allUsersCache.forEach(u => {
+                if (u.username !== myName) {
+                    const icon = u.role === 'driver' ? '🚗' : '👔';
+                    select.innerHTML += `<option value="${u.username}">${icon} ${u.username}</option>`;
+                }
+            });
+        } catch (e) { 
+            console.error("Failed to load users for chat", e); 
+        }
+    }
+
+    window.loadSaMessages = async function() {
+        const selectedUser = document.getElementById('saChatUserSelect').value;
+        const input = document.getElementById('saChatInput');
+        const btn = document.getElementById('saChatBtn');
+        const msgBox = document.getElementById('saChatMessages');
+        
+        clearInterval(saChatInterval); // Stop previous loops
+
+        if (!selectedUser) {
+            input.disabled = true; btn.disabled = true;
+            return;
+        }
+
+        input.disabled = false; btn.disabled = false;
+
+        // SPECIAL FEATURE: BROADCAST UI
+        if (selectedUser === 'BROADCAST') {
+            msgBox.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center p-4">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-bullhorn text-3xl"></i>
+                    </div>
+                    <h3 class="font-black text-blue-900 dark:text-white mb-1">Broadcast Mode</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Messages sent here will be instantly delivered to <strong>every Admin and Driver</strong> in the system.</p>
+                </div>`;
+            return; // We don't fetch chat history for the broadcast screen
+        }
+
+        await fetchSaMessages(selectedUser, msgBox);
+        saChatInterval = setInterval(() => fetchSaMessages(selectedUser, msgBox), 5000); 
+    };
+
+    async function fetchSaMessages(selectedUser, msgBox) {
+        const myName = localStorage.getItem('username');
+
+        try {
+            const res = await fetch(`${API_BASE_CHAT}/messages/${selectedUser}`);
+            const messages = await res.json();
+            
+            // Filter to show only the conversation between ME and the SELECTED USER
+            const thread = messages.filter(m => 
+                (m.sender === myName && m.receiver === selectedUser) || 
+                (m.sender === selectedUser && m.receiver === myName) ||
+                (m.sender === 'Admin' && m.receiver === selectedUser) || // Catch old messages
+                (m.sender === selectedUser && m.receiver === 'Admin')
+            );
+
+            if (thread.length === 0) {
+                msgBox.innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">No messages yet. Say hi!</div>';
+                return;
+            }
+
+            // Prevent UI flicker if no new messages exist
+            const currentCount = msgBox.querySelectorAll('.msg-bubble').length;
+            if (thread.length === currentCount && currentCount > 0) return;
+
+            msgBox.innerHTML = thread.map(m => {
+                const isMe = m.sender === myName || m.sender === 'Admin';
+                const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const align = isMe ? 'self-end bg-blue-600 text-white' : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+                const senderTag = isMe ? '' : `<div class="text-[9px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-widest">${m.sender}</div>`;
+                
+                return `
+                    <div class="msg-bubble ${align} max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm">
+                        ${senderTag}
+                        <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
+                        <div class="text-[9px] opacity-70 mt-1 text-right">${time}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            // Mark as read in the background
+            await fetch(`${API_BASE_CHAT}/messages/mark-read`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: selectedUser, role: 'superadmin' })
+            }).catch(e => console.log("Mark read failed silently"));
+
+        } catch (err) { console.error("Chat load error", err); }
+    }
+
+    document.getElementById('saChatForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const selectedUser = document.getElementById('saChatUserSelect').value;
+        const input = document.getElementById('saChatInput');
+        const text = input.value.trim();
+        const myName = localStorage.getItem('username'); 
+
+        if (!text || !selectedUser) return;
+        input.disabled = true; 
+
+        try {
+            // SPECIAL FEATURE: BROADCAST EXECUTION
+            if (selectedUser === 'BROADCAST') {
+                const options = Array.from(document.getElementById('saChatUserSelect').options);
+                const users = options.map(opt => opt.value).filter(val => val !== '' && val !== 'BROADCAST');
+                
+                await Promise.all(users.map(u => 
+                    fetch(`${API_BASE_CHAT}/messages`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sender: myName, receiver: u, text: `📢 [BROADCAST]: ${text}` })
+                    })
+                ));
+                
+                alert("Broadcast message successfully sent to all users!");
+                input.value = '';
+            } else {
+                // Standard Single Message
+                const msgBox = document.getElementById('saChatMessages');
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Optimistic UI rendering (make it feel instant)
+                msgBox.innerHTML += `
+                    <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                        <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                        <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                    </div>`;
+                msgBox.scrollTop = msgBox.scrollHeight;
+
+                await fetch(`${API_BASE_CHAT}/messages`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
+                });
+                
+                input.value = '';
+                fetchSaMessages(selectedUser, msgBox);
+            }
+        } catch (err) { 
+            alert("Failed to send message."); 
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+    });
+
+    // Check for unread messages (Red Badge logic)
+    async function checkSaUnread() {
+        if (saChatOpen) return;
+        try {
+            const myName = localStorage.getItem('username');
+            const res = await fetch(`${API_BASE_CHAT}/messages/${myName}`);
+            if (!res.ok) return;
+            const messages = await res.json();
+            
+            const hasUnread = messages.some(m => m.receiver === myName && !m.isRead);
+            const badge = document.getElementById('saChatBadge');
+            
+            if (hasUnread) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        } catch(e) {}
+    }
+
+    // Initialization
+    if (saChatOpen) {
+        document.getElementById('saChatBox').classList.remove('hidden');
+        document.getElementById('saChatBox').classList.add('flex');
+        document.getElementById('saChatBadge').classList.add('hidden');
+        populateSaUserDropdown();
+        window.loadSaMessages();
+    } else {
+        setTimeout(checkSaUnread, 2000); 
+        setInterval(checkSaUnread, 10000);
     }
 }

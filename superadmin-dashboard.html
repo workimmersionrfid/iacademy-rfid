@@ -269,36 +269,6 @@
         </div>
     </div>
 
-    <div id="saChatWidget" class="fixed bottom-6 left-6 z-[100] flex flex-col items-start transition-all">
-        <div id="saChatPanel" class="hidden bg-white dark:bg-gray-800 w-80 h-96 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 flex flex-col overflow-hidden transform scale-95 origin-bottom-left transition-all">
-            <div class="bg-blue-900 text-white p-3 flex justify-between items-center">
-                <h4 class="font-bold text-sm"><i class="fa-solid fa-comments mr-2"></i>Global Comms</h4>
-                <button onclick="toggleSaChat()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div class="p-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <select id="saChatUserSelect" onchange="loadSaMessages()" class="w-full text-xs p-2 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold">
-                    <option value="" disabled selected>Select user to message...</option>
-                </select>
-            </div>
-
-            <div id="saChatMessages" class="flex-1 p-3 overflow-y-auto custom-scrollbar bg-gray-50 dark:bg-gray-900 space-y-3 flex flex-col">
-                <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
-            </div>
-            
-            <div class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-                <form id="saChatForm" onsubmit="sendSaMessage(event)" class="flex gap-2">
-                    <input type="text" id="saChatInput" placeholder="Type a message..." required class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white" disabled>
-                    <button type="submit" id="saChatBtn" class="bg-blue-700 hover:bg-blue-800 text-white rounded-lg px-4 py-2 text-xs font-bold transition-colors disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
-                </form>
-            </div>
-        </div>
-
-        <button onclick="toggleSaChat()" class="bg-blue-800 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center text-2xl transition-transform hover:scale-105 border-2 border-blue-600 relative">
-            <i class="fa-solid fa-messages"></i>
-        </button>
-    </div>
-
     <script src="js/shared/auth.js"></script>
 
     <script src="js/superadmin/api.js"></script>
