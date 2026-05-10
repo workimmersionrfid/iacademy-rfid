@@ -242,8 +242,12 @@ app.post('/api/logs', async (req, res) => {
             department: newLog.department,
             vehicle: newLog.vehicle,
             type: "Fuel Expense",
-            details: `${newLog.liters}L ${newLog.fuelType} @ ${newLog.station}`,
-            cost: newLog.total
+            status: "N/A",
+            reasons: "N/A",
+            nextSteps: "N/A",
+            comments: `${newLog.liters}L ${newLog.fuelType} @ ${newLog.station}. ${newLog.notes || ''}`,
+            cost: newLog.total,
+            coordinates: (newLog.latitude && newLog.latitude !== "N/A") ? `${newLog.latitude}, ${newLog.longitude}` : "N/A"
         });
 
         res.status(201).json(newLog);
@@ -269,8 +273,12 @@ app.post('/api/tolls', async (req, res) => {
             department: newToll.department,
             vehicle: newToll.vehicle,
             type: "Toll Expense",
-            details: `Route: ${newToll.expressway}`,
-            cost: newToll.amount
+            status: "N/A",
+            reasons: "N/A",
+            nextSteps: "N/A",
+            comments: `Route: ${newToll.expressway}. ${newToll.notes || ''}`,
+            cost: newToll.amount,
+            coordinates: (newToll.latitude && newToll.latitude !== "N/A") ? `${newToll.latitude}, ${newToll.longitude}` : "N/A"
         });
 
         res.status(201).json(newToll);
@@ -347,7 +355,6 @@ app.post('/api/action-logs', async (req, res) => {
         const newLog = new ActionLog(req.body);
         await newLog.save();
 
-        // Pass the perfectly separated data straight to Google!
         pushToGoogleSheet({
             date: new Date().toLocaleString(),
             driver: newLog.driver_name || "N/A",
@@ -358,7 +365,8 @@ app.post('/api/action-logs', async (req, res) => {
             reasons: newLog.incomplete_reasons || "N/A",
             nextSteps: newLog.next_steps || "N/A",
             comments: newLog.comments || "N/A",
-            cost: 0 
+            cost: 0,
+            coordinates: (newLog.latitude && newLog.latitude !== "N/A") ? `${newLog.latitude}, ${newLog.longitude}` : "N/A"
         });
 
         res.status(201).json({ message: 'Log saved successfully!', log: newLog });
