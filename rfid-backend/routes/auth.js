@@ -93,8 +93,9 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
-       const newUser = new User({ 
-            username: username.trim(), // <--- Keep the exact casing they typed!
+        // 🚨 FIX APPLIED HERE: We save `username.trim()` instead of `normalizedUsername`!
+        const newUser = new User({ 
+            username: username.trim(), 
             firstName, lastName, middleName, 
             email: normalizedEmail, password: hashedPassword, role, department, verificationToken 
         });
@@ -164,13 +165,15 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        
+        // 🚨 FIX APPLIED HERE: Sending `user.username` back to the frontend so it saves the correct casing!
         res.json({ 
             message: 'Login successful', 
             token, 
             role: user.role, 
             department: user.department, 
             isVerified: user.isVerified,
-            username: user.username // <--- Send the properly cased name to the frontend!
+            username: user.username 
         });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -230,5 +233,4 @@ router.post('/reset-password', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// Export the router so index.js can use it
 module.exports = router;
