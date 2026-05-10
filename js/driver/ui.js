@@ -634,33 +634,53 @@ if(document.getElementById('transit-dropdown')) {
             if (!cb.closest('div').classList.contains('hidden')) selectedReasons.push(cb.value); 
         });
         
-        // NEW: Keep reasons separate instead of merging them!
         let reasonsStr = selectedReasons.length > 0 ? selectedReasons.join(", ") : "N/A";    
         
-        const coords = await getLiveLocation();
-        const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
+        // --- ANIMATION START ---
+        const originalText = btnLogTravel.innerHTML;
+        btnLogTravel.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Logging...';
+        btnLogTravel.disabled = true; // Prevent double-clicks!
         
-        const payload = {        
-            driver_name: localStorage.getItem('username'), 
-            plate_number: currentActiveVehicle, 
-            action: "Travel Update",        
-            department: currentActiveTaskDept, 
-            task: finalTask, 
-            location: finalLoc, 
-            delivery_status: travelStatus, 
-            incomplete_reasons: reasonsStr, 
-            next_steps: "N/A",
-            comments: document.getElementById('comments').value || "None",        
-            document_attached: "None", 
-            latitude: coords.lat, 
-            longitude: coords.lon    
-        };
-        
-        const success = await sendActionLog(payload, "Update Logged");    
-        if(success) {         
-            btnLogTravel.innerHTML = 'Logged Successfully';        
-            btnLogTravel.classList.replace('bg-blue-100', 'bg-blue-800'); btnLogTravel.classList.replace('text-blue-800', 'text-white');
-            btnLogTravel.classList.replace('dark:bg-blue-900/30', 'dark:bg-blue-700'); btnLogTravel.classList.replace('dark:text-blue-400', 'dark:text-white');
+        try {
+            const coords = await getLiveLocation();
+            const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
+            
+            const payload = {        
+                driver_name: localStorage.getItem('username'), 
+                plate_number: currentActiveVehicle, 
+                action: "Travel Update",        
+                department: currentActiveTaskDept, 
+                task: finalTask, 
+                location: finalLoc, 
+                delivery_status: travelStatus, 
+                incomplete_reasons: reasonsStr, 
+                next_steps: "N/A",
+                comments: document.getElementById('comments').value || "None",        
+                document_attached: "None", 
+                latitude: coords.lat, 
+                longitude: coords.lon    
+            };
+            
+            const success = await sendActionLog(payload, "Update Logged");    
+            if(success) {         
+                btnLogTravel.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Logged Successfully';        
+                btnLogTravel.classList.replace('bg-blue-100', 'bg-blue-800'); btnLogTravel.classList.replace('text-blue-800', 'text-white');
+                btnLogTravel.classList.replace('dark:bg-blue-900/30', 'dark:bg-blue-700'); btnLogTravel.classList.replace('dark:text-blue-400', 'dark:text-white');
+                
+                // Reset the button back to normal after 3 seconds
+                setTimeout(() => {
+                    btnLogTravel.innerHTML = 'Log Travel Update';
+                    btnLogTravel.classList.replace('bg-blue-800', 'bg-blue-100'); btnLogTravel.classList.replace('text-white', 'text-blue-800');
+                    btnLogTravel.classList.replace('dark:bg-blue-700', 'dark:bg-blue-900/30'); btnLogTravel.classList.replace('dark:text-white', 'dark:text-blue-400');
+                    btnLogTravel.disabled = false;
+                }, 3000);
+            } else {
+                btnLogTravel.innerHTML = originalText;
+                btnLogTravel.disabled = false;
+            }
+        } catch (error) {
+            btnLogTravel.innerHTML = originalText;
+            btnLogTravel.disabled = false;
         }
     });
 }
@@ -703,6 +723,7 @@ if(document.getElementById('completion-status')) {
         let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
         let dbCompletionType = "Failed"; 
         
+        // Validation Checks first...
         if (compType === "Successful") {        
             if (uploadedImagesData.length === 0) return alert("Please attach at least one photo proof."); 
             if (signatureEmpty) return alert("Please provide recipient e-signature."); 
@@ -710,7 +731,6 @@ if(document.getElementById('completion-status')) {
             
             const remarks = document.querySelectorAll('.remark-reason:checked');            
             if (remarks.length > 0) {
-                // Separated cleanly by commas
                 failReasonsStr = Array.from(remarks).map(cb => cb.value).join(", ");         
                 dbCompletionType = "Completed_Remarks";
             } else { dbCompletionType = "Completed"; }
@@ -721,90 +741,104 @@ if(document.getElementById('completion-status')) {
             const nextStep = document.querySelector('.fail-next-step:checked');
             if (!nextStep) return alert("Please select a Next Step.");
             
-            // NEW: Keep reasons and next steps separate!
             failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(", ");
             nextStepsStr = nextStep.value;  
         }    
         
-        const coords = await getLiveLocation();
-        const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
+        // --- ANIMATION START (If all validation passed) ---
+        const originalText = btnSubmitHandover.innerHTML;
+        btnSubmitHandover.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Submitting...';
+        btnSubmitHandover.disabled = true;
+        
+        try {
+            const coords = await getLiveLocation();
+            const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
 
-        const revisionOfLogId = localStorage.getItem(`revision_for_${currentActiveTaskId}`);
-        let finalActionName = "Final Task Handover";
-        let finalComments = document.getElementById('comments').value || "None";
-        
-        if (revisionOfLogId) {
-            finalActionName = "Revised Task Handover";
-            finalComments = `[REVISION OF LOG ID: ${revisionOfLogId}] ` + finalComments;
-        }
-
-        const payload = {        
-            driver_name: localStorage.getItem('username'), 
-            plate_number: currentActiveVehicle, 
-            action: finalActionName,        
-            department: currentActiveTaskDept, 
-            task: finalTask, 
-            location: finalLoc, 
-            delivery_status: finalStatusStr,        
-            comments: finalComments,        
-            document_attached: uploadedImagesData.length > 0 ? JSON.stringify(uploadedImagesData) : "None", 
-            latitude: coords.lat, 
-            longitude: coords.lon,        
-            completion_type: dbCompletionType, 
-            incomplete_reasons: failReasonsStr, 
-            next_steps: nextStepsStr, // Added explicitly to payload!
-            signature: sigData,
-            original_log_id: revisionOfLogId || "N/A"
-        };
-        
-        const success = await sendActionLog(payload, "Handover Complete");    
-        
-        if (success) {        
-            if (currentActiveTaskId) {
-                const isNeedsRebook = (compType === "Failed" && document.getElementById('check-reschedule').checked);
-                const shouldKeepTaskPending = (compType === "Failed" && document.getElementById('check-later').checked);
-                const updateStatus = isNeedsRebook ? 'Rebook' : (shouldKeepTaskPending ? 'Pending' : 'Completed');
-                
-                if (updateStatus !== 'Pending') {
-                    await fetch(`${API_BASE}/tasks/${currentActiveTaskId}`, {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: updateStatus })
-                    });
-                    alert(updateStatus === 'Rebook' ? "Task flagged for Rebooking by Admin." : "Task completed and removed from pending list!");
-                } else { alert("Task attempt logged. It remains on your pending list for later."); }
-                
-                if (revisionOfLogId) localStorage.removeItem(`revision_for_${currentActiveTaskId}`);
-                currentActiveTaskId = null; currentActiveVehicle = "N/A"; currentActiveTaskDept = "GENERAL"; 
+            const revisionOfLogId = localStorage.getItem(`revision_for_${currentActiveTaskId}`);
+            let finalActionName = "Final Task Handover";
+            let finalComments = document.getElementById('comments').value || "None";
+            
+            if (revisionOfLogId) {
+                finalActionName = "Revised Task Handover";
+                finalComments = `[REVISION OF LOG ID: ${revisionOfLogId}] ` + finalComments;
             }
 
-            const transitStatus = document.getElementById('transit-dropdown');
-            const btnLogTravel = document.getElementById('btn-log-travel');
-            const uiTransit = document.getElementById('ui-transit');
+            const payload = {        
+                driver_name: localStorage.getItem('username'), 
+                plate_number: currentActiveVehicle, 
+                action: finalActionName,        
+                department: currentActiveTaskDept, 
+                task: finalTask, 
+                location: finalLoc, 
+                delivery_status: finalStatusStr,        
+                comments: finalComments,        
+                document_attached: uploadedImagesData.length > 0 ? JSON.stringify(uploadedImagesData) : "None", 
+                latitude: coords.lat, 
+                longitude: coords.lon,        
+                completion_type: dbCompletionType, 
+                incomplete_reasons: failReasonsStr, 
+                next_steps: nextStepsStr,
+                signature: sigData,
+                original_log_id: revisionOfLogId || "N/A"
+            };
+            
+            const success = await sendActionLog(payload, "Handover Complete");    
+            
+            if (success) {        
+                if (currentActiveTaskId) {
+                    const isNeedsRebook = (compType === "Failed" && document.getElementById('check-reschedule').checked);
+                    const shouldKeepTaskPending = (compType === "Failed" && document.getElementById('check-later').checked);
+                    const updateStatus = isNeedsRebook ? 'Rebook' : (shouldKeepTaskPending ? 'Pending' : 'Completed');
+                    
+                    if (updateStatus !== 'Pending') {
+                        await fetch(`${API_BASE}/tasks/${currentActiveTaskId}`, {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: updateStatus })
+                        });
+                        alert(updateStatus === 'Rebook' ? "Task flagged for Rebooking by Admin." : "Task completed and removed from pending list!");
+                    } else { alert("Task attempt logged. It remains on your pending list for later."); }
+                    
+                    if (revisionOfLogId) localStorage.removeItem(`revision_for_${currentActiveTaskId}`);
+                    currentActiveTaskId = null; currentActiveVehicle = "N/A"; currentActiveTaskDept = "GENERAL"; 
+                }
 
-            transitStatus.value = ""; btnLogTravel.innerHTML = 'Log Travel Update';        
-            btnLogTravel.classList.replace('bg-blue-800', 'bg-blue-100'); btnLogTravel.classList.replace('text-white', 'text-blue-800');         
-            btnLogTravel.classList.replace('dark:bg-blue-700', 'dark:bg-blue-900/30'); btnLogTravel.classList.replace('dark:text-white', 'dark:text-blue-400');
-            
-            uiTransit.classList.add('hidden'); completionStatus.value = "";         
-            uiSuccessful.classList.add('hidden'); uiFailed.classList.add('hidden'); btnSubmitHandover.classList.add('hidden');                
-            
-            document.getElementById('task-action-controls').classList.add('hidden');
-            document.getElementById('no-task-placeholder').classList.remove('hidden');
-            document.getElementById('start-execution-section').classList.add('hidden');
+                const transitStatus = document.getElementById('transit-dropdown');
+                const btnLogTravel = document.getElementById('btn-log-travel');
+                const uiTransit = document.getElementById('ui-transit');
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
-            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);        
-            
-            uploadedImagesData = []; document.getElementById('file-name').innerHTML = `<i class="fa-solid fa-images text-blue-600 dark:text-blue-400 mr-2"></i> Attach Photo(s)`;
-            document.getElementById('previewContainer').innerHTML = ''; document.getElementById('comments').value = "";
-            
-            document.getElementById('active-task-info').classList.add('hidden');
-            document.getElementById('display-task-desc').innerText = "No task selected";
-            document.getElementById('display-task-dest').innerText = "N/A";
-            document.getElementById('display-task-type').innerText = "N/A";
-            document.getElementById('display-task-vehicle').innerText = "VEHICLE";
-            
-            closeExecutionModal();
-            initDriverData();
+                transitStatus.value = ""; btnLogTravel.innerHTML = 'Log Travel Update';        
+                btnLogTravel.classList.replace('bg-blue-800', 'bg-blue-100'); btnLogTravel.classList.replace('text-white', 'text-blue-800');         
+                btnLogTravel.classList.replace('dark:bg-blue-700', 'dark:bg-blue-900/30'); btnLogTravel.classList.replace('dark:text-white', 'dark:text-blue-400');
+                
+                uiTransit.classList.add('hidden'); completionStatus.value = "";         
+                uiSuccessful.classList.add('hidden'); uiFailed.classList.add('hidden'); btnSubmitHandover.classList.add('hidden');                
+                
+                document.getElementById('task-action-controls').classList.add('hidden');
+                document.getElementById('no-task-placeholder').classList.remove('hidden');
+                document.getElementById('start-execution-section').classList.add('hidden');
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        
+                document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);        
+                
+                uploadedImagesData = []; document.getElementById('file-name').innerHTML = `<i class="fa-solid fa-images text-blue-600 dark:text-blue-400 mr-2"></i> Attach Photo(s)`;
+                document.getElementById('previewContainer').innerHTML = ''; document.getElementById('comments').value = "";
+                
+                document.getElementById('active-task-info').classList.add('hidden');
+                document.getElementById('display-task-desc').innerText = "No task selected";
+                document.getElementById('display-task-dest').innerText = "N/A";
+                document.getElementById('display-task-type').innerText = "N/A";
+                document.getElementById('display-task-vehicle').innerText = "VEHICLE";
+                
+                closeExecutionModal();
+                initDriverData();
+                btnSubmitHandover.innerHTML = originalText;
+                btnSubmitHandover.disabled = false;
+            } else {
+                btnSubmitHandover.innerHTML = originalText;
+                btnSubmitHandover.disabled = false;
+            }
+        } catch (error) {
+            btnSubmitHandover.innerHTML = originalText;
+            btnSubmitHandover.disabled = false;
         }
     });
 }
