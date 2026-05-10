@@ -470,7 +470,7 @@ window.submitToll = async function(e) {
     finally { btn.innerHTML = originalText; btn.disabled = false; }
 };
 
-// --- EXECUTION & HANDOVER LOGIC ---
+// --- EXECUTION LOGIC ---
 window.startAssignedTask = function(taskId, taskType, taskDesc, destName, assignedVehicle, taskDept) {
     currentActiveTaskId = taskId; 
     currentActiveVehicle = assignedVehicle || "N/A";
@@ -567,10 +567,19 @@ async function compressImage(file) {
 if(document.getElementById('btn-clock-in')) {
     document.getElementById('btn-clock-in').addEventListener('click', async () => {    
         const coords = await getLiveLocation();
-        let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
-        try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
         
-        const success = await sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-In", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Started");
+        const success = await sendActionLog({ 
+            driver_name: localStorage.getItem('username'), 
+            plate_number: "N/A", 
+            department: "N/A", 
+            action: "Driver Shift Clock-In", 
+            task: "N/A", 
+            location: "N/A", 
+            delivery_status: "N/A", 
+            document_attached: "None", 
+            latitude: coords.lat, 
+            longitude: coords.lon 
+        }, "Shift Started");
         
         if (success) {
             showSuccessPopup('Clocked In!', 'Your shift has officially started. Drive safely!');
@@ -581,10 +590,19 @@ if(document.getElementById('btn-clock-in')) {
 if(document.getElementById('btn-clock-out')) {
     document.getElementById('btn-clock-out').addEventListener('click', async () => {    
         const coords = await getLiveLocation();    
-        let parsedDept = localStorage.getItem('userDept') || 'GENERAL';
-        try { parsedDept = JSON.parse(parsedDept).join(', '); } catch(e) {}
         
-        const success = await sendActionLog({ driver_name: localStorage.getItem('username'), plate_number: "N/A", department: parsedDept, action: "Driver Shift Clock-Out", task: "N/A", location: "N/A", delivery_status: "N/A", document_attached: "None", latitude: coords.lat, longitude: coords.lon }, "Shift Ended");
+        const success = await sendActionLog({ 
+            driver_name: localStorage.getItem('username'), 
+            plate_number: "N/A", 
+            department: "N/A", 
+            action: "Driver Shift Clock-Out", 
+            task: "N/A", 
+            location: "N/A", 
+            delivery_status: "N/A", 
+            document_attached: "None", 
+            latitude: coords.lat, 
+            longitude: coords.lon 
+        }, "Shift Ended");
         
         if (success) {
             showSuccessPopup('Clocked Out!', 'Your shift has ended. Great work today!');
@@ -608,19 +626,34 @@ if(document.getElementById('transit-dropdown')) {
 
     btnLogTravel.addEventListener('click', async () => {    
         if(!transitStatus.value) { alert("Please select a travel status first."); return; }        
+        
         let travelStatus = transitStatus.options[transitStatus.selectedIndex].text;
         let selectedReasons = [];    
-        document.querySelectorAll('.transit-reason:checked').forEach(cb => { if (!cb.closest('div').classList.contains('hidden')) selectedReasons.push(cb.value); });
-        if (selectedReasons.length > 0) travelStatus += " (" + selectedReasons.join(", ") + ")";    
+        
+        document.querySelectorAll('.transit-reason:checked').forEach(cb => { 
+            if (!cb.closest('div').classList.contains('hidden')) selectedReasons.push(cb.value); 
+        });
+        
+        // NEW: Keep reasons separate instead of merging them!
+        let reasonsStr = selectedReasons.length > 0 ? selectedReasons.join(", ") : "N/A";    
         
         const coords = await getLiveLocation();
         const { finalTask, finalLoc } = getFinalTaskAndLocation(); 
         
         const payload = {        
-            driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: "Travel Update",        
-            department: currentActiveTaskDept, task: finalTask, location: finalLoc, delivery_status: travelStatus,        
+            driver_name: localStorage.getItem('username'), 
+            plate_number: currentActiveVehicle, 
+            action: "Travel Update",        
+            department: currentActiveTaskDept, 
+            task: finalTask, 
+            location: finalLoc, 
+            delivery_status: travelStatus, 
+            incomplete_reasons: reasonsStr, 
+            next_steps: "N/A",
             comments: document.getElementById('comments').value || "None",        
-            document_attached: "None", latitude: coords.lat, longitude: coords.lon    
+            document_attached: "None", 
+            latitude: coords.lat, 
+            longitude: coords.lon    
         };
         
         const success = await sendActionLog(payload, "Update Logged");    
@@ -666,7 +699,7 @@ if(document.getElementById('completion-status')) {
 
     btnSubmitHandover.addEventListener('click', async () => {    
         const compType = completionStatus.value;    
-        let failReasonsStr = "None", sigData = "None";    
+        let failReasonsStr = "N/A", sigData = "None", nextStepsStr = "N/A";    
         let finalStatusStr = completionStatus.options[completionStatus.selectedIndex].text;    
         let dbCompletionType = "Failed"; 
         
@@ -677,7 +710,8 @@ if(document.getElementById('completion-status')) {
             
             const remarks = document.querySelectorAll('.remark-reason:checked');            
             if (remarks.length > 0) {
-                failReasonsStr = Array.from(remarks).map(cb => cb.value).join(" | ");         
+                // Separated cleanly by commas
+                failReasonsStr = Array.from(remarks).map(cb => cb.value).join(", ");         
                 dbCompletionType = "Completed_Remarks";
             } else { dbCompletionType = "Completed"; }
         }   
@@ -686,7 +720,10 @@ if(document.getElementById('completion-status')) {
             if (checkboxes.length === 0) return alert("Please select a failure reason."); 
             const nextStep = document.querySelector('.fail-next-step:checked');
             if (!nextStep) return alert("Please select a Next Step.");
-            failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(" | ") + " | Next Step: " + nextStep.value;  
+            
+            // NEW: Keep reasons and next steps separate!
+            failReasonsStr = Array.from(checkboxes).map(cb => cb.value).join(", ");
+            nextStepsStr = nextStep.value;  
         }    
         
         const coords = await getLiveLocation();
@@ -702,12 +739,21 @@ if(document.getElementById('completion-status')) {
         }
 
         const payload = {        
-            driver_name: localStorage.getItem('username'), plate_number: currentActiveVehicle, action: finalActionName,        
-            department: currentActiveTaskDept, task: finalTask, location: finalLoc, delivery_status: finalStatusStr,        
+            driver_name: localStorage.getItem('username'), 
+            plate_number: currentActiveVehicle, 
+            action: finalActionName,        
+            department: currentActiveTaskDept, 
+            task: finalTask, 
+            location: finalLoc, 
+            delivery_status: finalStatusStr,        
             comments: finalComments,        
             document_attached: uploadedImagesData.length > 0 ? JSON.stringify(uploadedImagesData) : "None", 
-            latitude: coords.lat, longitude: coords.lon,        
-            completion_type: dbCompletionType, incomplete_reasons: failReasonsStr, signature: sigData,
+            latitude: coords.lat, 
+            longitude: coords.lon,        
+            completion_type: dbCompletionType, 
+            incomplete_reasons: failReasonsStr, 
+            next_steps: nextStepsStr, // Added explicitly to payload!
+            signature: sigData,
             original_log_id: revisionOfLogId || "N/A"
         };
         
@@ -743,7 +789,6 @@ if(document.getElementById('completion-status')) {
             
             document.getElementById('task-action-controls').classList.add('hidden');
             document.getElementById('no-task-placeholder').classList.remove('hidden');
-            
             document.getElementById('start-execution-section').classList.add('hidden');
 
             ctx.clearRect(0, 0, canvas.width, canvas.height); signatureEmpty = true;        

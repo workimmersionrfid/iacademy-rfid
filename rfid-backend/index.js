@@ -99,6 +99,7 @@ const actionLogSchema = new mongoose.Schema({
     longitude: String,
     completion_type: String,
     incomplete_reasons: String,
+    next_steps: String, // <--- ADD THIS LINE!
     reschedule_date: String,
     signature: String, 
     timestamp: { type: Date, default: Date.now }
@@ -346,22 +347,17 @@ app.post('/api/action-logs', async (req, res) => {
         const newLog = new ActionLog(req.body);
         await newLog.save();
 
-        let detailedNotes = `Status: ${newLog.delivery_status}`;
-        
-        if (newLog.incomplete_reasons && newLog.incomplete_reasons !== "None") {
-            detailedNotes += ` | Reasons: ${newLog.incomplete_reasons}`;
-        }
-        if (newLog.comments && newLog.comments !== "None") {
-            detailedNotes += ` | Notes: ${newLog.comments}`;
-        }
-
+        // Pass the perfectly separated data straight to Google!
         pushToGoogleSheet({
             date: new Date().toLocaleString(),
             driver: newLog.driver_name || "N/A",
             department: newLog.department || "N/A",
             vehicle: newLog.plate_number || "N/A",
             type: newLog.action,
-            details: detailedNotes,
+            status: newLog.delivery_status || "N/A",
+            reasons: newLog.incomplete_reasons || "N/A",
+            nextSteps: newLog.next_steps || "N/A",
+            comments: newLog.comments || "N/A",
             cost: 0 
         });
 
