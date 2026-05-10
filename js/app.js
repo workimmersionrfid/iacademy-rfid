@@ -722,12 +722,14 @@ function initSuperAdminChatLogic() {
             const select = document.getElementById('saChatUserSelect');
             const myName = localStorage.getItem('username');
             
-            // Removed the emoji, strictly professional text
-            select.innerHTML += '<option value="BROADCAST" class="text-blue-600 dark:text-blue-400 font-black">BROADCAST TO ALL</option>';
+            // FIX: We use '=' to completely wipe out any hardcoded HTML duplicates or emojis!
+            select.innerHTML = `
+                <option value="" disabled selected>Select user to message...</option>
+                <option value="BROADCAST" class="text-blue-600 dark:text-blue-400 font-black">BROADCAST TO ALL</option>
+            `;
             
             allUsersCache.forEach(u => {
                 if (u.username !== myName) {
-                    // Replaced childish emojis with clean role labels
                     const roleLabel = u.role === 'driver' ? '(Driver)' : '(Admin)';
                     select.innerHTML += `<option value="${u.username}">${u.username} ${roleLabel}</option>`;
                 }
