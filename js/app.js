@@ -9,7 +9,6 @@ function renderNavigation(activePageId) {
     // 1. DYNAMIC NAVIGATION BASED ON ROLE
     let navItems = [];
     
-    // UPDATED: Allow both 'admin' and 'superadmin' to see the Control Center menu
     if (role === 'admin' || role === 'superadmin') {
         navItems = [
             { id: 'dashboard', name: 'Control Center', href: 'dashboard.html' },
@@ -78,7 +77,6 @@ function renderNavigation(activePageId) {
                 <i class="fa-regular fa-circle-user"></i>
            </button>`;
 
-    // THEME TOGGLE BUTTON
     const themeToggleHTML = `
         <button onclick="toggleTheme()" class="text-xl text-gray-400 dark:text-gray-300 hover:text-blue-800 dark:hover:text-yellow-400 transition-colors p-2 rounded-lg mr-2" title="Toggle Dark Mode">
             <i class="fa-solid fa-moon dark:hidden"></i>
@@ -91,16 +89,13 @@ function renderNavigation(activePageId) {
     navContainer.innerHTML = `
         <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300">
             <div class="max-w-[1500px] mx-auto px-6 flex items-center justify-between gap-8 h-20 lg:h-auto">
-                
                 <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="window.location.href='${(role === 'admin' || role === 'superadmin') ? 'dashboard.html' : 'driver-dashboard.html'}'">
                     <img src="logo.png" alt="iACADEMY RFID Logo" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-md transition-transform hover:scale-105">
                     <span class="font-black text-xl md:text-2xl tracking-tight text-gray-800 dark:text-white hidden sm:block ml-1">iACADEMY <span class="text-blue-800 dark:text-blue-400 font-light">RFID</span></span>
                 </div>
-
                 <nav class="hidden lg:flex items-center justify-center flex-1 gap-4 xl:gap-8 text-[13px] xl:text-[14px] whitespace-nowrap">
                     ${desktopLinksHTML}
                 </nav>
-
                 <div class="hidden lg:flex items-center gap-3 shrink-0 py-4">
                     ${(role === 'admin' || role === 'superadmin') ? `
                     <button onclick="triggerGlobalSearch()" class="text-xl text-gray-400 dark:text-gray-300 hover:text-blue-800 dark:hover:text-blue-400 transition-colors bg-gray-50 dark:bg-gray-800 p-2 rounded-lg" title="Search">
@@ -108,12 +103,10 @@ function renderNavigation(activePageId) {
                     </button>
                     <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
                     ` : ''}
-                    
                     ${themeToggleHTML}
                     ${userProfileHTML}
                     ${authButtonHTML}
                 </div>
-
                 <div class="flex lg:hidden items-center gap-3 shrink-0">
                     ${themeToggleHTML}
                     ${userProfileHTML}
@@ -122,13 +115,10 @@ function renderNavigation(activePageId) {
                     </button>
                 </div>
             </div>
-
             <div id="mobile-menu" class="hidden lg:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 absolute w-full shadow-2xl transition-colors duration-300">
                 <div class="px-4 py-4 flex flex-col space-y-1">
                     ${mobileLinksHTML}
-                    
                     <hr class="border-gray-100 dark:border-gray-800 my-3">
-                    
                     ${token ? `
                     <button onclick="globalLogout()" class="mt-2 w-full text-left flex items-center justify-between px-4 py-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold rounded-lg border border-red-100 dark:border-red-900/50 transition-colors">
                         <span>Log Out</span>
@@ -145,20 +135,14 @@ function renderNavigation(activePageId) {
         </header>
     `;
 
-    // 4. ATTACH MOBILE MENU TOGGLE LOGIC
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
-    
     if (mobileBtn && mobileMenu) {
         mobileBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
             const icon = mobileBtn.querySelector('i');
-            
-            if (mobileMenu.classList.contains('hidden')) {
-                icon.classList.replace('fa-xmark', 'fa-bars');
-            } else {
-                icon.classList.replace('fa-bars', 'fa-xmark');
-            }
+            if (mobileMenu.classList.contains('hidden')) icon.classList.replace('fa-xmark', 'fa-bars');
+            else icon.classList.replace('fa-bars', 'fa-xmark');
         });
     }
 }
@@ -183,9 +167,7 @@ window.globalLogout = function() {
 
 window.triggerGlobalSearch = function() {
     const query = prompt("Search for a Driver, Vehicle, or Task:");
-    if (query) {
-        alert("Search initiated for: " + query + "\n\n(Table filtering logic can be attached here)");
-    }
+    if (query) alert("Search initiated for: " + query + "\n\n(Table filtering logic can be attached here)");
 };
 
 // ==========================================
@@ -198,13 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem('token');
     
     if (token && role) {
-        // Clean up any rogue widgets
-        const oldAdminWidget = document.getElementById('adminChatWidget');
-        if (oldAdminWidget) oldAdminWidget.remove();
-        
-        const oldDriverWidget = document.getElementById('driverChatWidget');
-        if (oldDriverWidget) oldDriverWidget.remove();
-
         injectGlobalChat(role);
     }
 });
@@ -218,9 +193,7 @@ function injectGlobalChat(role) {
 
     const myName = localStorage.getItem('username') || 'User';
 
-    // ==========================================
     // 1. SUPER ADMIN CHAT UI
-    // ==========================================
     if (role === 'superadmin') {
         chatWrapper.innerHTML = `
             <div id="saChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
@@ -232,17 +205,14 @@ function injectGlobalChat(role) {
                             <button onclick="window.toggleSaChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
-                    
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="saChatUserSelect" onchange="window.loadSaMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
                             <option value="" disabled selected>Select user to message...</option>
-                            </select>
+                        </select>
                     </div>
-
                     <div id="saChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
                         <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
                     </div>
-                    
                     <form id="saChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
                         <input type="text" id="saChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
                         <button type="submit" id="saChatBtn" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
@@ -256,9 +226,7 @@ function injectGlobalChat(role) {
         `;
         initSuperAdminChatLogic(); 
 
-    // ==========================================
     // 2. STANDARD ADMIN CHAT UI
-    // ==========================================
     } else if (role === 'admin') {
         chatWrapper.innerHTML = `
             <div id="adminChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
@@ -270,17 +238,14 @@ function injectGlobalChat(role) {
                             <button onclick="window.toggleAdminChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
-                    
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="adminChatUserSelect" onchange="window.loadAdminMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
                             <option value="" disabled selected>Select user to message...</option>
-                            </select>
+                        </select>
                     </div>
-
                     <div id="adminChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
                         <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
                     </div>
-                    
                     <form id="adminChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
                         <input type="text" id="adminChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
                         <button type="submit" id="adminChatBtn" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
@@ -294,31 +259,26 @@ function injectGlobalChat(role) {
         `;
         initAdminChatLogic();
 
-    // ==========================================
     // 3. DRIVER CHAT UI
-    // ==========================================
     } else if (role === 'driver') {
         chatWrapper.innerHTML = `
             <div id="driverChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
                 <div id="chatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
                     <div class="bg-blue-800 dark:bg-blue-900 p-4 flex justify-between items-center text-white transition-colors">
-                        <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-headset"></i> Control Center</h3>
+                        <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-headset"></i> ${myName}</h3>
                         <div class="flex items-center">
                             <button onclick="window.clearDriverChat()" class="text-red-300 hover:text-red-400 transition-colors mr-3" title="Clear Conversation"><i class="fa-solid fa-trash-can text-lg"></i></button>
                             <button onclick="window.toggleChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
-                    
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="chatUserSelect" onchange="window.loadMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
                             <option value="" disabled selected>Select user to message...</option>
-                            </select>
+                        </select>
                     </div>
-
                     <div id="chatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
                         <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
                     </div>
-                    
                     <form id="chatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
                         <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
                         <button type="submit" id="chatBtn" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
@@ -333,369 +293,10 @@ function injectGlobalChat(role) {
         initDriverChatLogic();
     }
 }
-// ----------------------------------------------------
-// ADMIN CHAT LOGIC
-// ----------------------------------------------------
-function initAdminChatLogic() {
-    let adminChatOpen = localStorage.getItem('adminChatOpen') === 'true';
-    let currentChatDriver = localStorage.getItem('currentChatDriver') || null;
-    let adminChatInterval;
-    let allChatMessages = [];
-    let allDriversCache = [];
 
-    window.toggleAdminChat = function() {
-        adminChatOpen = !adminChatOpen;
-        localStorage.setItem('adminChatOpen', adminChatOpen); 
-        
-        const box = document.getElementById('adminChatBox');
-        const badge = document.getElementById('adminChatBadge');
-        
-        if (adminChatOpen) {
-            box.classList.remove('hidden');
-            box.classList.add('flex');
-            badge.classList.add('hidden');
-            if (currentChatDriver) window.openDriverChat(currentChatDriver);
-            else window.showChatList();
-            
-            loadAdminMessages();
-            adminChatInterval = setInterval(loadAdminMessages, 5000); 
-        } else {
-            box.classList.add('hidden');
-            box.classList.remove('flex');
-            clearInterval(adminChatInterval);
-        }
-    };
-
-    window.showChatList = function() {
-        currentChatDriver = null;
-        localStorage.removeItem('currentChatDriver'); 
-        
-        document.getElementById('activeChatView').classList.add('hidden');
-        document.getElementById('chatContactList').classList.remove('hidden');
-        document.getElementById('btnBackChat').classList.add('hidden');
-        document.getElementById('btnClearChat').classList.add('hidden'); 
-        document.getElementById('chatHeaderTitle').innerHTML = `<i class="fa-solid fa-inbox"></i> Driver Messages`;
-        renderContactList();
-    };
-
-    window.openDriverChat = function(driverUsername) {
-        currentChatDriver = driverUsername;
-        localStorage.setItem('currentChatDriver', driverUsername); 
-        
-        document.getElementById('chatContactList').classList.add('hidden');
-        document.getElementById('activeChatView').classList.remove('hidden');
-        document.getElementById('activeChatView').classList.add('flex');
-        document.getElementById('btnBackChat').classList.remove('hidden');
-        document.getElementById('btnClearChat').classList.remove('hidden'); 
-        document.getElementById('chatHeaderTitle').innerHTML = `<i class="fa-solid fa-user"></i> ${driverUsername}`;
-        
-        fetch(`${API_BASE_CHAT}/messages/mark-read`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: driverUsername, role: 'admin' })
-        }).catch(err => console.log("Mark read failed silently"));
-        
-        renderActiveChat();
-    };
-
-    window.clearAdminChat = async function() {
-        if (!currentChatDriver) return;
-        if (confirm(`Are you sure you want to clear your conversation with ${currentChatDriver}?`)) {
-            try {
-                const res = await fetch(`${API_BASE_CHAT}/messages/clear`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ driverUsername: currentChatDriver, clearedBy: 'Admin' })
-                });
-                if (res.ok) {
-                    allChatMessages = allChatMessages.filter(m => !(m.sender === currentChatDriver || m.receiver === currentChatDriver));
-                    renderActiveChat();
-                }
-            } catch (err) {}
-        }
-    };
-
-    async function loadAdminMessages() {
-        try {
-            if(allDriversCache.length === 0) {
-                const driverRes = await fetch(`${API_BASE_CHAT}/drivers`);
-                if(driverRes.ok) {
-                    allDriversCache = await driverRes.json();
-                } else {
-                    throw new Error("Could not fetch drivers list");
-                }
-            }
-
-            const res = await fetch(`${API_BASE_CHAT}/messages/Admin`);
-            if (!res.ok) throw new Error("Could not fetch chat messages");
-            
-            allChatMessages = await res.json();
-            
-            if (!adminChatOpen) {
-                const hasUnread = allChatMessages.some(m => m.receiver === 'Admin' && !m.isRead);
-                if (hasUnread) document.getElementById('adminChatBadge').classList.remove('hidden');
-                return;
-            }
-
-            if (currentChatDriver) renderActiveChat();
-            else renderContactList();
-            
-        } catch (err) { 
-            console.error("Chat Error:", err); 
-            if (adminChatOpen && !currentChatDriver) {
-                const listContainer = document.getElementById('chatContactList');
-                if (listContainer) {
-                    listContainer.innerHTML = '<div class="p-4 text-center text-red-500 text-xs font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Waiting for backend server...</div>';
-                }
-            }
-        }
-    }
-
-    function renderContactList() {
-        const container = document.getElementById('chatContactList');
-        if (!container) return;
-
-        const driversMap = {};
-        allDriversCache.forEach(d => { driversMap[d.username] = { latest: null, unread: 0, messages: [] }; });
-
-        allChatMessages.forEach(m => {
-            const driverName = m.sender === 'Admin' ? m.receiver : m.sender;
-            if (!driversMap[driverName]) driversMap[driverName] = { latest: null, unread: 0, messages: [] };
-            driversMap[driverName].messages.push(m);
-            driversMap[driverName].latest = m;
-            if (m.receiver === 'Admin' && !m.isRead) driversMap[driverName].unread++;
-        });
-
-        const sortedDrivers = Object.keys(driversMap).sort((a, b) => {
-            const timeA = driversMap[a].latest ? new Date(driversMap[a].latest.timestamp).getTime() : 0;
-            const timeB = driversMap[b].latest ? new Date(driversMap[b].latest.timestamp).getTime() : 0;
-            return timeB - timeA;
-        });
-
-        if (sortedDrivers.length === 0) {
-            container.innerHTML = '<div class="p-4 text-center text-gray-500 text-xs">No drivers registered yet.</div>';
-            return;
-        }
-
-        container.innerHTML = sortedDrivers.map(driver => {
-            const data = driversMap[driver];
-            const lastMsg = data.latest ? data.latest.text : "No messages yet";
-            const timeStr = data.latest ? new Date(data.latest.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
-            const unreadBadge = data.unread > 0 ? `<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">${data.unread}</span>` : '';
-            return `
-            <div onclick="window.openDriverChat('${driver}')" class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold shrink-0"><i class="fa-solid fa-user"></i></div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-baseline mb-0.5">
-                        <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">${driver}</h4>
-                        <span class="text-[9px] text-gray-400 shrink-0 ml-2">${timeStr}</span>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${lastMsg}</p>
-                </div>
-                ${unreadBadge}
-            </div>`;
-        }).join('');
-    }
-
-    function renderActiveChat() {
-        if (!currentChatDriver) return;
-        const container = document.getElementById('adminChatMessages');
-        if (!container) return;
-
-        const driverMessages = allChatMessages.filter(m => m.sender === currentChatDriver || m.receiver === currentChatDriver);
-        const currentMsgCount = container.querySelectorAll('.msg-bubble').length;
-        if (driverMessages.length === currentMsgCount && currentMsgCount !== 0) return;
-
-        let html = driverMessages.length === 0 ? '<div class="text-center text-xs text-gray-400 my-2">No messages yet. Start the conversation!</div>' : '';
-        html += driverMessages.map(m => {
-            const isAdmin = m.sender === 'Admin';
-            const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            if (isAdmin) {
-                return `<div class="msg-bubble self-end bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm">
-                            <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
-                            <span class="text-[9px] text-blue-200 block text-right mt-1">${time}</span>
-                        </div>`;
-            } else {
-                return `<div class="msg-bubble self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-2xl rounded-tl-sm max-w-[85%] shadow-sm">
-                            <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
-                            <span class="text-[9px] text-gray-500 dark:text-gray-400 block mt-1">${time}</span>
-                        </div>`;
-            }
-        }).join('');
-        container.innerHTML = html;
-        container.scrollTop = container.scrollHeight;
-    }
-
-    document.getElementById('adminChatForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentChatDriver) return;
-        const input = document.getElementById('adminChatInput');
-        const text = input.value.trim();
-        if (!text) return;
-        input.value = ''; 
-        
-        const msg = { sender: 'Admin', receiver: currentChatDriver, text: text };
-        const container = document.getElementById('adminChatMessages');
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        container.innerHTML += `<div class="msg-bubble self-end bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm opacity-70">
-                                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
-                                    <span class="text-[9px] text-blue-200 block text-right mt-1">${time}</span>
-                                </div>`;
-        container.scrollTop = container.scrollHeight;
-
-        try {
-            await fetch(`${API_BASE_CHAT}/messages`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(msg)
-            });
-            loadAdminMessages(); 
-        } catch(err) { alert('Failed to send message'); }
-    });
-
-    // --- CHECK FOR OPEN CHAT ON LOAD ---
-    if (adminChatOpen) {
-        document.getElementById('adminChatBox').classList.remove('hidden');
-        document.getElementById('adminChatBox').classList.add('flex');
-        document.getElementById('adminChatBadge').classList.add('hidden');
-        if (currentChatDriver) window.openDriverChat(currentChatDriver);
-        else window.showChatList();
-        
-        loadAdminMessages();
-        adminChatInterval = setInterval(loadAdminMessages, 5000);
-    } else {
-        setTimeout(loadAdminMessages, 2000); 
-        setInterval(() => { if(!adminChatOpen) loadAdminMessages(); }, 10000);
-    }
-}
-
-// ----------------------------------------------------
-// DRIVER CHAT LOGIC
-// ----------------------------------------------------
-function initDriverChatLogic() {
-    let driverChatOpen = localStorage.getItem('driverChatOpen') === 'true';
-    let chatInterval;
-
-    window.toggleChat = function() {
-        driverChatOpen = !driverChatOpen;
-        localStorage.setItem('driverChatOpen', driverChatOpen); 
-        
-        const box = document.getElementById('chatBox');
-        const badge = document.getElementById('chatBadge');
-        
-        if (driverChatOpen) {
-            box.classList.remove('hidden');
-            box.classList.add('flex');
-            badge.classList.add('hidden');
-            loadMessages();
-            chatInterval = setInterval(loadMessages, 5000); 
-            fetch(`${API_BASE_CHAT}/messages/mark-read`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: localStorage.getItem('username'), role: 'driver' })
-            }).catch(e => console.log("Mark read failed silently"));
-        } else {
-            box.classList.add('hidden');
-            box.classList.remove('flex');
-            clearInterval(chatInterval);
-        }
-    };
-
-    window.clearDriverChat = async function() {
-        const myName = localStorage.getItem('username');
-        if (!myName) return;
-        if (confirm("Are you sure you want to clear this conversation?")) {
-            try {
-                const res = await fetch(`${API_BASE_CHAT}/messages/clear`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ driverUsername: myName, clearedBy: myName })
-                });
-                if (res.ok) {
-                    const container = document.getElementById('chatMessages');
-                    if(container) container.innerHTML = '<div class="text-center text-xs text-gray-400 dark:text-gray-500 my-2">Send a message to the Admin. Request early access for future tasks here.</div>';
-                }
-            } catch (err) {}
-        }
-    };
-
-    async function loadMessages() {
-        const myName = localStorage.getItem('username');
-        if (!myName) return;
-        
-        try {
-            const res = await fetch(`${API_BASE_CHAT}/messages/${myName}`);
-            if (!res.ok) throw new Error("Could not fetch messages");
-            const messages = await res.json();
-            
-            if (!driverChatOpen) {
-                const hasUnread = messages.some(m => m.receiver === myName && !m.isRead);
-                if (hasUnread) document.getElementById('chatBadge').classList.remove('hidden');
-                return;
-            }
-
-            const container = document.getElementById('chatMessages');
-            if (!container) return;
-
-            const currentMsgCount = container.querySelectorAll('.msg-bubble').length;
-            if (messages.length === currentMsgCount && currentMsgCount !== 0) return;
-
-            let html = '<div class="text-center text-xs text-gray-400 dark:text-gray-500 my-2">Send a message to the Admin. Request early access for future tasks here.</div>';
-            html += messages.map(m => {
-                const isMe = m.sender === myName;
-                const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                if (isMe) {
-                    return `<div class="msg-bubble self-end bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm">
-                                <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
-                                <span class="text-[9px] text-blue-200 block text-right mt-1">${time}</span>
-                            </div>`;
-                } else {
-                    return `<div class="msg-bubble self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-2xl rounded-tl-sm max-w-[85%] shadow-sm">
-                                <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
-                                <span class="text-[9px] text-gray-500 dark:text-gray-400 block mt-1">${time}</span>
-                            </div>`;
-                }
-            }).join('');
-            container.innerHTML = html;
-            container.scrollTop = container.scrollHeight;
-        } catch (err) { console.error("Chat load error", err); }
-    }
-
-    document.getElementById('chatForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = document.getElementById('chatInput');
-        const text = input.value.trim();
-        if (!text) return;
-        input.value = ''; 
-        
-        const msg = { sender: localStorage.getItem('username'), receiver: 'Admin', text: text };
-        const container = document.getElementById('chatMessages');
-        if (!container) return;
-
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        container.innerHTML += `<div class="msg-bubble self-end bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm opacity-70">
-                                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
-                                    <span class="text-[9px] text-blue-200 block text-right mt-1">${time}</span>
-                                </div>`;
-        container.scrollTop = container.scrollHeight;
-
-        try {
-            await fetch(`${API_BASE_CHAT}/messages`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(msg)
-            });
-            loadMessages(); 
-        } catch(err) { alert('Failed to send message'); }
-    });
-
-    if (driverChatOpen) {
-        document.getElementById('chatBox').classList.remove('hidden');
-        document.getElementById('chatBox').classList.add('flex');
-        document.getElementById('chatBadge').classList.add('hidden');
-        loadMessages();
-        chatInterval = setInterval(loadMessages, 5000);
-    } else {
-        setTimeout(loadMessages, 2000); 
-        setInterval(() => { if(!driverChatOpen) loadMessages(); }, 10000);
-    }
-}
-// ----------------------------------------------------
-// SUPER ADMIN CHAT LOGIC (Global Comms & Broadcast)
-// ----------------------------------------------------
+// ====================================================
+// 1. SUPER ADMIN CHAT LOGIC
+// ====================================================
 function initSuperAdminChatLogic() {
     let saChatOpen = localStorage.getItem('saChatOpen') === 'true';
     let saChatInterval;
@@ -704,133 +305,76 @@ function initSuperAdminChatLogic() {
     window.toggleSaChat = function() {
         saChatOpen = !saChatOpen;
         localStorage.setItem('saChatOpen', saChatOpen); 
-        
         const box = document.getElementById('saChatBox');
-        const badge = document.getElementById('saChatBadge');
         
         if (saChatOpen) {
-            box.classList.remove('hidden');
-            box.classList.add('flex');
-            badge.classList.add('hidden');
+            box.classList.remove('hidden'); box.classList.add('flex');
+            document.getElementById('saChatBadge').classList.add('hidden');
             populateSaUserDropdown();
             window.loadSaMessages();
         } else {
-            box.classList.add('hidden');
-            box.classList.remove('flex');
+            box.classList.add('hidden'); box.classList.remove('flex');
             clearInterval(saChatInterval);
+        }
+    };
+
+    window.clearSaChat = async function() {
+        const myName = localStorage.getItem('username');
+        if (confirm("Are you sure you want to clear your entire chat history?")) {
+            try {
+                await fetch(`${API_BASE_CHAT}/messages/clear/${myName}`, { method: 'DELETE' });
+                document.getElementById('saChatMessages').innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">Chat history cleared.</div>';
+            } catch (err) { console.error(err); }
         }
     };
 
     async function populateSaUserDropdown() {
         if (allUsersCache.length > 0) return; 
         try {
-            const [driversRes, adminsRes] = await Promise.all([
-                fetch(`${API_BASE_CHAT}/drivers`),
-                fetch(`${API_BASE_CHAT}/admins`)
-            ]);
-            const drivers = await driversRes.json();
-            const admins = await adminsRes.json();
-            allUsersCache = [...admins, ...drivers];
-
+            const [driversRes, adminsRes] = await Promise.all([ fetch(`${API_BASE_CHAT}/drivers`), fetch(`${API_BASE_CHAT}/admins`) ]);
+            allUsersCache = [...await adminsRes.json(), ...await driversRes.json()];
             const select = document.getElementById('saChatUserSelect');
             const myName = localStorage.getItem('username');
             
-            // This strictly assigns the broadcast option ONCE and wipes out anything else
             select.innerHTML = `
                 <option value="" disabled selected>Select user to message...</option>
-                <option value="BROADCAST" class="text-blue-600 dark:text-blue-400 font-black">BROADCAST TO ALL</option>
+                <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 BROADCAST TO ALL</option>
+                <option value="BROADCAST_ADMINS" class="text-purple-600 font-black">📢 BROADCAST TO ADMINS</option>
             `;
             
             allUsersCache.forEach(u => {
                 if (u.username !== myName) {
                     const roleLabel = u.role === 'driver' ? '(Driver)' : '(Admin)';
-                    select.innerHTML += `<option value="${u.username}">${u.username} ${roleLabel}</option>`;
+                    select.innerHTML += `<option value="${u.username}" data-role="${u.role}">${u.username} ${roleLabel}</option>`;
                 }
             });
-        } catch (e) { console.error("Failed to load users for chat", e); }
+        } catch (e) { console.error(e); }
     }
-    
+
     window.loadSaMessages = async function() {
         const selectedUser = document.getElementById('saChatUserSelect').value;
         const input = document.getElementById('saChatInput');
         const btn = document.getElementById('saChatBtn');
         const msgBox = document.getElementById('saChatMessages');
         
-        clearInterval(saChatInterval); // Stop previous loops
-
-        if (!selectedUser) {
-            input.disabled = true; btn.disabled = true;
-            return;
-        }
-
+        clearInterval(saChatInterval);
+        if (!selectedUser) { input.disabled = true; btn.disabled = true; return; }
         input.disabled = false; btn.disabled = false;
 
-        // SPECIAL FEATURE: BROADCAST UI
-        if (selectedUser === 'BROADCAST') {
+        if (selectedUser.startsWith('BROADCAST')) {
+            const targetText = selectedUser === 'BROADCAST_ALL' ? 'every Admin and Driver' : 'every Admin';
             msgBox.innerHTML = `
                 <div class="flex flex-col items-center justify-center h-full text-center p-4">
-                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mb-3">
-                        <i class="fa-solid fa-bullhorn text-3xl"></i>
-                    </div>
+                    <i class="fa-solid fa-bullhorn text-4xl text-blue-500 mb-3"></i>
                     <h3 class="font-black text-blue-900 dark:text-white mb-1">Broadcast Mode</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Messages sent here will be instantly delivered to <strong>every Admin and Driver</strong> in the system.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Messages sent here will be delivered to <strong>${targetText}</strong>.</p>
                 </div>`;
-            return; // We don't fetch chat history for the broadcast screen
+            return; 
         }
 
-        await fetchSaMessages(selectedUser, msgBox);
-        saChatInterval = setInterval(() => fetchSaMessages(selectedUser, msgBox), 5000); 
+        await fetchMessagesThread(selectedUser, msgBox);
+        saChatInterval = setInterval(() => fetchMessagesThread(selectedUser, msgBox), 5000); 
     };
-
-    async function fetchSaMessages(selectedUser, msgBox) {
-        const myName = localStorage.getItem('username');
-
-        try {
-            const res = await fetch(`${API_BASE_CHAT}/messages/${selectedUser}`);
-            const messages = await res.json();
-            
-            // Filter to show only the conversation between ME and the SELECTED USER
-            const thread = messages.filter(m => 
-                (m.sender === myName && m.receiver === selectedUser) || 
-                (m.sender === selectedUser && m.receiver === myName) ||
-                (m.sender === 'Admin' && m.receiver === selectedUser) || // Catch old messages
-                (m.sender === selectedUser && m.receiver === 'Admin')
-            );
-
-            if (thread.length === 0) {
-                msgBox.innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">No messages yet. Say hi!</div>';
-                return;
-            }
-
-            // Prevent UI flicker if no new messages exist
-            const currentCount = msgBox.querySelectorAll('.msg-bubble').length;
-            if (thread.length === currentCount && currentCount > 0) return;
-
-            msgBox.innerHTML = thread.map(m => {
-                const isMe = m.sender === myName || m.sender === 'Admin';
-                const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const align = isMe ? 'self-end bg-blue-600 text-white' : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
-                const senderTag = isMe ? '' : `<div class="text-[9px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-widest">${m.sender}</div>`;
-                
-                return `
-                    <div class="msg-bubble ${align} max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm">
-                        ${senderTag}
-                        <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
-                        <div class="text-[9px] opacity-70 mt-1 text-right">${time}</div>
-                    </div>
-                `;
-            }).join('');
-            
-            msgBox.scrollTop = msgBox.scrollHeight;
-
-            // Mark as read in the background
-            await fetch(`${API_BASE_CHAT}/messages/mark-read`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: selectedUser, role: 'superadmin' })
-            }).catch(e => console.log("Mark read failed silently"));
-
-        } catch (err) { console.error("Chat load error", err); }
-    }
 
     document.getElementById('saChatForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -843,10 +387,14 @@ function initSuperAdminChatLogic() {
         input.disabled = true; 
 
         try {
-            // SPECIAL FEATURE: BROADCAST EXECUTION
-            if (selectedUser === 'BROADCAST') {
+            if (selectedUser.startsWith('BROADCAST')) {
                 const options = Array.from(document.getElementById('saChatUserSelect').options);
-                const users = options.map(opt => opt.value).filter(val => val !== '' && val !== 'BROADCAST');
+                let users = [];
+                if (selectedUser === 'BROADCAST_ALL') {
+                    users = options.filter(opt => opt.value && !opt.value.startsWith('BROADCAST')).map(o => o.value);
+                } else {
+                    users = options.filter(opt => opt.value && !opt.value.startsWith('BROADCAST') && opt.getAttribute('data-role') !== 'driver').map(o => o.value);
+                }
                 
                 await Promise.all(users.map(u => 
                     fetch(`${API_BASE_CHAT}/messages`, {
@@ -854,64 +402,250 @@ function initSuperAdminChatLogic() {
                         body: JSON.stringify({ sender: myName, receiver: u, text: `📢 [BROADCAST]: ${text}` })
                     })
                 ));
-                
-                alert("Broadcast message successfully sent to all users!");
-                input.value = '';
+                alert("Broadcast message successfully sent!");
             } else {
-                // Standard Single Message
-                const msgBox = document.getElementById('saChatMessages');
-                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                // Optimistic UI rendering (make it feel instant)
-                msgBox.innerHTML += `
-                    <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
-                        <p class="whitespace-pre-wrap leading-snug">${text}</p>
-                        <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
-                    </div>`;
-                msgBox.scrollTop = msgBox.scrollHeight;
-
                 await fetch(`${API_BASE_CHAT}/messages`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
                 });
-                
-                input.value = '';
-                fetchSaMessages(selectedUser, msgBox);
+                fetchMessagesThread(selectedUser, document.getElementById('saChatMessages'));
             }
-        } catch (err) { 
-            alert("Failed to send message."); 
-        } finally {
-            input.disabled = false;
-            input.focus();
-        }
+            input.value = '';
+        } catch (err) { alert("Failed to send message."); } 
+        finally { input.disabled = false; input.focus(); }
     });
 
-    // Check for unread messages (Red Badge logic)
-    async function checkSaUnread() {
-        if (saChatOpen) return;
+    if (saChatOpen) window.toggleSaChat();
+}
+
+// ====================================================
+// 2. STANDARD ADMIN CHAT LOGIC
+// ====================================================
+function initAdminChatLogic() {
+    let adminChatOpen = localStorage.getItem('adminChatOpen') === 'true';
+    let adminChatInterval;
+    let allUsersCache = [];
+
+    window.toggleAdminChat = function() {
+        adminChatOpen = !adminChatOpen;
+        localStorage.setItem('adminChatOpen', adminChatOpen); 
+        const box = document.getElementById('adminChatBox');
+        
+        if (adminChatOpen) {
+            box.classList.remove('hidden'); box.classList.add('flex');
+            document.getElementById('adminChatBadge').classList.add('hidden');
+            populateAdminUserDropdown();
+            window.loadAdminMessages();
+        } else {
+            box.classList.add('hidden'); box.classList.remove('flex');
+            clearInterval(adminChatInterval);
+        }
+    };
+
+    window.clearAdminChat = async function() {
+        const myName = localStorage.getItem('username');
+        if (confirm("Are you sure you want to clear your chat history?")) {
+            try {
+                await fetch(`${API_BASE_CHAT}/messages/clear/${myName}`, { method: 'DELETE' });
+                document.getElementById('adminChatMessages').innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">Chat history cleared.</div>';
+            } catch (err) { console.error(err); }
+        }
+    };
+
+    async function populateAdminUserDropdown() {
+        if (allUsersCache.length > 0) return;
         try {
+            const [driversRes, adminsRes] = await Promise.all([ fetch(`${API_BASE_CHAT}/drivers`), fetch(`${API_BASE_CHAT}/admins`) ]);
+            allUsersCache = [...await adminsRes.json(), ...await driversRes.json()];
+            const select = document.getElementById('adminChatUserSelect');
             const myName = localStorage.getItem('username');
-            const res = await fetch(`${API_BASE_CHAT}/messages/${myName}`);
-            if (!res.ok) return;
-            const messages = await res.json();
             
-            const hasUnread = messages.some(m => m.receiver === myName && !m.isRead);
-            const badge = document.getElementById('saChatBadge');
+            select.innerHTML = `<option value="" disabled selected>Select user to message...</option>`;
             
-            if (hasUnread) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
-        } catch(e) {}
+            allUsersCache.forEach(u => {
+                if (u.username !== myName) {
+                    const roleLabel = u.role === 'driver' ? '(Driver)' : '(Admin)';
+                    select.innerHTML += `<option value="${u.username}">${u.username} ${roleLabel}</option>`;
+                }
+            });
+        } catch (e) { console.error(e); }
     }
 
-    // Initialization
-    if (saChatOpen) {
-        document.getElementById('saChatBox').classList.remove('hidden');
-        document.getElementById('saChatBox').classList.add('flex');
-        document.getElementById('saChatBadge').classList.add('hidden');
-        populateSaUserDropdown();
-        window.loadSaMessages();
-    } else {
-        setTimeout(checkSaUnread, 2000); 
-        setInterval(checkSaUnread, 10000);
+    window.loadAdminMessages = async function() {
+        const selectedUser = document.getElementById('adminChatUserSelect').value;
+        const input = document.getElementById('adminChatInput');
+        const btn = document.getElementById('adminChatBtn');
+        const msgBox = document.getElementById('adminChatMessages');
+        
+        clearInterval(adminChatInterval);
+        if (!selectedUser) { input.disabled = true; btn.disabled = true; return; }
+        
+        input.disabled = false; btn.disabled = false;
+        await fetchMessagesThread(selectedUser, msgBox);
+        adminChatInterval = setInterval(() => fetchMessagesThread(selectedUser, msgBox), 5000);
+    };
+
+    document.getElementById('adminChatForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const selectedUser = document.getElementById('adminChatUserSelect').value;
+        const input = document.getElementById('adminChatInput');
+        const text = input.value.trim();
+        const myName = localStorage.getItem('username'); 
+
+        if (!text || !selectedUser) return;
+        input.value = ''; 
+
+        try {
+            await fetch(`${API_BASE_CHAT}/messages`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
+            });
+            fetchMessagesThread(selectedUser, document.getElementById('adminChatMessages'));
+        } catch (err) { alert('Failed to send message'); }
+    });
+
+    if (adminChatOpen) window.toggleAdminChat();
+}
+
+// ====================================================
+// 3. DRIVER CHAT LOGIC
+// ====================================================
+function initDriverChatLogic() {
+    let driverChatOpen = localStorage.getItem('driverChatOpen') === 'true';
+    let chatInterval;
+    let allAdminsCache = [];
+
+    window.toggleChat = function() {
+        driverChatOpen = !driverChatOpen;
+        localStorage.setItem('driverChatOpen', driverChatOpen); 
+        const box = document.getElementById('chatBox');
+        
+        if (driverChatOpen) {
+            box.classList.remove('hidden'); box.classList.add('flex');
+            document.getElementById('chatBadge').classList.add('hidden');
+            populateDriverUserDropdown();
+            window.loadMessages();
+        } else {
+            box.classList.add('hidden'); box.classList.remove('flex');
+            clearInterval(chatInterval);
+        }
+    };
+
+    window.clearDriverChat = async function() {
+        const myName = localStorage.getItem('username');
+        if (confirm("Are you sure you want to clear your chat history?")) {
+            try {
+                await fetch(`${API_BASE_CHAT}/messages/clear/${myName}`, { method: 'DELETE' });
+                document.getElementById('chatMessages').innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">Chat history cleared.</div>';
+            } catch (err) { console.error(err); }
+        }
+    };
+
+    async function populateDriverUserDropdown() {
+        if (allAdminsCache.length > 0) return;
+        try {
+            const res = await fetch(`${API_BASE_CHAT}/admins`);
+            allAdminsCache = await res.json();
+            const select = document.getElementById('chatUserSelect');
+            const myName = localStorage.getItem('username');
+            
+            select.innerHTML = `<option value="" disabled selected>Select user to message...</option>`;
+            allAdminsCache.forEach(u => {
+                if(u.username !== myName) {
+                    select.innerHTML += `<option value="${u.username}">${u.username} (Admin)</option>`;
+                }
+            });
+        } catch (e) { console.error(e); }
     }
+
+    window.loadMessages = async function() {
+        const selectedUser = document.getElementById('chatUserSelect').value;
+        const input = document.getElementById('chatInput');
+        const btn = document.getElementById('chatBtn');
+        const msgBox = document.getElementById('chatMessages');
+        
+        clearInterval(chatInterval);
+        if (!selectedUser) { input.disabled = true; btn.disabled = true; return; }
+        
+        input.disabled = false; btn.disabled = false;
+        await fetchMessagesThread(selectedUser, msgBox);
+        chatInterval = setInterval(() => fetchMessagesThread(selectedUser, msgBox), 5000);
+    };
+
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const selectedUser = document.getElementById('chatUserSelect').value;
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        const myName = localStorage.getItem('username'); 
+
+        if (!text || !selectedUser) return;
+        input.value = ''; 
+
+        try {
+            await fetch(`${API_BASE_CHAT}/messages`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
+            });
+            fetchMessagesThread(selectedUser, document.getElementById('chatMessages'));
+        } catch (err) { alert('Failed to send message'); }
+    });
+
+    if (driverChatOpen) window.toggleChat();
+}
+
+// ====================================================
+// SHARED UTILITY: FETCH AND RENDER MESSAGES THREAD
+// ====================================================
+async function fetchMessagesThread(selectedUser, msgBox) {
+    const myName = localStorage.getItem('username');
+    try {
+        const res = await fetch(`${API_BASE_CHAT}/messages/${selectedUser}`);
+        const messages = await res.json();
+        
+        // Filter strictly to the conversation between ME and SELECTED USER
+        const thread = messages.filter(m => 
+            (m.sender === myName && m.receiver === selectedUser) || 
+            (m.sender === selectedUser && m.receiver === myName) ||
+            (m.sender === 'Admin' && m.receiver === selectedUser) || // Legacy support
+            (m.sender === selectedUser && m.receiver === 'Admin')
+        );
+
+        if (thread.length === 0) {
+            msgBox.innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">No messages yet. Say hi!</div>';
+            return;
+        }
+
+        const currentCount = msgBox.querySelectorAll('.msg-bubble').length;
+        if (thread.length === currentCount && currentCount > 0) return;
+
+        msgBox.innerHTML = thread.map(m => {
+            const isMe = m.sender === myName || m.sender === 'Admin';
+            const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const align = isMe ? 'self-end bg-blue-600 text-white' : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+            
+            // Displays Name Above the Bubble!
+            const senderTag = `<div class="text-[9px] font-bold text-gray-400 mb-1 ${isMe ? 'text-right mr-1' : 'ml-1'} uppercase tracking-widest">${isMe ? 'YOU' : m.sender}</div>`;
+            
+            return `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full">
+                    ${senderTag}
+                    <div class="msg-bubble ${align} max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm">
+                        <p class="whitespace-pre-wrap leading-snug">${m.text}</p>
+                        <div class="text-[9px] opacity-70 mt-1 text-right">${time}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        msgBox.scrollTop = msgBox.scrollHeight;
+
+        // Auto-mark as read
+        const myRole = localStorage.getItem('userRole');
+        await fetch(`${API_BASE_CHAT}/messages/mark-read`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: selectedUser, role: myRole })
+        }).catch(e => {});
+
+    } catch (err) { console.error("Chat load error", err); }
 }
