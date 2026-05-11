@@ -16,38 +16,28 @@
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else { document.documentElement.classList.remove('dark'); }
-        
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
     </script>
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 font-sans min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 font-sans min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <nav class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-chess-king text-yellow-400 text-2xl"></i>
-                <h1 class="text-xl font-black tracking-tight">Super Admin <span class="font-light text-blue-300">Portal</span></h1>
-            </div>
-            <div class="flex items-center gap-4 sm:gap-6">
-                <a href="dashboard.html" class="hidden sm:flex items-center gap-2 bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors shadow-sm">
-                    <i class="fa-solid fa-desktop"></i> Standard Admin Panel
-                </a>
-                
-                <button onclick="toggleTheme()" class="text-gray-300 hover:text-yellow-400 transition-colors"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i></button>
-                <button onclick="logout()" class="text-xs font-bold uppercase tracking-widest text-red-400 hover:text-red-300"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
-            </div>
-        </div>
-    </nav>
+    <div id="shared-nav"></div>
 
-    <main class="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
+    <main class="max-w-[1500px] mx-auto px-6 py-8 space-y-8">
         
+        <div class="bg-gradient-to-r from-blue-900 to-slate-900 rounded-3xl p-8 lg:p-12 text-white shadow-xl relative overflow-hidden transition-colors">
+            <div class="relative z-10">
+                <p class="text-[10px] font-bold tracking-widest text-blue-300 mb-1 uppercase">Super Administrator Portal</p>
+                <h1 class="text-3xl md:text-4xl font-black">System Control Center</h1>
+            </div>
+            <i class="fa-solid fa-chess-king text-8xl md:text-[150px] text-white/5 absolute -right-4 top-1/2 transform -translate-y-1/2 -rotate-12"></i>
+        </div>
+
         <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="-mb-px flex space-x-8 overflow-x-auto custom-scrollbar" aria-label="Tabs">
                 <button id="btn-overview" onclick="switchTab('overview')" class="tab-btn border-blue-800 dark:border-blue-400 text-blue-800 dark:text-blue-400 font-bold whitespace-nowrap py-4 px-1 border-b-2 text-sm uppercase tracking-wide transition-colors">
@@ -331,6 +321,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             if (checkAuthAndRole('superadmin')) {
+                // 3. THIS CALLS THE UNIFIED NAVBAR TO RENDER
+                renderNavigation('dashboard');
                 fetchSystemData();
             }
         });
