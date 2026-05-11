@@ -180,6 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem('token');
     
     if (token && role) {
+        // Clean up any rogue widgets
+        const oldAdminWidget = document.getElementById('adminChatWidget');
+        if (oldAdminWidget) oldAdminWidget.remove();
+        
+        const oldDriverWidget = document.getElementById('driverChatWidget');
+        if (oldDriverWidget) oldDriverWidget.remove();
+
         injectGlobalChat(role);
     }
 });
@@ -338,8 +345,8 @@ function initSuperAdminChatLogic() {
             
             select.innerHTML = `
                 <option value="" disabled selected>Select user to message...</option>
-                <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 BROADCAST TO ALL</option>
-                <option value="BROADCAST_ADMINS" class="text-purple-600 font-black">📢 BROADCAST TO ADMINS</option>
+                <option value="BROADCAST_ALL" class="text-blue-600 font-black">BROADCAST TO ALL</option>
+                <option value="BROADCAST_ADMINS" class="text-purple-600 font-black">BROADCAST TO ADMINS</option>
             `;
             
             allUsersCache.forEach(u => {
@@ -403,14 +410,30 @@ function initSuperAdminChatLogic() {
                     })
                 ));
                 alert("Broadcast message successfully sent!");
+                input.value = '';
             } else {
+                const msgBox = document.getElementById('saChatMessages');
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Optimistic UI mapping matches fetchMessagesThread structure
+                msgBox.innerHTML += `
+                    <div class="flex flex-col items-end w-full">
+                        <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                        <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                            <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                            <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                        </div>
+                    </div>`;
+                msgBox.scrollTop = msgBox.scrollHeight;
+
                 await fetch(`${API_BASE_CHAT}/messages`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
                 });
-                fetchMessagesThread(selectedUser, document.getElementById('saChatMessages'));
+                
+                input.value = '';
+                await fetchMessagesThread(selectedUser, msgBox); // <--- FIXED: Now correctly references the shared function!
             }
-            input.value = '';
         } catch (err) { alert("Failed to send message."); } 
         finally { input.disabled = false; input.focus(); }
     });
@@ -493,6 +516,19 @@ function initAdminChatLogic() {
         const myName = localStorage.getItem('username'); 
 
         if (!text || !selectedUser) return;
+        
+        const msgBox = document.getElementById('adminChatMessages');
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        msgBox.innerHTML += `
+            <div class="flex flex-col items-end w-full">
+                <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                    <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                </div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
         input.value = ''; 
 
         try {
@@ -500,7 +536,7 @@ function initAdminChatLogic() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            fetchMessagesThread(selectedUser, document.getElementById('adminChatMessages'));
+            await fetchMessagesThread(selectedUser, document.getElementById('adminChatMessages'));
         } catch (err) { alert('Failed to send message'); }
     });
 
@@ -580,6 +616,19 @@ function initDriverChatLogic() {
         const myName = localStorage.getItem('username'); 
 
         if (!text || !selectedUser) return;
+        
+        const msgBox = document.getElementById('chatMessages');
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        msgBox.innerHTML += `
+            <div class="flex flex-col items-end w-full">
+                <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                    <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                </div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
         input.value = ''; 
 
         try {
@@ -587,7 +636,7 @@ function initDriverChatLogic() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            fetchMessagesThread(selectedUser, document.getElementById('chatMessages'));
+            await fetchMessagesThread(selectedUser, document.getElementById('chatMessages'));
         } catch (err) { alert('Failed to send message'); }
     });
 
