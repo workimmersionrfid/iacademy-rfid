@@ -216,8 +216,10 @@ function injectGlobalChat(role) {
     chatWrapper.id = 'globalChatWrapper';
     document.body.appendChild(chatWrapper);
 
+    const myName = localStorage.getItem('username') || 'User';
+
     // ==========================================
-    // 1. SUPER ADMIN CHAT UI (Global Comms & Broadcast)
+    // 1. SUPER ADMIN CHAT UI
     // ==========================================
     if (role === 'superadmin') {
         chatWrapper.innerHTML = `
@@ -225,14 +227,16 @@ function injectGlobalChat(role) {
                 <div id="saChatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
                     <div class="bg-blue-900 text-white p-4 flex justify-between items-center transition-colors">
                         <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-chess-king"></i> Global Comms</h3>
-                        <button onclick="window.toggleSaChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        <div class="flex items-center">
+                            <button onclick="window.clearSaChat()" class="text-red-300 hover:text-red-400 transition-colors mr-3" title="Clear Conversation"><i class="fa-solid fa-trash-can text-lg"></i></button>
+                            <button onclick="window.toggleSaChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
                     </div>
                     
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="saChatUserSelect" onchange="window.loadSaMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
                             <option value="" disabled selected>Select user to message...</option>
-                            <option value="BROADCAST" class="text-blue-600 dark:text-blue-400 font-black">📢 BROADCAST TO ALL</option>
-                        </select>
+                            </select>
                     </div>
 
                     <div id="saChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
@@ -253,35 +257,37 @@ function injectGlobalChat(role) {
         initSuperAdminChatLogic(); 
 
     // ==========================================
-    // 2. STANDARD ADMIN CHAT UI (Inbox Style)
+    // 2. STANDARD ADMIN CHAT UI
     // ==========================================
     } else if (role === 'admin') {
         chatWrapper.innerHTML = `
             <div id="adminChatWidget" class="fixed bottom-6 right-6 z-[90] flex flex-col items-end">
                 <div id="adminChatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
                     <div class="bg-blue-800 dark:bg-blue-900 p-4 flex justify-between items-center text-white transition-colors">
-                        <div class="flex items-center gap-2">
-                            <button id="btnBackChat" onclick="window.showChatList()" class="hidden hover:text-blue-200 transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
-                            <h3 id="chatHeaderTitle" class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-inbox"></i> Driver Messages</h3>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button id="btnClearChat" onclick="window.clearAdminChat()" class="hidden text-red-300 hover:text-red-400 transition-colors" title="Clear Conversation"><i class="fa-solid fa-trash-can"></i></button>
+                        <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-user-tie"></i> ${myName}</h3>
+                        <div class="flex items-center">
+                            <button onclick="window.clearAdminChat()" class="text-red-300 hover:text-red-400 transition-colors mr-3" title="Clear Conversation"><i class="fa-solid fa-trash-can text-lg"></i></button>
                             <button onclick="window.toggleAdminChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
-                    <div id="chatContactList" class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 custom-scrollbar p-2 space-y-1 transition-colors">
-                        <div class="p-4 text-center text-gray-400 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    
+                    <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <select id="adminChatUserSelect" onchange="window.loadAdminMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
+                            <option value="" disabled selected>Select user to message...</option>
+                            </select>
                     </div>
-                    <div id="activeChatView" class="hidden flex-1 flex flex-col min-h-0">
-                        <div id="adminChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors"></div>
-                        <form id="adminChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
-                            <input type="text" id="adminChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm">
-                            <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-colors shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
-                        </form>
+
+                    <div id="adminChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
+                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
                     </div>
+                    
+                    <form id="adminChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
+                        <input type="text" id="adminChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
+                        <button type="submit" id="adminChatBtn" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
                 </div>
                 <button onclick="window.toggleAdminChat()" class="w-14 h-14 bg-blue-800 hover:bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
-                    <i class="fa-solid fa-comments"></i>
+                    <i class="fa-solid fa-comment-dots"></i>
                     <span id="adminChatBadge" class="hidden absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
                 </button>
             </div>
@@ -297,21 +303,29 @@ function injectGlobalChat(role) {
                 <div id="chatBox" class="hidden w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden flex-col transition-colors duration-300 h-[500px]">
                     <div class="bg-blue-800 dark:bg-blue-900 p-4 flex justify-between items-center text-white transition-colors">
                         <h3 class="font-bold flex items-center gap-2 text-sm"><i class="fa-solid fa-headset"></i> Control Center</h3>
-                        <div class="flex items-center gap-3">
-                            <button onclick="window.clearDriverChat()" class="text-red-300 hover:text-red-400 transition-colors" title="Clear Conversation"><i class="fa-solid fa-trash-can text-lg"></i></button>
+                        <div class="flex items-center">
+                            <button onclick="window.clearDriverChat()" class="text-red-300 hover:text-red-400 transition-colors mr-3" title="Clear Conversation"><i class="fa-solid fa-trash-can text-lg"></i></button>
                             <button onclick="window.toggleChat()" class="text-blue-200 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
                         </div>
                     </div>
-                    <div id="chatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
-                        <div class="text-center text-xs text-gray-400 dark:text-gray-500 my-2">Send a message to the Admin. Request early access for future tasks here.</div>
+                    
+                    <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <select id="chatUserSelect" onchange="window.loadMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
+                            <option value="" disabled selected>Select user to message...</option>
+                            </select>
                     </div>
+
+                    <div id="chatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
+                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
+                    </div>
+                    
                     <form id="chatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
-                        <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm">
-                        <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-colors shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+                        <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
+                        <button type="submit" id="chatBtn" class="bg-blue-700 hover:bg-blue-800 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md disabled:opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
                     </form>
                 </div>
                 <button onclick="window.toggleChat()" class="w-14 h-14 bg-blue-800 hover:bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl relative transition-transform hover:scale-105 focus:outline-none">
-                    <i class="fa-solid fa-comments"></i>
+                    <i class="fa-solid fa-comment-dots"></i>
                     <span id="chatBadge" class="hidden absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
                 </button>
             </div>
