@@ -147,7 +147,6 @@ function renderNavigation(activePageId) {
     }
 }
 
-// --- GLOBAL FUNCTIONS ---
 window.toggleTheme = function() {
     if (document.documentElement.classList.contains('dark')) {
         document.documentElement.classList.remove('dark');
@@ -180,10 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem('token');
     
     if (token && role) {
-        // Clean up any rogue widgets
         const oldAdminWidget = document.getElementById('adminChatWidget');
         if (oldAdminWidget) oldAdminWidget.remove();
-        
         const oldDriverWidget = document.getElementById('driverChatWidget');
         if (oldDriverWidget) oldDriverWidget.remove();
 
@@ -214,11 +211,11 @@ function injectGlobalChat(role) {
                     </div>
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="saChatUserSelect" onchange="window.loadSaMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
-                            <option value="" disabled selected>Select user to message...</option>
+                            <option value="" disabled selected>Select user/group to message...</option>
                         </select>
                     </div>
                     <div id="saChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
-                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
+                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a chat to start</div>
                     </div>
                     <form id="saChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
                         <input type="text" id="saChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
@@ -247,11 +244,11 @@ function injectGlobalChat(role) {
                     </div>
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="adminChatUserSelect" onchange="window.loadAdminMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
-                            <option value="" disabled selected>Select user to message...</option>
+                            <option value="" disabled selected>Select user/group to message...</option>
                         </select>
                     </div>
                     <div id="adminChatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
-                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
+                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a chat to start</div>
                     </div>
                     <form id="adminChatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
                         <input type="text" id="adminChatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
@@ -280,11 +277,11 @@ function injectGlobalChat(role) {
                     </div>
                     <div class="p-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         <select id="chatUserSelect" onchange="window.loadMessages()" class="w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white outline-none font-bold shadow-sm cursor-pointer">
-                            <option value="" disabled selected>Select user to message...</option>
+                            <option value="" disabled selected>Select user/group to message...</option>
                         </select>
                     </div>
                     <div id="chatMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex flex-col gap-3 custom-scrollbar text-sm transition-colors">
-                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a user to start chatting</div>
+                        <div class="text-center text-xs text-gray-400 italic my-auto">Select a chat to start</div>
                     </div>
                     <form id="chatForm" class="p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-2 transition-colors">
                         <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required class="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2 outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white text-sm" disabled>
@@ -316,7 +313,6 @@ function initSuperAdminChatLogic() {
         
         if (saChatOpen) {
             box.classList.remove('hidden'); box.classList.add('flex');
-            document.getElementById('saChatBadge').classList.add('hidden');
             populateSaUserDropdown();
             window.loadSaMessages();
         } else {
@@ -344,9 +340,9 @@ function initSuperAdminChatLogic() {
             const myName = localStorage.getItem('username');
             
             select.innerHTML = `
-                <option value="" disabled selected>Select user to message...</option>
-                <option value="BROADCAST_ALL" class="text-blue-600 font-black">BROADCAST TO ALL</option>
-                <option value="BROADCAST_ADMINS" class="text-purple-600 font-black">BROADCAST TO ADMINS</option>
+                <option value="" disabled selected>Select user/group to message...</option>
+                <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 BROADCAST TO ALL</option>
+                <option value="BROADCAST_ADMINS" class="text-purple-600 font-black">📢 BROADCAST TO ADMINS</option>
             `;
             
             allUsersCache.forEach(u => {
@@ -368,17 +364,7 @@ function initSuperAdminChatLogic() {
         if (!selectedUser) { input.disabled = true; btn.disabled = true; return; }
         input.disabled = false; btn.disabled = false;
 
-        if (selectedUser.startsWith('BROADCAST')) {
-            const targetText = selectedUser === 'BROADCAST_ALL' ? 'every Admin and Driver' : 'every Admin';
-            msgBox.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-full text-center p-4">
-                    <i class="fa-solid fa-bullhorn text-4xl text-blue-500 mb-3"></i>
-                    <h3 class="font-black text-blue-900 dark:text-white mb-1">Broadcast Mode</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Messages sent here will be delivered to <strong>${targetText}</strong>.</p>
-                </div>`;
-            return; 
-        }
-
+        // NO MORE STATIC SCREEN! It fetches the group chat history directly
         await fetchMessagesThread(selectedUser, msgBox);
         saChatInterval = setInterval(() => fetchMessagesThread(selectedUser, msgBox), 5000); 
     };
@@ -391,51 +377,29 @@ function initSuperAdminChatLogic() {
         const myName = localStorage.getItem('username'); 
 
         if (!text || !selectedUser) return;
-        input.disabled = true; 
+        
+        // Optimistic UI for instant feedback
+        const msgBox = document.getElementById('saChatMessages');
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        msgBox.innerHTML += `
+            <div class="flex flex-col items-end w-full">
+                <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                    <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                </div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+        input.value = ''; 
 
         try {
-            if (selectedUser.startsWith('BROADCAST')) {
-                const options = Array.from(document.getElementById('saChatUserSelect').options);
-                let users = [];
-                if (selectedUser === 'BROADCAST_ALL') {
-                    users = options.filter(opt => opt.value && !opt.value.startsWith('BROADCAST')).map(o => o.value);
-                } else {
-                    users = options.filter(opt => opt.value && !opt.value.startsWith('BROADCAST') && opt.getAttribute('data-role') !== 'driver').map(o => o.value);
-                }
-                
-                await Promise.all(users.map(u => 
-                    fetch(`${API_BASE_CHAT}/messages`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sender: myName, receiver: u, text: `📢 [BROADCAST]: ${text}` })
-                    })
-                ));
-                alert("Broadcast message successfully sent!");
-                input.value = '';
-            } else {
-                const msgBox = document.getElementById('saChatMessages');
-                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                // Optimistic UI mapping matches fetchMessagesThread structure
-                msgBox.innerHTML += `
-                    <div class="flex flex-col items-end w-full">
-                        <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
-                        <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
-                            <p class="whitespace-pre-wrap leading-snug">${text}</p>
-                            <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
-                        </div>
-                    </div>`;
-                msgBox.scrollTop = msgBox.scrollHeight;
-
-                await fetch(`${API_BASE_CHAT}/messages`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
-                });
-                
-                input.value = '';
-                await fetchMessagesThread(selectedUser, msgBox); // <--- FIXED: Now correctly references the shared function!
-            }
+            // Sends directly to the selectedUser (whether it's an ID or "BROADCAST_ALL")
+            await fetch(`${API_BASE_CHAT}/messages`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
+            });
+            await fetchMessagesThread(selectedUser, msgBox); 
         } catch (err) { alert("Failed to send message."); } 
-        finally { input.disabled = false; input.focus(); }
     });
 
     if (saChatOpen) window.toggleSaChat();
@@ -456,7 +420,6 @@ function initAdminChatLogic() {
         
         if (adminChatOpen) {
             box.classList.remove('hidden'); box.classList.add('flex');
-            document.getElementById('adminChatBadge').classList.add('hidden');
             populateAdminUserDropdown();
             window.loadAdminMessages();
         } else {
@@ -483,7 +446,12 @@ function initAdminChatLogic() {
             const select = document.getElementById('adminChatUserSelect');
             const myName = localStorage.getItem('username');
             
-            select.innerHTML = `<option value="" disabled selected>Select user to message...</option>`;
+            // Standard Admins get access to both group channels too!
+            select.innerHTML = `
+                <option value="" disabled selected>Select user/group to message...</option>
+                <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 BROADCAST TO ALL</option>
+                <option value="BROADCAST_ADMINS" class="text-purple-600 font-black">📢 BROADCAST TO ADMINS</option>
+            `;
             
             allUsersCache.forEach(u => {
                 if (u.username !== myName) {
@@ -536,7 +504,7 @@ function initAdminChatLogic() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            await fetchMessagesThread(selectedUser, document.getElementById('adminChatMessages'));
+            await fetchMessagesThread(selectedUser, msgBox);
         } catch (err) { alert('Failed to send message'); }
     });
 
@@ -558,7 +526,6 @@ function initDriverChatLogic() {
         
         if (driverChatOpen) {
             box.classList.remove('hidden'); box.classList.add('flex');
-            document.getElementById('chatBadge').classList.add('hidden');
             populateDriverUserDropdown();
             window.loadMessages();
         } else {
@@ -585,7 +552,11 @@ function initDriverChatLogic() {
             const select = document.getElementById('chatUserSelect');
             const myName = localStorage.getItem('username');
             
-            select.innerHTML = `<option value="" disabled selected>Select user to message...</option>`;
+            // Drivers only get the BROADCAST_ALL room (not the admin one!)
+            select.innerHTML = `
+                <option value="" disabled selected>Select user/group to message...</option>
+                <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 BROADCAST TO ALL</option>
+            `;
             allAdminsCache.forEach(u => {
                 if(u.username !== myName) {
                     select.innerHTML += `<option value="${u.username}">${u.username} (Admin)</option>`;
@@ -636,7 +607,7 @@ function initDriverChatLogic() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            await fetchMessagesThread(selectedUser, document.getElementById('chatMessages'));
+            await fetchMessagesThread(selectedUser, msgBox);
         } catch (err) { alert('Failed to send message'); }
     });
 
@@ -652,13 +623,17 @@ async function fetchMessagesThread(selectedUser, msgBox) {
         const res = await fetch(`${API_BASE_CHAT}/messages/${selectedUser}`);
         const messages = await res.json();
         
-        // Filter strictly to the conversation between ME and SELECTED USER
-        const thread = messages.filter(m => 
-            (m.sender === myName && m.receiver === selectedUser) || 
-            (m.sender === selectedUser && m.receiver === myName) ||
-            (m.sender === 'Admin' && m.receiver === selectedUser) || // Legacy support
-            (m.sender === selectedUser && m.receiver === 'Admin')
-        );
+        // This handles standard 1-on-1 chats OR Group Rooms seamlessly!
+        const thread = messages.filter(m => {
+            if (selectedUser.startsWith('BROADCAST')) {
+                return m.receiver === selectedUser; // It's a group room! Fetch everything sent to this room.
+            }
+            // Standard 1-on-1 logic
+            return (m.sender === myName && m.receiver === selectedUser) || 
+                   (m.sender === selectedUser && m.receiver === myName) ||
+                   (m.sender === 'Admin' && m.receiver === selectedUser) || 
+                   (m.sender === selectedUser && m.receiver === 'Admin');
+        });
 
         if (thread.length === 0) {
             msgBox.innerHTML = '<div class="text-center text-xs text-gray-400 italic my-auto">No messages yet. Say hi!</div>';
@@ -688,13 +663,5 @@ async function fetchMessagesThread(selectedUser, msgBox) {
         }).join('');
         
         msgBox.scrollTop = msgBox.scrollHeight;
-
-        // Auto-mark as read
-        const myRole = localStorage.getItem('userRole');
-        await fetch(`${API_BASE_CHAT}/messages/mark-read`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: selectedUser, role: myRole })
-        }).catch(e => {});
-
     } catch (err) { console.error("Chat load error", err); }
 }
