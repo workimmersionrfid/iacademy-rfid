@@ -147,7 +147,6 @@ function renderNavigation(activePageId) {
     }
 }
 
-// --- GLOBAL FUNCTIONS ---
 window.toggleTheme = function() {
     if (document.documentElement.classList.contains('dark')) {
         document.documentElement.classList.remove('dark');
@@ -347,6 +346,7 @@ function initSuperAdminChatLogic() {
             const select = document.getElementById('saChatUserSelect');
             const myName = localStorage.getItem('username');
             
+            // FIXED: PROPER DROPDOWN OPTIONS INJECTED HERE
             select.innerHTML = `
                 <option value="" disabled selected>Select user/group to message...</option>
                 <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 Global Comms (All)</option>
@@ -386,14 +386,27 @@ function initSuperAdminChatLogic() {
         if (!text || !selectedUser) return;
         input.disabled = true; 
 
+        // Optimistic UI for instant feedback
+        const msgBox = document.getElementById('saChatMessages');
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        msgBox.innerHTML += `
+            <div class="flex flex-col items-end w-full">
+                <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                    <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                </div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+        input.value = ''; 
+
         try {
-            // Send to exact room or person directly in the DB
+            // FIXED: NO MORE LOOP! Just send straight to the target (e.g. BROADCAST_ALL)
             await fetch(`${API_BASE_CHAT}/messages`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            input.value = '';
-            await fetchMessagesThread(selectedUser, document.getElementById('saChatMessages')); 
+            await fetchMessagesThread(selectedUser, msgBox); 
         } catch (err) { alert("Failed to send message."); } 
         finally { input.disabled = false; input.focus(); }
     });
@@ -449,6 +462,7 @@ function initAdminChatLogic() {
             const select = document.getElementById('adminChatUserSelect');
             const myName = localStorage.getItem('username');
             
+            // FIXED: PROPER DROPDOWN OPTIONS INJECTED HERE
             select.innerHTML = `
                 <option value="" disabled selected>Select user/group to message...</option>
                 <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 Global Comms (All)</option>
@@ -488,13 +502,26 @@ function initAdminChatLogic() {
         if (!text || !selectedUser) return;
         input.disabled = true;
         
+        const msgBox = document.getElementById('adminChatMessages');
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        msgBox.innerHTML += `
+            <div class="flex flex-col items-end w-full">
+                <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                    <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                </div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+        input.value = ''; 
+
         try {
             await fetch(`${API_BASE_CHAT}/messages`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            input.value = '';
-            await fetchMessagesThread(selectedUser, document.getElementById('adminChatMessages'));
+            await fetchMessagesThread(selectedUser, msgBox);
         } catch (err) { alert('Failed to send message'); }
         finally { input.disabled = false; input.focus(); }
     });
@@ -550,10 +577,12 @@ function initDriverChatLogic() {
             const select = document.getElementById('chatUserSelect');
             const myName = localStorage.getItem('username');
             
+            // FIXED: PROPER DROPDOWN OPTIONS INJECTED HERE
             select.innerHTML = `
-                <option value="" disabled selected>Select user/group to message...</option>
+                <option value="" disabled selected>Select Admin/Group to message...</option>
                 <option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 Global Comms (All)</option>
             `;
+            
             allAdminsCache.forEach(u => {
                 if(u.username !== myName) {
                     select.innerHTML += `<option value="${u.username}">${u.username} (Admin)</option>`;
@@ -586,13 +615,26 @@ function initDriverChatLogic() {
         if (!text || !selectedUser) return;
         input.disabled = true;
         
+        const msgBox = document.getElementById('chatMessages');
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        msgBox.innerHTML += `
+            <div class="flex flex-col items-end w-full">
+                <div class="text-[9px] font-bold text-gray-400 mb-1 text-right mr-1 uppercase tracking-widest">YOU</div>
+                <div class="msg-bubble self-end bg-blue-600 text-white max-w-[85%] rounded-xl px-3 py-2 text-sm shadow-sm opacity-70">
+                    <p class="whitespace-pre-wrap leading-snug">${text}</p>
+                    <div class="text-[9px] text-blue-200 mt-1 text-right">${time}</div>
+                </div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+        input.value = ''; 
+
         try {
             await fetch(`${API_BASE_CHAT}/messages`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: myName, receiver: selectedUser, text: text })
             });
-            input.value = '';
-            await fetchMessagesThread(selectedUser, document.getElementById('chatMessages'));
+            await fetchMessagesThread(selectedUser, msgBox);
         } catch (err) { alert('Failed to send message'); }
         finally { input.disabled = false; input.focus(); }
     });
@@ -609,11 +651,12 @@ async function fetchMessagesThread(selectedUser, msgBox) {
         const res = await fetch(`${API_BASE_CHAT}/messages/${selectedUser}`);
         const messages = await res.json();
         
-        // This natively handles BOTH group rooms and 1-on-1 private chats!
+        // This handles standard 1-on-1 chats OR Group Rooms seamlessly!
         const thread = messages.filter(m => {
             if (selectedUser.startsWith('BROADCAST')) {
-                return m.receiver === selectedUser; 
+                return m.receiver === selectedUser; // It's a group room! Fetch everything sent to this room.
             }
+            // Standard 1-on-1 logic
             return (m.sender === myName && m.receiver === selectedUser) || 
                    (m.sender === selectedUser && m.receiver === myName) ||
                    (m.sender === 'Admin' && m.receiver === selectedUser) || 
@@ -652,6 +695,13 @@ async function fetchMessagesThread(selectedUser, msgBox) {
         }).join('');
         
         msgBox.scrollTop = msgBox.scrollHeight;
+
+        // Auto-mark as read
+        const myRole = localStorage.getItem('userRole');
+        await fetch(`${API_BASE_CHAT}/messages/mark-read`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: selectedUser, role: myRole })
+        }).catch(e => {});
 
     } catch (err) { console.error("Chat load error", err); }
 }
