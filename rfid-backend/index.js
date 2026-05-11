@@ -404,18 +404,47 @@ app.post('/api/messages', async (req, res) => {
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+// PUT: Mark messages as read (IGNORE BROADCASTS)
 app.put('/api/messages/mark-read', async (req, res) => {
     try {
         const { username, role } = req.body;
-        if (role === 'admin') {
-            await Message.updateMany({ sender: username, receiver: 'Admin', isRead: false }, { isRead: true });
-        } else {
-            await Message.updateMany({ sender: 'Admin', receiver: username, isRead: false }, { isRead: true });
+        
+        // We don't mark group broadcasts as "read" because multiple people share the room
+        if (username === 'BROADCAST_ALL' || username === 'BROADCAST_ADMINS') {
+            return res.status(200).json({ message: "Broadcast read state ignored" });
         }
-        res.json({ success: true });
-    } catch(err) { res.status(500).json({ error: err.message }); }
+
+        if (role === 'admin' || role === 'superadmin') {
+            await Message.updateMany({ sender: username, isRead: false }, { $set: { isRead: true } });
+        } else {
+            await Message.updateMany({ receiver: username, isRead: false }, { $set: { isRead: true } });
+        }
+        res.status(200).json({ message: "Messages marked as read" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
+// DELETE: Clear chat history for a specific user (PROTECTED BROADCASTS)
+app.delete('/api/messages/clear/:username', async (req, res) => {
+    try {
+        const user = req.params.username;
+        
+        // Delete personal messages, but DO NOT delete the permanent broadcast rooms!
+        await Message.deleteMany({ 
+            $and: [
+                { $or: [{ sender: user }, { receiver: user }] },
+                { receiver: { $nin: ['BROADCAST_ALL', 'BROADCAST_ADMINS'] } }
+            ]
+        });
+        
+        res.status(200).json({ message: "Personal chat history cleared successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// (LEGACY) PUT: Soft clear chat
 app.put('/api/messages/clear', async (req, res) => {
     try {
         const { driverUsername, clearedBy } = req.body; 
