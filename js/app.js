@@ -279,6 +279,12 @@ function initGlobalChatLogic(role) {
             const drivers = await driversRes.json();
             const admins = await adminsRes.json();
             
+            // THE FIX: Explicitly inject 'admin_boss' into the admins array 
+            // if the backend API happens to hide the master superadmin!
+            if (!admins.some(a => a.username === 'admin_boss')) {
+                admins.unshift({ username: 'admin_boss', role: 'superadmin' });
+            }
+
             const select = document.getElementById('chatUserSelect');
             const myName = localStorage.getItem('username');
             
@@ -292,7 +298,7 @@ function initGlobalChatLogic(role) {
                 select.innerHTML += `<option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 Global Comms (All)</option>`;
             }
 
-            // Permissions: Drivers only see admins. Admins/Superadmins see everyone.
+            // Permissions: Drivers only see admins/superadmins. Admins/Superadmins see everyone.
             if (role === 'driver') {
                 allUsersCache = [...admins];
             } else {
@@ -301,7 +307,10 @@ function initGlobalChatLogic(role) {
             
             allUsersCache.forEach(u => {
                 if (u.username !== myName) {
-                    const roleLabel = u.role === 'driver' ? '(Driver)' : '(Admin)';
+                    let roleLabel = '(Admin)';
+                    if (u.role === 'driver') roleLabel = '(Driver)';
+                    if (u.role === 'superadmin' || u.username === 'admin_boss') roleLabel = '(Super Admin)';
+                    
                     select.innerHTML += `<option value="${u.username}" data-role="${u.role}">${u.username} ${roleLabel}</option>`;
                 }
             });
