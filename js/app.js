@@ -17,6 +17,16 @@ function renderNavigation(activePageId) {
             { id: 'calculator', name: 'Trip Calculator', href: 'calculator.html' },
             { id: 'travel-map', name: 'Fleet Map & Routing', href: 'travel-map.html' },
         ];
+
+        // PROTECTED ROUTE: Only SuperAdmins (or admins granted special access) get this link
+        if (role === 'superadmin' || localStorage.getItem('grantedSuperAccess') === 'true') {
+            navItems.push({ 
+                id: 'superadmin', 
+                name: '<i class="fa-solid fa-chess-king text-yellow-500 mr-1"></i> Super Admin', 
+                href: 'superadmin-dashboard.html' 
+            });
+        }
+
     } else if (role === 'driver') {
         navItems = [
             { id: 'dashboard', name: 'My Tasks', href: 'driver-dashboard.html' },
@@ -34,7 +44,7 @@ function renderNavigation(activePageId) {
             : "text-gray-500 dark:text-gray-400 hover:text-blue-800 dark:hover:text-white border-transparent";
 
         return `
-            <a href="${item.href}" class="py-7 relative font-medium transition-colors border-b-2 ${activeClasses}">
+            <a href="${item.href}" class="py-7 relative font-medium transition-colors border-b-2 ${activeClasses} flex items-center">
                 ${item.name}
             </a>
         `;
@@ -147,7 +157,6 @@ function renderNavigation(activePageId) {
     }
 }
 
-// --- GLOBAL FUNCTIONS ---
 window.toggleTheme = function() {
     if (document.documentElement.classList.contains('dark')) {
         document.documentElement.classList.remove('dark');
@@ -193,7 +202,6 @@ function injectGlobalChat(role) {
 
     const myName = localStorage.getItem('username') || 'User';
     
-    // Pick the icon based on the user's role
     let roleIcon = 'fa-user';
     if (role === 'superadmin') roleIcon = 'fa-chess-king';
     if (role === 'admin') roleIcon = 'fa-user-tie';
@@ -230,7 +238,6 @@ function injectGlobalChat(role) {
         </div>
     `;
 
-    // Initialize the logic securely based on role
     initGlobalChatLogic(role);
 }
 
@@ -279,8 +286,6 @@ function initGlobalChatLogic(role) {
             const drivers = await driversRes.json();
             const admins = await adminsRes.json();
             
-            // THE FIX: Explicitly inject 'admin_boss' into the admins array 
-            // if the backend API happens to hide the master superadmin!
             if (!admins.some(a => a.username === 'admin_boss')) {
                 admins.unshift({ username: 'admin_boss', role: 'superadmin' });
             }
@@ -290,7 +295,6 @@ function initGlobalChatLogic(role) {
             
             select.innerHTML = `<option value="" disabled selected>Select user/group to message...</option>`;
             
-            // Permissions: Ensure Everyone gets the specific Broadcast Rooms they are allowed to see
             if (role === 'superadmin' || role === 'admin') {
                 select.innerHTML += `<option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 Global Comms (All)</option>`;
                 select.innerHTML += `<option value="BROADCAST_ADMINS" class="text-purple-600 font-black">📢 Global Comms (Admins)</option>`;
@@ -298,7 +302,6 @@ function initGlobalChatLogic(role) {
                 select.innerHTML += `<option value="BROADCAST_ALL" class="text-blue-600 font-black">📢 Global Comms (All)</option>`;
             }
 
-            // Permissions: Drivers only see admins/superadmins. Admins/Superadmins see everyone.
             if (role === 'driver') {
                 allUsersCache = [...admins];
             } else {
@@ -342,7 +345,6 @@ function initGlobalChatLogic(role) {
         if (!text || !selectedUser) return;
         input.disabled = true; 
 
-        // Optimistic UI for instant feedback
         const msgBox = document.getElementById('chatMessages');
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         msgBox.innerHTML += `
@@ -378,10 +380,9 @@ async function fetchMessagesThread(selectedUser, msgBox) {
         const res = await fetch(`${API_BASE_CHAT}/messages/${selectedUser}`);
         const messages = await res.json();
         
-        // Natively filters between Private 1-on-1 Chats and Shared Group Rooms
         const thread = messages.filter(m => {
             if (selectedUser.startsWith('BROADCAST')) {
-                return m.receiver === selectedUser; // Global Room Mode
+                return m.receiver === selectedUser; 
             }
             return (m.sender === myName && m.receiver === selectedUser) || 
                    (m.sender === selectedUser && m.receiver === myName) ||
@@ -406,7 +407,6 @@ async function fetchMessagesThread(selectedUser, msgBox) {
             const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             const align = isMe ? 'self-end bg-blue-600 text-white' : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
             
-            // Shows who sent the message in Group Chats!
             const senderTag = `<div class="text-[9px] font-bold text-gray-400 mb-1 ${isMe ? 'text-right mr-1' : 'ml-1'} uppercase tracking-widest">${isMe ? 'YOU' : m.sender}</div>`;
             
             return `
@@ -422,7 +422,6 @@ async function fetchMessagesThread(selectedUser, msgBox) {
         
         msgBox.scrollTop = msgBox.scrollHeight;
 
-        // Auto-mark as read
         const myRole = localStorage.getItem('userRole');
         await fetch(`${API_BASE_CHAT}/messages/mark-read`, {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
