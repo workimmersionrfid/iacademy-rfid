@@ -311,9 +311,12 @@ window.updateVehicleDropdown = function() {
         }
     });
 
-    if (availableCount === 0) dVehicleSelect.innerHTML = `<option value="" disabled selected>No available vehicles</option>`;
-    else if (autoSelectPlate) dVehicleSelect.value = autoSelectPlate;
-};
+   if (availableCount === 0) {
+        dVehicleSelect.options[0].text = "No available vehicles (See reasons below)";
+    } else if (autoSelectPlate) {
+        dVehicleSelect.value = autoSelectPlate;
+    }
+    };
 
 window.toggleCustomDestination = function() {
     const select = document.getElementById('tDestinationSelect');
