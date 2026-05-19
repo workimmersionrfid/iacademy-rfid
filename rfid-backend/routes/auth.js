@@ -29,7 +29,7 @@ const sendEmail = async (options) => {
         const utf8Subject = `=?utf-8?B?${Buffer.from(options.subject).toString('base64')}?=`;
         
         const messageParts = [
-            `From: "iACADEMY RFID System" <${process.env.EMAIL_USER}>`,
+            `From: "iACADEMY Fleet Management" <${process.env.EMAIL_USER}>`,
             `To: ${options.to}`,
             `Subject: ${utf8Subject}`,
             `Content-Type: text/html; charset=utf-8`,
